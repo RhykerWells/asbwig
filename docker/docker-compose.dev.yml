@@ -1,0 +1,16 @@
+name: asbwig
+
+networks:
+  default:
+
+services:
+  app:
+    container_name: asbwig-dev-app
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    networks:
+      - default
+    env_file:
+      - app.dev.env
