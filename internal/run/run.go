@@ -5,12 +5,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Ranger-4297/ASBWIG/internal"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
 
 func Run() {
-	discord, err := discordgo.New("Bot " + os.Getenv("ASBWIG_TOKEN"))
+	discord, err := discordgo.New("Bot " + internal.ConfigBotToken)
 	if err != nil {
 		log.Fatalln("ERROR LOGGING IN\n", err)
 	}
