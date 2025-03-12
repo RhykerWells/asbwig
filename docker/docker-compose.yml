@@ -8,15 +8,13 @@ networks:
 
 services:
   app:
-    container_name: asbwig-dev-app
-    build:
-      context: ../
-      dockerfile: docker/Dockerfile
+    container_name: asbwig-app
+    image: Ranger-4297/asbwig:latest
     restart: unless-stopped
     networks:
       - default
     env_file:
-      - app.dev.env
+      - app.env
     depends_on:
       - db
   db:
@@ -28,4 +26,4 @@ services:
     networks:
       - default
     env_file:
-      - db.dev.env
+      - db.env
