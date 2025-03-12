@@ -10,6 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func Init() {
+	err := internal.Init()
+	if err != nil{
+		log.WithError(err).Fatal("Failed to start core")
+	}
+}
+
 func Run() {
 	discord, err := discordgo.New("Bot " + internal.ConfigBotToken)
 	if err != nil {
