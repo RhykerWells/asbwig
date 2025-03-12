@@ -27,6 +27,8 @@ Prefix each variable with `export`:</br>
 
 Downloading and installing
 ```
+sudo apt update
+sudo apt install git
 git clone https://github.com/Ranger-4297/ASBWIG
 cd ASBWIG/cmd/ASBWIG
 go build
@@ -34,3 +36,5 @@ go build
 
 Once it has finished compiling. Run the binary with:</br>
 `./ASBWIG`
+
+## Docker
