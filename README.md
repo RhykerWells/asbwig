@@ -12,6 +12,7 @@ Configure Postgres</br>
 CREATE DATABASE asbwig;
 create user asbwig with encrypted password 'password';
 grant all privileges on database asbwig to asbwig;
+\c asbwig
 grant usage, create on schema public to asbwig;
 \q
 ```
