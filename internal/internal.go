@@ -36,10 +36,10 @@ func Init() error {
 
 	err := postgresConnect(db, host, ConfigPGUsername, ConfigPGPassword)
 	if err != nil {
-		log.WithError(err).Fatal("Failed to start database")
+		log.WithError(err).Fatal("Failed to connect to database")
 	}
 
-	log.Infof("Initializing schema")
+	log.Infof(fmt.Sprintf("Connected to database...Initializing schema"))
 	initDB(GuildConfigSchema)
 
 	return err
