@@ -5,6 +5,7 @@ package internal
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	log "github.com/sirupsen/logrus"
@@ -39,7 +40,7 @@ func Init() error {
 		log.WithError(err).Fatal("Failed to connect to database")
 	}
 
-	log.Infof(fmt.Sprintf("Connected to database...Initializing schema"))
+	log.Infof("Connected to database...Initializing schema")
 	initDB(GuildConfigSchema)
 
 	return err
@@ -63,6 +64,8 @@ func postgresConnect(database string, host string, username string, password str
 }
 
 func initDB(schema string) {
+	// Wait in case initial database creation. Bit starts too quickly
+	time.Sleep(10 * time.Second)
 	_, err := PQ.Exec(schema)
 	if err != nil {
 		log.WithError(err).Fatal("Failed initializing postgres db schema")
