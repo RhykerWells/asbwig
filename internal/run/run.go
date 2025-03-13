@@ -5,13 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Ranger-4297/asbwig/bot"
 	"github.com/Ranger-4297/asbwig/internal"
-	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-)
-
-var (
-	Session *discordgo.Session
 )
 
 func Init() {
@@ -22,6 +18,8 @@ func Init() {
 }
 
 func Run() {
+	internal.Session.AddHandler(bot.MessageCreate)
+	internal.Session.AddHandler(bot.GuildJoin)
 	shutdown()
 }
 
