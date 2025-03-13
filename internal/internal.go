@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/Ranger-4297/asbwig/bot"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -60,6 +61,7 @@ func run(s *discordgo.Session) {
 	s.Open()
 	Bot = s.State.User
 	log.Infoln("Bot is now running. Press CTRL-C to exit.")
+	s.AddHandler(bot.Message)
 }
 
 func postgresConnect(database string, host string, username string, password string) error {
