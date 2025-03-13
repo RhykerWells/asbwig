@@ -18,7 +18,8 @@ services:
     env_file:
       - app.dev.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     container_name: asbwig-dev-postgres-db
     image: postgres:16
@@ -29,3 +30,8 @@ services:
       - default
     env_file:
       - db.dev.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
