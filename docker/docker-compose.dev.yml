@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
   db:
-    container_name: asbwig-postgres-db
+    container_name: asbwig-dev-postgres-db
     image: postgres:16
     restart: no
     volumes:
