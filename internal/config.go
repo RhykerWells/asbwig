@@ -1,6 +1,9 @@
 package internal
 
-import "os"
+import (
+    "os"
+    "strings"
+)
 
 var (
     ConfigBotName           = os.Getenv("ASBWIG_BOTNAME")
@@ -11,3 +14,11 @@ var (
     ConfigPGUsername        = os.Getenv("ASBWIG_PGUSER")
     ConfigPGPassword        = os.Getenv("ASBWIG_PGPASSWORD")
 )
+
+func ConfigDgoBotToken() string {
+	token := ConfigBotToken
+	if !strings.HasPrefix(token, "Bot ") {
+		token = "Bot " + token
+	}
+	return token
+}

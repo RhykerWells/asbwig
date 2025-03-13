@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	Session *discordgo.Session
+)
+
 func Init() {
 	err := internal.Init()
 	if err != nil{
@@ -18,26 +22,15 @@ func Init() {
 }
 
 func Run() {
-	discord, err := discordgo.New("Bot " + internal.ConfigBotToken)
-	if err != nil {
-		log.Fatalln("ERROR LOGGING IN\n", err)
-	}
-
-	err = discord.Open()
-	if err != nil {
-		log.Fatalln("ERROR OPENING CONNECTION\n", err)
-	}
-	defer discord.Close()
-	closeHandler(discord)
+	shutdown()
 }
 
-func closeHandler(discord *discordgo.Session) {
-	log.Infoln("Bot is now running. Press CTRL-C to exit.")
-    sc := make(chan os.Signal, 1)
-    signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+func shutdown() {
+    sc := make(chan os.Signal, 2)
+    signal.Notify(sc, syscall.SIGTERM, os.Interrupt)
     <-sc
 
-    // Cleanly close down the Discord session.
+	// Cleanly close down the Discord session.
 	log.Infoln("Exiting now....")
-    discord.Close()
+	os.Exit(0)
 }
