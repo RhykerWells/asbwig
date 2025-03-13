@@ -9,17 +9,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/jmoiron/sqlx"
-	log "github.com/sirupsen/logrus"
 	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var (
-	PQ		*sql.DB
-	SQLX	*sqlx.DB
+	PQ   *sql.DB
+	SQLX *sqlx.DB
 
 	Session *discordgo.Session
-	Bot		*discordgo.User
+	Bot     *discordgo.User
 )
 
 const GuildConfigSchema = `

@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Ranger-4297/ASBWIG/internal"
+	"github.com/Ranger-4297/asbwig/internal"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,7 +16,7 @@ var (
 
 func Init() {
 	err := internal.Init()
-	if err != nil{
+	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
 	}
 }
@@ -26,9 +26,9 @@ func Run() {
 }
 
 func shutdown() {
-    sc := make(chan os.Signal, 2)
-    signal.Notify(sc, syscall.SIGTERM, os.Interrupt)
-    <-sc
+	sc := make(chan os.Signal, 2)
+	signal.Notify(sc, syscall.SIGTERM, os.Interrupt)
+	<-sc
 
 	// Cleanly close down the Discord session.
 	log.Infoln("Exiting now....")

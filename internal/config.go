@@ -1,18 +1,18 @@
 package internal
 
 import (
-    "os"
-    "strings"
+	"os"
+	"strings"
 )
 
 var (
-    ConfigBotName           = os.Getenv("ASBWIG_BOTNAME")
-    ConfigBotToken          = os.Getenv("ASBWIG_TOKEN")
+	ConfigBotName  = os.Getenv("asbwig_BOTNAME")
+	ConfigBotToken = os.Getenv("asbwig_TOKEN")
 
-    ConfigPGHost            = os.Getenv("ASBWIG_PGHOST")
-    ConfigPGDB              = os.Getenv("ASBWIG_PGDB")
-    ConfigPGUsername        = os.Getenv("ASBWIG_PGUSER")
-    ConfigPGPassword        = os.Getenv("ASBWIG_PGPASSWORD")
+	ConfigPGHost     = os.Getenv("asbwig_PGHOST")
+	ConfigPGDB       = os.Getenv("asbwig_PGDB")
+	ConfigPGUsername = os.Getenv("asbwig_PGUSER")
+	ConfigPGPassword = os.Getenv("asbwig_PGPASSWORD")
 )
 
 func ConfigDgoBotToken() string {

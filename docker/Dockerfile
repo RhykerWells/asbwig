@@ -6,7 +6,7 @@ RUN go mod download
 
 COPY ./ .
 
-WORKDIR /app/cmd/ASBWIG
+WORKDIR /app/cmd/asbwig
 RUN CGO_ENABLED=0 GOOS=linux go build
 
-CMD ["/app/cmd/ASBWIG/ASBWIG"]
+CMD ["/app/cmd/asbwig/asbwig"]

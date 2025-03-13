@@ -1,4 +1,4 @@
-module github.com/Ranger-4297/ASBWIG
+module github.com/Ranger-4297/asbwig
 
 go 1.20
 
