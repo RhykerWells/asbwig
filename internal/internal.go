@@ -58,6 +58,7 @@ func Init() error {
 
 func run(s *discordgo.Session) {
 	s.Open()
+	Bot = s.State.User
 	log.Infoln("Bot is now running. Press CTRL-C to exit.")
 }
 
