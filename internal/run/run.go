@@ -20,6 +20,7 @@ func Init() {
 func Run() {
 	internal.Session.AddHandler(bot.MessageCreate)
 	internal.Session.AddHandler(bot.GuildJoin)
+	internal.Session.AddHandler(bot.GuildLeave)
 	shutdown()
 }
 
