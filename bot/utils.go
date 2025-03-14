@@ -59,7 +59,7 @@ func GetMember(g, u string) (interface{}, error) {
 }
 
 // Helper tools
-func ToInt(conv interface{}) int64 {
+func ToInt64(conv interface{}) int64 {
 	t := reflect.ValueOf(conv)
 	switch {
 		case t.CanInt():
@@ -71,7 +71,7 @@ func ToInt(conv interface{}) int64 {
 			return 0
 		case t.Kind() == reflect.String:
 			i, _ := strconv.ParseFloat(t.String(), 64)
-			return ToInt(i)
+			return ToInt64(i)
 		default:
 			return 0
 	}
