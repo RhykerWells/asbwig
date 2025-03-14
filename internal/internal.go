@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS core_config (
 `
 
 func Init() error {
-	Session, err := discordgo.New(ConfigDgoBotToken())
+	s, err := discordgo.New(ConfigDgoBotToken())
 	if err != nil {
 		log.WithError(err).Fatal()
 	}
@@ -52,14 +52,12 @@ func Init() error {
 	log.Infof("Initializing DB schema")
 	initDB(GuildConfigSchema)
 
-	run(Session)
-
+	Session = s
 	return err
 }
 
-func run(s *discordgo.Session) {
+func Run(s *discordgo.Session) {
 	s.Open()
-	Session = s
 	Bot = s.State.User
 	log.Infoln("Bot is now running. Press CTRL-C to exit.")
 }

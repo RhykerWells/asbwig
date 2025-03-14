@@ -6,9 +6,10 @@ import (
 )
 
 func InitEvents() {
-	internal.Session.AddHandler(messageCreate)
+	internal.Session.AddHandler(botReady)
 	internal.Session.AddHandler(guildJoin)
 	internal.Session.AddHandler(guildLeave)
+	internal.Session.AddHandler(messageCreate)
 
 	log.Infoln("Event system initialised")
 }

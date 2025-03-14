@@ -12,13 +12,14 @@ import (
 
 func Init() {
 	err := internal.Init()
+	bot.Run(internal.Session)
+	internal.Run(internal.Session)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
 	}
 }
 
 func Run() {
-	bot.Run()
 	shutdown()
 }
 
