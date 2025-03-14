@@ -42,19 +42,14 @@ func DeleteMessage(c, m string, delay ...any) error {
 // User functions
 func GetUser(u string) (interface{}, error) {
 	user, err := internal.Session.User(u)
-	if err != nil {
-		return nil, err
-	}
 
-	return user, nil
+	return user, err
 }
 
-func GetMember(g, u string) (interface{}, error) {
-	user, err := internal.Session.GuildMember(g, u)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+func GetMember(g *discordgo.Guild, u string) (interface{}, error) {
+	user, err := internal.Session.GuildMember(g.ID, u)
+
+	return user, err
 }
 
 // Helper tools
