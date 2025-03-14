@@ -1,23 +1,14 @@
-package bot
+package events
 
 import (
+    "github.com/Ranger-4297/asbwig/internal"
 	"github.com/Ranger-4297/asbwig/bot/prefix"
-	"github.com/Ranger-4297/asbwig/internal"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
 
-// Send message event
-func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-    // Ignore all messages created by the bot itself
-    // This isn't required in this specific example but it's a good practice.
-    if m.Author.ID == s.State.User.ID {
-        return
-    }
-}
-
 // Join guild event
-func GuildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
+func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
     prefix.GuildPrefix(g.ID)
     log.WithFields(log.Fields{
             "guild": g.ID,
@@ -27,7 +18,10 @@ func GuildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 }
 
 // Leave guild event
-func GuildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
+func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
+    if g.Unavailable {
+        return // Guild outage
+    }
     removeGuildConfig(g.ID)
     log.Infoln("Left guild: ", g.ID)
 }

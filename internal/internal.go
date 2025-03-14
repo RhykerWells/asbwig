@@ -34,7 +34,6 @@ func Init() error {
 	if err != nil {
 		log.WithError(err).Fatal()
 	}
-	run(Session)
 
 	db := "asbwig"
 	if ConfigPGDB != "" {
@@ -52,6 +51,8 @@ func Init() error {
 
 	log.Infof("Initializing DB schema")
 	initDB(GuildConfigSchema)
+
+	run(Session)
 
 	return err
 }

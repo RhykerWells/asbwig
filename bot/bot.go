@@ -1,9 +1,9 @@
 package bot
 
-import "github.com/Ranger-4297/asbwig/internal"
+import (
+	"github.com/Ranger-4297/asbwig/bot/events"
+)
 
 func Run() {
-	internal.Session.AddHandler(MessageCreate)
-	internal.Session.AddHandler(GuildJoin)
-	internal.Session.AddHandler(GuildLeave)
+	events.InitEvents()
 }
