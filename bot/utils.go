@@ -52,6 +52,47 @@ func GetMember(g *discordgo.Guild, u string) (interface{}, error) {
 	return user, err
 }
 
+// Role functions
+func AddRole(g *discordgo.Guild, m *discordgo.Member, r string) error {
+    for _, v := range m.Roles {
+        if v == r {
+            // Already has the role
+            return nil
+        }
+    }
+
+    return internal.Session.GuildMemberRoleAdd(g.ID, m.User.ID, r)
+}
+
+func RemoveRole(g *discordgo.Guild, m *discordgo.Member, r string) error {
+	for _, v := range m.Roles {
+        if v != r {
+            internal.Session.GuildMemberRoleRemove(g.ID, m.User.ID, r)
+			return nil
+        }
+    }
+	return nil
+}
+
+func SetRoles(g *discordgo.Guild, m *discordgo.Member, r []string) error {
+    roles := make(map[string]struct{})
+	for _, id := range m.Roles {
+		r := GetRole(g, id)
+		if r != nil && r.Managed {
+			roles[id] = struct{}{}
+		}
+	}
+	roleSlice := make([]string, 0, len(roles))
+	for id := range roles {
+		roleSlice = append(roleSlice, id)
+	}
+	userData := &discordgo.GuildMemberParams{
+		Roles: &roleSlice,
+	}
+	_, err := internal.Session.GuildMemberEdit(g.ID, m.User.ID, userData)
+	return err
+}
+
 // Helper tools
 func ToInt64(conv interface{}) int64 {
 	t := reflect.ValueOf(conv)
@@ -69,4 +110,13 @@ func ToInt64(conv interface{}) int64 {
 		default:
 			return 0
 	}
+}
+func GetRole(g *discordgo.Guild, id string) *discordgo.Role {
+	for i := range g.Roles {
+		if g.Roles[i].ID == id {
+			return g.Roles[i]
+		}
+	}
+
+	return nil
 }
