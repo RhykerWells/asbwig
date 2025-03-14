@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/Ranger-4297/asbwig/internal"
@@ -54,4 +56,23 @@ func GetMember(g, u string) (interface{}, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+// Helper tools
+func ToInt(conv interface{}) int64 {
+	t := reflect.ValueOf(conv)
+	switch {
+		case t.CanInt():
+			return t.Int()
+		case t.CanFloat():
+			if t.Float() == float64(int64(t.Float())) {
+				return int64(t.Float())
+			}
+			return 0
+		case t.Kind() == reflect.String:
+			i, _ := strconv.ParseFloat(t.String(), 64)
+			return ToInt(i)
+		default:
+			return 0
+	}
 }
