@@ -1,2 +1,5 @@
 # Binary
 cmd/asbwig/asbwig
+
+# Vscode debug
+app.env

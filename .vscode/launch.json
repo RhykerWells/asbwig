@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "asbwig Local",
+            "type":"go",
+            "request": "launch",
+            "mode": "debug",
+            "envFile": "${workspaceFolder}/app.env",
+            "program": "${workspaceFolder}/cmd/asbwig/main.go",
+            "output": "${workspaceFolder}/cmd/asbwig/asbwig",
+        }
+    ]
+}
