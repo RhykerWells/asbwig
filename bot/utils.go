@@ -37,3 +37,21 @@ func DeleteChannelMessageAfterDelay(delay time.Duration, c string, m string) err
     err := internal.Session.ChannelMessageDelete(c, m)
     return err
 }
+
+// User functions
+func GetUser(u string) (interface{}, error) {
+	user, err := internal.Session.User(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func GetMember(g, u string) (interface{}, error) {
+	user, err := internal.Session.GuildMember(g, u)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
