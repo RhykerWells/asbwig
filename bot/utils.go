@@ -11,10 +11,10 @@ import (
 )
 
 // Message functions
-func SendMessage(c string, messageData *discordgo.MessageSend, delay ...any) (message *discordgo.Message, err error) {
-	message, err = internal.Session.ChannelMessageSendComplex(c, messageData)
+func SendMessage(c string, messageData *discordgo.MessageSend, delay ...any) error {
+	message, err := internal.Session.ChannelMessageSendComplex(c, messageData)
 	DeleteMessage(c, message.ID, delay)
-	return
+	return err
 }
 
 func SendDM(user string, msg *discordgo.MessageSend) error {
@@ -23,7 +23,7 @@ func SendDM(user string, msg *discordgo.MessageSend) error {
 		return err
 	}
 
-	_, err = SendMessage(channel.ID, msg)
+	err = SendMessage(channel.ID, msg)
 	return err
 }
 
