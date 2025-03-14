@@ -11,8 +11,9 @@ import (
 )
 
 // Message functions
-func SendMessage(c string, messageData *discordgo.MessageSend) (messageObject *discordgo.Message, err error) {
-	messageObject, err = internal.Session.ChannelMessageSendComplex(c, messageData)
+func SendMessage(c string, messageData *discordgo.MessageSend, delay ...any) (message *discordgo.Message, err error) {
+	message, err = internal.Session.ChannelMessageSendComplex(c, messageData)
+	DeleteMessage(c, message.ID, delay)
 	return
 }
 
@@ -26,16 +27,14 @@ func SendDM(user string, msg *discordgo.MessageSend) error {
 	return err
 }
 
-func SendMessageToDeleteAfter(delay time.Duration, c string, messageData *discordgo.MessageSend) {
-	message, err := SendMessage(c, messageData)
-	if err != nil {
-		logrus.Warn("Failed to send temporary message")
-	}
-	DeleteChannelMessageAfterDelay(delay, c, message.ID)
-}
+func DeleteMessage(c, m string, delay ...any) error {
+    dur := 0
+    if len(delay) > 0 {
+        dur = int(ToInt64(delay[0]))
+    }
+	time.Sleep(time.Duration(dur))
 
-func DeleteChannelMessageAfterDelay(delay time.Duration, c string, m string) error {
-    time.Sleep(delay)
+    logrus.Infoln(dur)
     err := internal.Session.ChannelMessageDelete(c, m)
     return err
 }
