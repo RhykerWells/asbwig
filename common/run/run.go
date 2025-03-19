@@ -6,14 +6,14 @@ import (
 	"syscall"
 
 	"github.com/Ranger-4297/asbwig/bot"
-	"github.com/Ranger-4297/asbwig/internal"
+	"github.com/Ranger-4297/asbwig/common"
 	log "github.com/sirupsen/logrus"
 )
 
 func Init() {
-	err := internal.Init()
-	bot.Run(internal.Session)
-	internal.Run(internal.Session)
+	err := common.Init()
+	bot.Run(common.Session)
+	common.Run(common.Session)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
 	}

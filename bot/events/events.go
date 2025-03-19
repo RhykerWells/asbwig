@@ -1,15 +1,15 @@
 package events
 
 import (
-	"github.com/Ranger-4297/asbwig/internal"
+	"github.com/Ranger-4297/asbwig/common"
 	log "github.com/sirupsen/logrus"
 )
 
 func InitEvents() {
-	internal.Session.AddHandler(botReady)
-	internal.Session.AddHandler(guildJoin)
-	internal.Session.AddHandler(guildLeave)
-	internal.Session.AddHandler(messageCreate)
+	common.Session.AddHandler(botReady)
+	common.Session.AddHandler(guildJoin)
+	common.Session.AddHandler(guildLeave)
+	common.Session.AddHandler(messageCreate)
 
 	log.Infoln("Event system initialised")
 }

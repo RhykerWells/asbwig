@@ -1,4 +1,4 @@
-package internal
+package common
 
 //go:generate sqlboiler --no-hooks psql
 
