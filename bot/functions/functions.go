@@ -1,4 +1,4 @@
-package bot
+package functions
 
 import (
 	"reflect"
@@ -13,7 +13,9 @@ import (
 // Message functions
 func SendMessage(channelID string, messageData *discordgo.MessageSend, delay ...any) error {
 	message, err := common.Session.ChannelMessageSendComplex(channelID, messageData)
-	DeleteMessage(channelID, message.ID, delay)
+	if delay != nil {
+		DeleteMessage(channelID, message.ID, delay)
+	}
 	return err
 }
 
