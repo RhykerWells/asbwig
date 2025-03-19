@@ -11,74 +11,79 @@ import (
 )
 
 // Message functions
-func SendMessage(c string, messageData *discordgo.MessageSend, delay ...any) error {
-	message, err := internal.Session.ChannelMessageSendComplex(c, messageData)
-	DeleteMessage(c, message.ID, delay)
+func SendMessage(channelID string, messageData *discordgo.MessageSend, delay ...any) error {
+	message, err := internal.Session.ChannelMessageSendComplex(channelID, messageData)
+	DeleteMessage(channelID, message.ID, delay)
 	return err
 }
 
-func SendDM(user string, msg *discordgo.MessageSend) error {
-	channel, err := internal.Session.UserChannelCreate(user)
+func SendDM(userID string, messageData *discordgo.MessageSend) error {
+	channel, err := internal.Session.UserChannelCreate(userID)
 	if err != nil {
 		return err
 	}
 
-	err = SendMessage(channel.ID, msg)
+	err = SendMessage(channel.ID, messageData)
 	return err
 }
 
-func DeleteMessage(c, m string, delay ...any) error {
-    dur := 0
+func DeleteMessage(channelID, messageData string, delay ...any) error {
+    duration := 0
     if len(delay) > 0 {
-        dur = int(ToInt64(delay[0]))
+		if int(ToInt64(delay[0])) < 1 {
+			return nil
+		}
+        duration = int(ToInt64(delay[0]))
     }
-	time.Sleep(time.Duration(dur))
+	time.Sleep(time.Duration(duration))
 
-    logrus.Infoln(dur)
-    err := internal.Session.ChannelMessageDelete(c, m)
+    logrus.Infoln(duration)
+    err := internal.Session.ChannelMessageDelete(channelID, messageData)
     return err
 }
 
 // User functions
-func GetUser(u string) (interface{}, error) {
-	user, err := internal.Session.User(u)
+func GetUser(user string) (interface{}, error) {
+	u, err := internal.Session.User(user)
 
-	return user, err
+	return u, err
 }
 
-func GetMember(g *discordgo.Guild, u string) (interface{}, error) {
-	user, err := internal.Session.GuildMember(g.ID, u)
+func GetMember(guild *discordgo.Guild, user string) (interface{}, error) {
+	u, err := internal.Session.GuildMember(guild.ID, user)
 
-	return user, err
+	return u, err
 }
 
 // Role functions
-func AddRole(g *discordgo.Guild, m *discordgo.Member, r string) error {
-    for _, v := range m.Roles {
-        if v == r {
+func AddRole(guild *discordgo.Guild, member *discordgo.Member, roleID string) error {
+    for _, v := range member.Roles {
+        if v == roleID {
             // Already has the role
             return nil
         }
     }
 
-    return internal.Session.GuildMemberRoleAdd(g.ID, m.User.ID, r)
+    return internal.Session.GuildMemberRoleAdd(guild.ID, member.User.ID, roleID)
 }
 
-func RemoveRole(g *discordgo.Guild, m *discordgo.Member, r string) error {
-	for _, v := range m.Roles {
-        if v != r {
-            internal.Session.GuildMemberRoleRemove(g.ID, m.User.ID, r)
+func RemoveRole(guild *discordgo.Guild, member *discordgo.Member, roleID string) error {
+	for _, v := range member.Roles {
+
+        if GetRole(guild, v).ID != roleID {
+            internal.Session.GuildMemberRoleRemove(guild.ID, member.User.ID, roleID)
 			return nil
         }
     }
 	return nil
 }
 
-func SetRoles(g *discordgo.Guild, m *discordgo.Member, r []string) error {
+func SetRoles(guild *discordgo.Guild, member *discordgo.Member, roleIDs []string) error {
     roles := make(map[string]struct{})
-	for _, id := range m.Roles {
-		r := GetRole(g, id)
-		if r != nil && r.Managed {
+
+	for _, id := range member.Roles {
+		role := GetRole(guild, id)
+		if role != nil && role.Managed {
 			roles[id] = struct{}{}
 		}
 	}
@@ -89,7 +94,7 @@ func SetRoles(g *discordgo.Guild, m *discordgo.Member, r []string) error {
 	userData := &discordgo.GuildMemberParams{
 		Roles: &roleSlice,
 	}
-	_, err := internal.Session.GuildMemberEdit(g.ID, m.User.ID, userData)
+	_, err := internal.Session.GuildMemberEdit(guild.ID, member.User.ID, userData)
 	return err
 }
 
