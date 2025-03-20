@@ -100,6 +100,16 @@ func SetRoles(guild *discordgo.Guild, member *discordgo.Member, roleIDs []string
 	return err
 }
 
+// Misc
+func SetStatus(statusText string) {
+	// TODO VERSION on nothing
+	if statusText == "" {
+		statusText = ""
+	}
+
+	common.Session.UpdateCustomStatus(statusText)
+}
+
 // Helper tools
 func ToInt64(conv interface{}) int64 {
 	t := reflect.ValueOf(conv)
