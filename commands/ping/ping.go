@@ -11,7 +11,7 @@ var Command = &dcommand.AsbwigCommand {
 	Description: "Displays bot latency",
 	Run: (func(data *dcommand.Data) {
 		message := &discordgo.MessageSend {
-			Content: "Weee",
+			Content: "Pong",
 		}
 		functions.SendMessage(data.Message.ChannelID, message)
 	}),
