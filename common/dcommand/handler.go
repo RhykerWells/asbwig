@@ -15,15 +15,6 @@ func NewCommandHandler() *CommandHandler {
 	}
 }
 
-func (c *CommandHandler) RegisterCommand(cmds ...*AsbwigCommand) {
-	for _, cmd := range cmds {
-		c.cmdInstances = append(c.cmdInstances, *cmd)
-		for _, command := range cmd.Command {
-			c.cmdMap[command] = *cmd
-		}
-	}
-}
-
 // Handles all message create events to the bot, to pass them to child functions
 func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discordgo.MessageCreate) {
 	if event.Author.ID == s.State.User.ID || event.Author.Bot {
