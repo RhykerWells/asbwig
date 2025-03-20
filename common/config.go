@@ -13,6 +13,8 @@ var (
 	ConfigPGDB       = os.Getenv("ASBWIG_PGDB")
 	ConfigPGUsername = os.Getenv("ASBWIG_PGUSER")
 	ConfigPGPassword = os.Getenv("ASBWIG_PGPASSWORD")
+	
+	ConfigBotOwner = os.Getenv("ASBWIG_OWNERID")
 )
 
 func ConfigDgoBotToken() string {
