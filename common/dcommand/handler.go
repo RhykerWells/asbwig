@@ -3,6 +3,7 @@ package dcommand
 import (
 	"strings"
 
+	"github.com/Ranger-4297/asbwig/bot/functions"
 	prfx "github.com/Ranger-4297/asbwig/bot/prefix"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
@@ -46,13 +47,7 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 		Message: event.Message,
 	}
 
-	go cmd.Run(data)
-
-	logrus.WithFields(logrus.Fields{
-		"Guild": event.GuildID,
-		"Command": command,
-		"Triggering user": event.Author.ID},
-		).Infoln("Executed command")
+	runCommand(cmd, data)
 }
 
 // Checkmessage checks a given content for the prefix or bot mention of the guild
@@ -90,4 +85,20 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 		ok = true
 	}
 	return prefix, ok
+}
+
+func runCommand(cmd AsbwigCommand, data *Data) {
+	argCount := len(data.Args)
+	if argCount < cmd.ArgsRequired {
+		functions.SendBasicMessage(data.Message.ChannelID, "Not enough arguments passed")
+		return
+	}
+
+	go cmd.Run(data)
+
+	logrus.WithFields(logrus.Fields{
+		"Guild": data.Message.GuildID,
+		"Command": cmd.Command,
+		"Triggering user": data.Message.Author.ID},
+		).Infoln("Executed command")
 }

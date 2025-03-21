@@ -11,6 +11,11 @@ import (
 )
 
 // Message functions
+func SendBasicMessage(channelID string, message string) error {
+	_, err := common.Session.ChannelMessageSend(channelID, message)
+	return err
+}
+
 func SendMessage(channelID string, messageData *discordgo.MessageSend, delay ...any) error {
 	message, err := common.Session.ChannelMessageSendComplex(channelID, messageData)
 	if delay != nil {
@@ -111,6 +116,8 @@ func SetStatus(statusText string) {
 }
 
 // Helper tools
+
+// ToInt64 takes the value of an int, float or string and returns it as a whole 64-bit integer if possible.
 func ToInt64(conv interface{}) int64 {
 	t := reflect.ValueOf(conv)
 	switch {

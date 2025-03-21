@@ -9,8 +9,9 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand {
-	Command:	[]string{"setstatus"},
-	Description: "Changes the bot status",
+	Command:		[]string{"setstatus"},
+	Description: 	"Changes the bot status",
+	ArgsRequired:	1,
 	Run: (func(data *dcommand.Data) {
 		functions.SetStatus(strings.Join(data.Args, " "))
 		message := &discordgo.MessageSend {

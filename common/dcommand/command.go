@@ -3,7 +3,7 @@ package dcommand
 type AsbwigCommand struct {
 	Command			[]string
 	Description 	string
-	Elevated		bool
+	ArgsRequired	int
 	Run				Run
 	Data			*Data
 }
