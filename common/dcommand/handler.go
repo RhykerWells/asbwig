@@ -47,7 +47,7 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 		Message: event.Message,
 	}
 
-	runCommand(cmd, data)
+	go runCommand(cmd, data)
 }
 
 // Checkmessage checks a given content for the prefix or bot mention of the guild
@@ -94,7 +94,7 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 		return
 	}
 
-	go cmd.Run(data)
+	cmd.Run(data)
 
 	logrus.WithFields(logrus.Fields{
 		"Guild": data.Message.GuildID,
