@@ -1,6 +1,9 @@
 # Your Discord bot token
 ASBWIG_TOKEN=tokenXXXX
 
+# Your user ID
+ASBWIG_OWNERID=userID
+
 # Database
 ASBWIG_PGHOST=db
 ASBWIG_PGDB=asbwig
