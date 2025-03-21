@@ -11,9 +11,9 @@ import (
 )
 
 // Message functions
-func SendBasicMessage(channelID string, message string) error {
-	_, err := common.Session.ChannelMessageSend(channelID, message)
-	return err
+func SendBasicMessage(channelID string, message string) (msg *discordgo.Message, err error) {
+	msg, err = common.Session.ChannelMessageSend(channelID, message)
+	return msg, err
 }
 
 func SendMessage(channelID string, messageData *discordgo.MessageSend, delay ...any) error {
@@ -31,6 +31,11 @@ func SendDM(userID string, messageData *discordgo.MessageSend) error {
 	}
 
 	err = SendMessage(channel.ID, messageData)
+	return err
+}
+
+func EditBasicMessage(channelID, messageID, message string) error {
+	_, err := common.Session.ChannelMessageEdit(channelID, messageID, message)
 	return err
 }
 
