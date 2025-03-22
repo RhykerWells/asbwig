@@ -4,6 +4,7 @@ import (
 	"github.com/Ranger-4297/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/Ranger-4297/asbwig/commands/invite"
 	"github.com/Ranger-4297/asbwig/commands/ping"
 
 	"github.com/Ranger-4297/asbwig/commands/botOwner/eval"
@@ -17,6 +18,7 @@ func InitCommands(session *discordgo.Session) {
 		helpCmd,
 
 		ping.Command,
+		invite.Command,
 
 		setstatus.Command,
 		eval.Command,
