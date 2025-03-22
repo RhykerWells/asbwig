@@ -3,6 +3,7 @@ package dcommand
 type AsbwigCommand struct {
 	Command			[]string
 	Description 	string
+	Args			[]*Args
 	ArgsRequired	int
 	Run				Run
 	Data			*Data
@@ -16,7 +17,7 @@ type CommandHandler struct {
 type RegisteredCommand struct {
 	Name	[]string
 	Description string
-	Args		int
+	Args		[]*Args
 }
 
 func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
@@ -34,6 +35,7 @@ func (c *CommandHandler) RegisteredCommands() (map[string]RegisteredCommand) {
 		rcmd := &RegisteredCommand{
 			Name: 		 cmd.Command,
 			Description: cmd.Description,
+			Args: 		 cmd.Args,
 		}
 		cmdMap[cmd.Command[0]] = *rcmd
 	}

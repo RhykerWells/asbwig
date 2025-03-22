@@ -11,6 +11,9 @@ import (
 
 var helpCmd = &dcommand.AsbwigCommand {
 	Command:	[]string{"help"},
+	Args:		[]*dcommand.Args{
+		{Name:	"command", Type:	dcommand.String},
+	},
 	Description: "Displays bot help",
 	Run: helpFunc,
 }
@@ -56,8 +59,27 @@ func help(command string, channelID string) {
 		Description: cmd.Description,
 		Color: 0x00FF7B,
 	}
+	args := getArgs(cmd)
+	helpEmbed.Description = cmd.Description
+	if args != "" {
+		helpEmbed.Description += "\n```" + args + "\n```"
+	}
 	message := &discordgo.MessageSend {
 		Embed: helpEmbed,
 	}
 	functions.SendMessage(channelID, message)
+}
+
+func getArgs(command dcommand.RegisteredCommand) (str string) {
+	for _, arg := range command.Args {
+		str += command.Name[0]
+		str += " <" + argHelp(arg) + ">\n"
+	}
+	return
+}
+
+func argHelp(arg *dcommand.Args) (str string) {
+	argType := arg.Type.Help()
+	str = fmt.Sprintf("%s:%s", arg.Name, argType)
+	return
 }
