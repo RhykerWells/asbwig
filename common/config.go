@@ -8,6 +8,7 @@ import (
 var (
 	ConfigBotName  = os.Getenv("ASBWIG_BOTNAME")
 	ConfigBotToken = os.Getenv("ASBWIG_TOKEN")
+	ConfigBotClientID = os.Getenv("ASBWIG_CLIENTID")
 
 	ConfigPGHost     = os.Getenv("ASBWIG_PGHOST")
 	ConfigPGDB       = os.Getenv("ASBWIG_PGDB")
