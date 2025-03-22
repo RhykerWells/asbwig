@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Ranger-4297/asbwig/bot/functions"
+	"github.com/Ranger-4297/asbwig/commands/util"
 	"github.com/Ranger-4297/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	piston "github.com/milindmadhukar/go-piston"
@@ -18,7 +19,7 @@ var Command = &dcommand.AsbwigCommand {
 	Args:			[]*dcommand.Args{
 		{Name:	"Code", Type:	dcommand.String},
 	},
-	Run: eval,
+	Run: util.OwnerCommand(eval),
 }
 
 func eval(data *dcommand.Data) {
