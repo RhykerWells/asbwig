@@ -9,11 +9,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var CmdHndlr *CommandHandler
+
 func NewCommandHandler() *CommandHandler {
-	return &CommandHandler{
-	cmdInstances: make([]AsbwigCommand, 0),
+	handler := &CommandHandler {
+		cmdInstances: make([]AsbwigCommand, 0),
 		cmdMap:	make(map[string]AsbwigCommand),
 	}
+	CmdHndlr = handler
+	return CmdHndlr
 }
 
 // Handles all message create events to the bot, to pass them to child functions
