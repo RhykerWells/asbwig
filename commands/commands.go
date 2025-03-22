@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ranger-4297/asbwig/commands/ping"
 
+	"github.com/Ranger-4297/asbwig/commands/botOwner/eval"
 	"github.com/Ranger-4297/asbwig/commands/botOwner/setstatus"
 )
 
@@ -18,6 +19,7 @@ func InitCommands(session *discordgo.Session) {
 		ping.Command,
 
 		setstatus.Command,
+		eval.Command,
 	)
 
 	session.AddHandler(cmdHandler.HandleMessageCreate)

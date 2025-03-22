@@ -16,6 +16,7 @@ require (
 require (
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/milindmadhukar/go-piston v0.0.0-20240618154618-bbb46040f91d
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
