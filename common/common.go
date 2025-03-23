@@ -50,7 +50,7 @@ func Init() error {
 	}
 
 	log.Infof("Initializing DB schema")
-	initDB(GuildConfigSchema)
+	InitSchema("Core", GuildConfigSchema)
 
 	Session = s
 	return err
@@ -79,11 +79,11 @@ func postgresConnect(database string, host string, username string, password str
 	return err
 }
 
-func initDB(schema string) {
+func InitSchema(schemaname string, schema string) {
 	// Wait in case initial database creation. Bit starts too quickly
 	_, err := PQ.Exec(schema)
 	if err != nil {
-		log.WithError(err).Fatal("Failed initializing postgres db schema")
+		log.WithError(err).Fatal("Failed initializing postgres db schema for " + schemaname)
 	}
-	log.Infoln("Database initialized")
+	log.Infoln("Schema " + schemaname + " initialized")
 }
