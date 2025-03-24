@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/ranger-4297/asbwig">
+  <a href="https://github.com/RhykerWells/asbwig">
     <picture>
       <img src="./img/avatar.png" height="128">
     </picture>
@@ -46,7 +46,7 @@ Downloading and installing
 ```
 sudo apt update
 sudo apt install git
-git clone https://github.com/Ranger-4297/asbwig
+git clone https://github.com/RhykerWells/asbwig
 cd asbwig/cmd/asbwig
 go build
 ```
@@ -63,7 +63,7 @@ sudo apt install git
 ```
 Clone the repository
 ```
-git clone https://github.com/Ranger-4297/asbwig
+git clone https://github.com/RhykerWells/asbwig
 cd asbwig/docker
 ```
 Copy the environment variable files and edit where applicable

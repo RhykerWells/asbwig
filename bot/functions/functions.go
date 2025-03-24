@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Ranger-4297/asbwig/common"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )

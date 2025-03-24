@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"github.com/Ranger-4297/asbwig/bot/events"
-	"github.com/Ranger-4297/asbwig/commands"
+	"github.com/RhykerWells/asbwig/bot/events"
+	"github.com/RhykerWells/asbwig/commands"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -3,19 +3,19 @@ package commands
 import (
 	"fmt"
 
-	"github.com/Ranger-4297/asbwig/bot/functions"
-	"github.com/Ranger-4297/asbwig/common"
-	"github.com/Ranger-4297/asbwig/common/dcommand"
+	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
-var helpCmd = &dcommand.AsbwigCommand {
-	Command:	[]string{"help"},
-	Args:		[]*dcommand.Args{
-		{Name:	"command", Type:	dcommand.String},
+var helpCmd = &dcommand.AsbwigCommand{
+	Command: []string{"help"},
+	Args: []*dcommand.Args{
+		{Name: "command", Type: dcommand.String},
 	},
 	Description: "Displays bot help",
-	Run: helpFunc,
+	Run:         helpFunc,
 }
 
 func helpFunc(data *dcommand.Data) {
@@ -31,14 +31,14 @@ func helpFunc(data *dcommand.Data) {
 	}
 
 	// Generic help category
-	basicEmbed := &discordgo.MessageEmbed {
-		Author: &discordgo.MessageEmbedAuthor {
-			Name:	fmt.Sprintf("%s help", common.Bot.Username),
+	basicEmbed := &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    fmt.Sprintf("%s help", common.Bot.Username),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Color: 0x00FF7B,
 	}
-	message := &discordgo.MessageSend {
+	message := &discordgo.MessageSend{
 		Embed: basicEmbed,
 	}
 	functions.SendMessage(data.Message.ChannelID, message)
@@ -51,20 +51,20 @@ func help(command string, channelID string) {
 		functions.SendBasicMessage(channelID, fmt.Sprintf("Command `%s` not found", command))
 		return
 	}
-	helpEmbed := &discordgo.MessageEmbed {
-		Author: &discordgo.MessageEmbedAuthor {
-			Name:	fmt.Sprintf("%s help - %s", common.Bot.Username, command),
+	helpEmbed := &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    fmt.Sprintf("%s help - %s", common.Bot.Username, command),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Description: cmd.Description,
-		Color: 0x00FF7B,
+		Color:       0x00FF7B,
 	}
 	args := getArgs(cmd)
 	helpEmbed.Description = cmd.Description
 	if args != "" {
 		helpEmbed.Description += "\n```" + args + "\n```"
 	}
-	message := &discordgo.MessageSend {
+	message := &discordgo.MessageSend{
 		Embed: helpEmbed,
 	}
 	functions.SendMessage(channelID, message)

@@ -5,8 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Ranger-4297/asbwig/bot"
-	"github.com/Ranger-4297/asbwig/common"
+	"github.com/RhykerWells/asbwig/bot"
+	"github.com/RhykerWells/asbwig/common"
 	log "github.com/sirupsen/logrus"
 )
 
