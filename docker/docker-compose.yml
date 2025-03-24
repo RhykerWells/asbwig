@@ -9,7 +9,7 @@ networks:
 services:
   app:
     container_name: asbwig-app
-    image: Ranger-4297/asbwig:latest
+    image: RhykerWells/asbwig:latest
     restart: unless-stopped
     networks:
       - default

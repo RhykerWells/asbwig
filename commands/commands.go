@@ -1,14 +1,14 @@
 package commands
 
 import (
-	"github.com/Ranger-4297/asbwig/common/dcommand"
+	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/Ranger-4297/asbwig/commands/invite"
-	"github.com/Ranger-4297/asbwig/commands/ping"
+	"github.com/RhykerWells/asbwig/commands/invite"
+	"github.com/RhykerWells/asbwig/commands/ping"
 
-	"github.com/Ranger-4297/asbwig/commands/botOwner/eval"
-	"github.com/Ranger-4297/asbwig/commands/botOwner/setstatus"
+	"github.com/RhykerWells/asbwig/commands/botOwner/eval"
+	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
 
 func InitCommands(session *discordgo.Session) {

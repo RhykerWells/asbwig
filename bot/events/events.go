@@ -1,7 +1,7 @@
 package events
 
 import (
-	"github.com/Ranger-4297/asbwig/common"
+	"github.com/RhykerWells/asbwig/common"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -1,8 +1,8 @@
 package events
 
 import (
-	"github.com/Ranger-4297/asbwig/bot/prefix"
-	"github.com/Ranger-4297/asbwig/common"
+	"github.com/RhykerWells/asbwig/bot/prefix"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )

@@ -1,6 +1,6 @@
 package prefix
 
-import "github.com/Ranger-4297/asbwig/common"
+import "github.com/RhykerWells/asbwig/common"
 
 func GuildPrefix(guild string) string {
 	var prefix string

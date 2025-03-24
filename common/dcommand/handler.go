@@ -3,8 +3,8 @@ package dcommand
 import (
 	"strings"
 
-	"github.com/Ranger-4297/asbwig/bot/functions"
-	prfx "github.com/Ranger-4297/asbwig/bot/prefix"
+	"github.com/RhykerWells/asbwig/bot/functions"
+	prfx "github.com/RhykerWells/asbwig/bot/prefix"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )
@@ -12,9 +12,9 @@ import (
 var CmdHndlr *CommandHandler
 
 func NewCommandHandler() *CommandHandler {
-	handler := &CommandHandler {
+	handler := &CommandHandler{
 		cmdInstances: make([]AsbwigCommand, 0),
-		cmdMap:	make(map[string]AsbwigCommand),
+		cmdMap:       make(map[string]AsbwigCommand),
 	}
 	CmdHndlr = handler
 	return CmdHndlr
@@ -81,10 +81,10 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 	prefix := ""
 	ok := false
 
-	if strings.Index(message, "<@" + botID + ">") == 0 {
+	if strings.Index(message, "<@"+botID+">") == 0 {
 		prefix = "<@" + botID + ">"
 		ok = true
-	} else if strings.Index(message, "<@!" + botID + ">") == 0 {
+	} else if strings.Index(message, "<@!"+botID+">") == 0 {
 		prefix = "<@!" + botID + ">"
 		ok = true
 	}
@@ -101,8 +101,8 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 	cmd.Run(data)
 
 	logrus.WithFields(logrus.Fields{
-		"Guild": data.Message.GuildID,
-		"Command": cmd.Command,
+		"Guild":           data.Message.GuildID,
+		"Command":         cmd.Command,
 		"Triggering user": data.Message.Author.ID},
-		).Infoln("Executed command")
+	).Infoln("Executed command")
 }

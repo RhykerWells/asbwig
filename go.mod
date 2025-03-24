@@ -1,4 +1,4 @@
-module github.com/Ranger-4297/asbwig
+module github.com/RhykerWells/asbwig
 
 go 1.20
 

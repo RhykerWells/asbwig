@@ -5,19 +5,19 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Ranger-4297/asbwig/bot/functions"
-	"github.com/Ranger-4297/asbwig/commands/util"
-	"github.com/Ranger-4297/asbwig/common/dcommand"
+	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/commands/util"
+	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	piston "github.com/milindmadhukar/go-piston"
 )
 
-var Command = &dcommand.AsbwigCommand {
-	Command:		[]string{"eval"},
-	Description: 	"Evaluates Go code",
-	ArgsRequired:	1,
-	Args:			[]*dcommand.Args{
-		{Name:	"Code", Type:	dcommand.String},
+var Command = &dcommand.AsbwigCommand{
+	Command:      []string{"eval"},
+	Description:  "Evaluates Go code",
+	ArgsRequired: 1,
+	Args: []*dcommand.Args{
+		{Name: "Code", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(eval),
 }
@@ -28,15 +28,15 @@ func eval(data *dcommand.Data) {
 		return
 	}
 	output, err := exec(codeBlock, data.Message.Reference())
-	if err != nil  {
+	if err != nil {
 		functions.SendBasicMessage(data.Message.ChannelID, "Something went wrong.")
 		return
 	}
-	functions.SendBasicMessage(data.Message.ChannelID, "```" + output.Run.Output + "```")
+	functions.SendBasicMessage(data.Message.ChannelID, "```"+output.Run.Output+"```")
 }
 
-func exec(code string, messageReference *discordgo.MessageReference) (*piston.PistonExecution, error){
-// execute code using piston library
+func exec(code string, messageReference *discordgo.MessageReference) (*piston.PistonExecution, error) {
+	// execute code using piston library
 	pclient := piston.CreateDefaultClient()
 	output, err := pclient.Execute("go", "",
 		[]piston.Code{
@@ -49,7 +49,7 @@ func exec(code string, messageReference *discordgo.MessageReference) (*piston.Pi
 	return output, err
 }
 
-func codeBlockExtractor(data *dcommand.Data) (string) {
+func codeBlockExtractor(data *dcommand.Data) string {
 	messageContent := strings.Join(data.Args, " ")
 	codeblockRegex, _ := regexp.Compile("```go.*")
 	c := strings.Split(messageContent, "\n")
