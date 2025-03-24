@@ -79,11 +79,12 @@ func postgresConnect(database string, host string, username string, password str
 	return err
 }
 
-func InitSchema(schemaname string, schema string) {
-	// Wait in case initial database creation. Bit starts too quickly
-	_, err := PQ.Exec(schema)
-	if err != nil {
-		log.WithError(err).Fatal("Failed initializing postgres db schema for " + schemaname)
+func InitSchema(schemaname string, schemas ...string) {
+	for _, schema := range schemas {
+		_, err := PQ.Exec(schema)
+		if err != nil {
+			log.WithError(err).Fatal("Failed initializing postgres db schema for " + schemaname)
+		}
 	}
 	log.Infoln("Schema " + schemaname + " initialized")
 }
