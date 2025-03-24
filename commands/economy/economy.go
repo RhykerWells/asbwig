@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS economy_cash (
 	cash BIGINT
 )
 `}
+
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
 }

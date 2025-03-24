@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 
@@ -28,10 +27,7 @@ func InitCommands(session *discordgo.Session) {
 		eval.Command,
 	)
 
-	economySetup()
+	economy.EconomySetup(cmdHandler)
 	session.AddHandler(cmdHandler.HandleMessageCreate)
 } 
 
-func economySetup() {
-	common.InitSchema("Economy", economy.GuildEconomySchema)
-}
