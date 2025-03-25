@@ -4,7 +4,7 @@ package economy
 
 import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
-	set "github.com/RhykerWells/asbwig/commands/economy/informational/settings"
+	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 )
@@ -12,9 +12,9 @@ import (
 var GuildEconomySchema = []string{`
 CREATE TABLE IF NOT EXISTS economy_config (
 	guild_id TEXT PRIMARY KEY,
-	max_bet BIGINT NOT NULL DEFAULT '5000',
+	maxbet BIGINT NOT NULL DEFAULT '5000',
 	symbol TEXT NOT NULL DEFAULT '£',
-	start_balance BIGINT NOT NULL DEFAULT '200'
+	startbalance BIGINT NOT NULL DEFAULT '200'
 );
 `,`
 CREATE TABLE IF NOT EXISTS economy_cash (
