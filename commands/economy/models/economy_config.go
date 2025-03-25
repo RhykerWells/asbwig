@@ -24,9 +24,9 @@ import (
 // EconomyConfig is an object representing the database table.
 type EconomyConfig struct {
 	GuildID      string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	MaxBet       int64  `boil:"max_bet" json:"max_bet" toml:"max_bet" yaml:"max_bet"`
+	Maxbet       int64  `boil:"maxbet" json:"maxbet" toml:"maxbet" yaml:"maxbet"`
 	Symbol       string `boil:"symbol" json:"symbol" toml:"symbol" yaml:"symbol"`
-	StartBalance int64  `boil:"start_balance" json:"start_balance" toml:"start_balance" yaml:"start_balance"`
+	Startbalance int64  `boil:"startbalance" json:"startbalance" toml:"startbalance" yaml:"startbalance"`
 
 	R *economyConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -34,40 +34,40 @@ type EconomyConfig struct {
 
 var EconomyConfigColumns = struct {
 	GuildID      string
-	MaxBet       string
+	Maxbet       string
 	Symbol       string
-	StartBalance string
+	Startbalance string
 }{
 	GuildID:      "guild_id",
-	MaxBet:       "max_bet",
+	Maxbet:       "maxbet",
 	Symbol:       "symbol",
-	StartBalance: "start_balance",
+	Startbalance: "startbalance",
 }
 
 var EconomyConfigTableColumns = struct {
 	GuildID      string
-	MaxBet       string
+	Maxbet       string
 	Symbol       string
-	StartBalance string
+	Startbalance string
 }{
 	GuildID:      "economy_config.guild_id",
-	MaxBet:       "economy_config.max_bet",
+	Maxbet:       "economy_config.maxbet",
 	Symbol:       "economy_config.symbol",
-	StartBalance: "economy_config.start_balance",
+	Startbalance: "economy_config.startbalance",
 }
 
 // Generated where
 
 var EconomyConfigWhere = struct {
 	GuildID      whereHelperstring
-	MaxBet       whereHelperint64
+	Maxbet       whereHelperint64
 	Symbol       whereHelperstring
-	StartBalance whereHelperint64
+	Startbalance whereHelperint64
 }{
 	GuildID:      whereHelperstring{field: "\"economy_config\".\"guild_id\""},
-	MaxBet:       whereHelperint64{field: "\"economy_config\".\"max_bet\""},
+	Maxbet:       whereHelperint64{field: "\"economy_config\".\"maxbet\""},
 	Symbol:       whereHelperstring{field: "\"economy_config\".\"symbol\""},
-	StartBalance: whereHelperint64{field: "\"economy_config\".\"start_balance\""},
+	Startbalance: whereHelperint64{field: "\"economy_config\".\"startbalance\""},
 }
 
 // EconomyConfigRels is where relationship names are stored.
@@ -87,9 +87,9 @@ func (*economyConfigR) NewStruct() *economyConfigR {
 type economyConfigL struct{}
 
 var (
-	economyConfigAllColumns            = []string{"guild_id", "max_bet", "symbol", "start_balance"}
+	economyConfigAllColumns            = []string{"guild_id", "maxbet", "symbol", "startbalance"}
 	economyConfigColumnsWithoutDefault = []string{"guild_id"}
-	economyConfigColumnsWithDefault    = []string{"max_bet", "symbol", "start_balance"}
+	economyConfigColumnsWithDefault    = []string{"maxbet", "symbol", "startbalance"}
 	economyConfigPrimaryKeyColumns     = []string{"guild_id"}
 	economyConfigGeneratedColumns      = []string{}
 )
