@@ -3,6 +3,7 @@ package economy
 //go:generate sqlboiler --no-hooks psql
 
 import (
+	"github.com/RhykerWells/asbwig/commands/economy/balance"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 )
@@ -24,6 +25,10 @@ CREATE TABLE IF NOT EXISTS economy_cash (
 
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
+
+	cmdHandler.RegisterCommands(
+		balance.Command,
+	)
 }
 
 func GuildEconomyAdd(guild_id string) {
