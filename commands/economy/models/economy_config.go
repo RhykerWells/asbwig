@@ -23,7 +23,7 @@ import (
 
 // EconomyConfig is an object representing the database table.
 type EconomyConfig struct {
-	GuildID      int64  `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	GuildID      string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	MaxBet       int64  `boil:"max_bet" json:"max_bet" toml:"max_bet" yaml:"max_bet"`
 	Symbol       string `boil:"symbol" json:"symbol" toml:"symbol" yaml:"symbol"`
 	StartBalance int64  `boil:"start_balance" json:"start_balance" toml:"start_balance" yaml:"start_balance"`
@@ -58,44 +58,13 @@ var EconomyConfigTableColumns = struct {
 
 // Generated where
 
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
-func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
-func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
-func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
-func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
-func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
-	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
-}
-func (w whereHelperstring) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
 var EconomyConfigWhere = struct {
-	GuildID      whereHelperint64
+	GuildID      whereHelperstring
 	MaxBet       whereHelperint64
 	Symbol       whereHelperstring
 	StartBalance whereHelperint64
 }{
-	GuildID:      whereHelperint64{field: "\"economy_config\".\"guild_id\""},
+	GuildID:      whereHelperstring{field: "\"economy_config\".\"guild_id\""},
 	MaxBet:       whereHelperint64{field: "\"economy_config\".\"max_bet\""},
 	Symbol:       whereHelperstring{field: "\"economy_config\".\"symbol\""},
 	StartBalance: whereHelperint64{field: "\"economy_config\".\"start_balance\""},
@@ -248,13 +217,13 @@ func EconomyConfigs(mods ...qm.QueryMod) economyConfigQuery {
 }
 
 // FindEconomyConfigG retrieves a single record by ID.
-func FindEconomyConfigG(ctx context.Context, guildID int64, selectCols ...string) (*EconomyConfig, error) {
+func FindEconomyConfigG(ctx context.Context, guildID string, selectCols ...string) (*EconomyConfig, error) {
 	return FindEconomyConfig(ctx, boil.GetContextDB(), guildID, selectCols...)
 }
 
 // FindEconomyConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyConfig(ctx context.Context, exec boil.ContextExecutor, guildID int64, selectCols ...string) (*EconomyConfig, error) {
+func FindEconomyConfig(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*EconomyConfig, error) {
 	economyConfigObj := &EconomyConfig{}
 
 	sel := "*"
@@ -780,12 +749,12 @@ func (o *EconomyConfigSlice) ReloadAll(ctx context.Context, exec boil.ContextExe
 }
 
 // EconomyConfigExistsG checks if the EconomyConfig row exists.
-func EconomyConfigExistsG(ctx context.Context, guildID int64) (bool, error) {
+func EconomyConfigExistsG(ctx context.Context, guildID string) (bool, error) {
 	return EconomyConfigExists(ctx, boil.GetContextDB(), guildID)
 }
 
 // EconomyConfigExists checks if the EconomyConfig row exists.
-func EconomyConfigExists(ctx context.Context, exec boil.ContextExecutor, guildID int64) (bool, error) {
+func EconomyConfigExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"economy_config\" where \"guild_id\"=$1 limit 1)"
 

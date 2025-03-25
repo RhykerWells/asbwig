@@ -24,7 +24,7 @@ import (
 
 // EconomyCash is an object representing the database table.
 type EconomyCash struct {
-	GuildID int64      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	GuildID string     `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	UserID  int64      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	Cash    null.Int64 `boil:"cash" json:"cash,omitempty" toml:"cash" yaml:"cash,omitempty"`
 
@@ -53,6 +53,37 @@ var EconomyCashTableColumns = struct {
 }
 
 // Generated where
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
+func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
+func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
+func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
+func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
+func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelperint64 struct{ field string }
 
@@ -116,11 +147,11 @@ func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIs
 func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var EconomyCashWhere = struct {
-	GuildID whereHelperint64
+	GuildID whereHelperstring
 	UserID  whereHelperint64
 	Cash    whereHelpernull_Int64
 }{
-	GuildID: whereHelperint64{field: "\"economy_cash\".\"guild_id\""},
+	GuildID: whereHelperstring{field: "\"economy_cash\".\"guild_id\""},
 	UserID:  whereHelperint64{field: "\"economy_cash\".\"user_id\""},
 	Cash:    whereHelpernull_Int64{field: "\"economy_cash\".\"cash\""},
 }
@@ -272,13 +303,13 @@ func EconomyCashes(mods ...qm.QueryMod) economyCashQuery {
 }
 
 // FindEconomyCashG retrieves a single record by ID.
-func FindEconomyCashG(ctx context.Context, guildID int64, selectCols ...string) (*EconomyCash, error) {
+func FindEconomyCashG(ctx context.Context, guildID string, selectCols ...string) (*EconomyCash, error) {
 	return FindEconomyCash(ctx, boil.GetContextDB(), guildID, selectCols...)
 }
 
 // FindEconomyCash retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyCash(ctx context.Context, exec boil.ContextExecutor, guildID int64, selectCols ...string) (*EconomyCash, error) {
+func FindEconomyCash(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*EconomyCash, error) {
 	economyCashObj := &EconomyCash{}
 
 	sel := "*"
@@ -804,12 +835,12 @@ func (o *EconomyCashSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 }
 
 // EconomyCashExistsG checks if the EconomyCash row exists.
-func EconomyCashExistsG(ctx context.Context, guildID int64) (bool, error) {
+func EconomyCashExistsG(ctx context.Context, guildID string) (bool, error) {
 	return EconomyCashExists(ctx, boil.GetContextDB(), guildID)
 }
 
 // EconomyCashExists checks if the EconomyCash row exists.
-func EconomyCashExists(ctx context.Context, exec boil.ContextExecutor, guildID int64) (bool, error) {
+func EconomyCashExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"economy_cash\" where \"guild_id\"=$1 limit 1)"
 
