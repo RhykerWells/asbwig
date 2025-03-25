@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
@@ -24,7 +25,7 @@ var Command = &dcommand.AsbwigCommand{
 }
 
 func settings(data *dcommand.Data) {
-	embed := &discordgo.MessageEmbed {Author: &discordgo.MessageEmbedAuthor{Name:    data.Message.Author.Username, IconURL: data.Message.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+	embed := &discordgo.MessageEmbed {Author: &discordgo.MessageEmbedAuthor{Name: data.Message.Author.Username, IconURL: data.Message.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
 	if len(data.Args) <= 0 {
 		embed.Description = "No `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -61,7 +62,7 @@ func settings(data *dcommand.Data) {
 			functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		displayvalue := fmt.Sprintf("%s%d", guild.Symbol, nvalue)
+		displayvalue := fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(nvalue))
 		if nvalue == 0 {
 			displayvalue = "Disabled"
 		}
