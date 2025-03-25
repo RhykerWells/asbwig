@@ -12,7 +12,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
-	"github.com/sirupsen/logrus"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -41,19 +40,7 @@ func settings(data *dcommand.Data) {
 	var settings models.EconomyConfig
 	if setting == "default" {
 		settings.GuildID = data.Message.GuildID
-		err := settings.Upsert(
-			context.Background(),
-			common.PQ,
-			true,
-			[]string{"guild_id"},
-			boil.Whitelist(
-				"maxbet",
-				"symbol",
-				"startbalance",
-			),
-			boil.Infer(),
-		)
-		logrus.Warnln(err)
+		settings.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("maxbet","symbol","startbalance",), boil.Infer())
 		embed.Description = "Economy settings have been reset to default values"
 		embed.Color = 0x00ff7b
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -64,10 +51,7 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	guild, _ := models.EconomyConfigs(
-		qm.Select("symbol"),
-		qm.Where("guild_id=?", data.Message.GuildID),
-	).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(qm.Select("symbol"), qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)
 	value := strings.ToLower(data.Args[1])
 	switch setting {
 	case "startbalance", "maxbet":
@@ -89,7 +73,6 @@ func settings(data *dcommand.Data) {
 		embed.Color = 0x00ff7b
 	}
 	query := fmt.Sprintf("UPDATE economy_config SET %s = $1 WHERE guild_id = $2", setting)
-	_, err := queries.Raw(query, value, data.Message.GuildID).Exec(common.PQ)
-	logrus.Warnln(err)
+	queries.Raw(query, value, data.Message.GuildID).Exec(common.PQ)
 	functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
