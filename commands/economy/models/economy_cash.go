@@ -24,8 +24,9 @@ import (
 
 // EconomyCash is an object representing the database table.
 type EconomyCash struct {
+	ID      int        `boil:"id" json:"id" toml:"id" yaml:"id"`
 	GuildID string     `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	UserID  int64      `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	UserID  string     `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	Cash    null.Int64 `boil:"cash" json:"cash,omitempty" toml:"cash" yaml:"cash,omitempty"`
 
 	R *economyCashR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -33,26 +34,53 @@ type EconomyCash struct {
 }
 
 var EconomyCashColumns = struct {
+	ID      string
 	GuildID string
 	UserID  string
 	Cash    string
 }{
+	ID:      "id",
 	GuildID: "guild_id",
 	UserID:  "user_id",
 	Cash:    "cash",
 }
 
 var EconomyCashTableColumns = struct {
+	ID      string
 	GuildID string
 	UserID  string
 	Cash    string
 }{
+	ID:      "economy_cash.id",
 	GuildID: "economy_cash.guild_id",
 	UserID:  "economy_cash.user_id",
 	Cash:    "economy_cash.cash",
 }
 
 // Generated where
+
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint) IN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint) NIN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelperstring struct{ field string }
 
@@ -78,29 +106,6 @@ func (w whereHelperstring) IN(slice []string) qm.QueryMod {
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-type whereHelperint64 struct{ field string }
-
-func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -147,12 +152,14 @@ func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIs
 func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var EconomyCashWhere = struct {
+	ID      whereHelperint
 	GuildID whereHelperstring
-	UserID  whereHelperint64
+	UserID  whereHelperstring
 	Cash    whereHelpernull_Int64
 }{
+	ID:      whereHelperint{field: "\"economy_cash\".\"id\""},
 	GuildID: whereHelperstring{field: "\"economy_cash\".\"guild_id\""},
-	UserID:  whereHelperint64{field: "\"economy_cash\".\"user_id\""},
+	UserID:  whereHelperstring{field: "\"economy_cash\".\"user_id\""},
 	Cash:    whereHelpernull_Int64{field: "\"economy_cash\".\"cash\""},
 }
 
@@ -173,10 +180,10 @@ func (*economyCashR) NewStruct() *economyCashR {
 type economyCashL struct{}
 
 var (
-	economyCashAllColumns            = []string{"guild_id", "user_id", "cash"}
+	economyCashAllColumns            = []string{"id", "guild_id", "user_id", "cash"}
 	economyCashColumnsWithoutDefault = []string{"guild_id", "user_id"}
-	economyCashColumnsWithDefault    = []string{"cash"}
-	economyCashPrimaryKeyColumns     = []string{"guild_id"}
+	economyCashColumnsWithDefault    = []string{"id", "cash"}
+	economyCashPrimaryKeyColumns     = []string{"id"}
 	economyCashGeneratedColumns      = []string{}
 )
 
@@ -303,13 +310,13 @@ func EconomyCashes(mods ...qm.QueryMod) economyCashQuery {
 }
 
 // FindEconomyCashG retrieves a single record by ID.
-func FindEconomyCashG(ctx context.Context, guildID string, selectCols ...string) (*EconomyCash, error) {
-	return FindEconomyCash(ctx, boil.GetContextDB(), guildID, selectCols...)
+func FindEconomyCashG(ctx context.Context, iD int, selectCols ...string) (*EconomyCash, error) {
+	return FindEconomyCash(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
 // FindEconomyCash retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyCash(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*EconomyCash, error) {
+func FindEconomyCash(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*EconomyCash, error) {
 	economyCashObj := &EconomyCash{}
 
 	sel := "*"
@@ -317,10 +324,10 @@ func FindEconomyCash(ctx context.Context, exec boil.ContextExecutor, guildID str
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"economy_cash\" where \"guild_id\"=$1", sel,
+		"select %s from \"economy_cash\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, guildID)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, economyCashObj)
 	if err != nil {
@@ -691,7 +698,7 @@ func (o *EconomyCash) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), economyCashPrimaryKeyMapping)
-	sql := "DELETE FROM \"economy_cash\" WHERE \"guild_id\"=$1"
+	sql := "DELETE FROM \"economy_cash\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -786,7 +793,7 @@ func (o *EconomyCash) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *EconomyCash) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEconomyCash(ctx, exec, o.GuildID)
+	ret, err := FindEconomyCash(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -835,21 +842,21 @@ func (o *EconomyCashSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 }
 
 // EconomyCashExistsG checks if the EconomyCash row exists.
-func EconomyCashExistsG(ctx context.Context, guildID string) (bool, error) {
-	return EconomyCashExists(ctx, boil.GetContextDB(), guildID)
+func EconomyCashExistsG(ctx context.Context, iD int) (bool, error) {
+	return EconomyCashExists(ctx, boil.GetContextDB(), iD)
 }
 
 // EconomyCashExists checks if the EconomyCash row exists.
-func EconomyCashExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
+func EconomyCashExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"economy_cash\" where \"guild_id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"economy_cash\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, guildID)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, guildID)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -861,5 +868,5 @@ func EconomyCashExists(ctx context.Context, exec boil.ContextExecutor, guildID s
 
 // Exists checks if the EconomyCash row exists.
 func (o *EconomyCash) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return EconomyCashExists(ctx, exec, o.GuildID)
+	return EconomyCashExists(ctx, exec, o.ID)
 }

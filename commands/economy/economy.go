@@ -19,8 +19,9 @@ CREATE TABLE IF NOT EXISTS economy_config (
 );
 `,`
 CREATE TABLE IF NOT EXISTS economy_cash (
-	guild_id TEXT PRIMARY KEY,
-	user_id BIGINT NOT NULL,
+	ID SERIAL PRIMARY KEY,
+	guild_id TEXT NOT NULL,
+	user_id TEXT NOT NULL,
 	cash BIGINT
 )
 `}
