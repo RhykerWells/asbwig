@@ -4,9 +4,11 @@
 package models
 
 var TableNames = struct {
+	EconomyBank   string
 	EconomyCash   string
 	EconomyConfig string
 }{
+	EconomyBank:   "economy_bank",
 	EconomyCash:   "economy_cash",
 	EconomyConfig: "economy_config",
 }
