@@ -6,7 +6,24 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+
+var (
+	gatewayIntentsUsed = discordgo.MakeIntent(
+		discordgo.IntentGuilds |
+		discordgo.IntentGuildMembers |
+		discordgo.IntentGuildModeration |
+		discordgo.IntentGuildVoiceStates |
+		discordgo.IntentGuildPresences |
+		discordgo.IntentGuildMessages |
+		discordgo.IntentGuildMessageReactions |
+		discordgo.IntentDirectMessages |
+		discordgo.IntentDirectMessageReactions |
+		discordgo.IntentMessageContent |
+		discordgo.IntentGuildScheduledEvents,
+	)
+)
 func Run(s *discordgo.Session) {
 	events.InitEvents()
 	commands.InitCommands(s)
+	s.Identify.Intents = gatewayIntentsUsed
 }
