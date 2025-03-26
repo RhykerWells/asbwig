@@ -6,7 +6,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -26,6 +25,6 @@ func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	var cash models.EconomyCash
 	cash.GuildID = guildid
 	cash.UserID = userid
-	cash.Cash = null.Int64From(balance)
+	cash.Cash = balance
 	_ = cash.Insert(context.Background(), common.PQ, boil.Infer())
 }
