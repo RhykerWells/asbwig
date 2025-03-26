@@ -5,7 +5,7 @@ package economy
 import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
-	"github.com/RhykerWells/asbwig/commands/economy/settings/set/viewsettings"
+	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 )
