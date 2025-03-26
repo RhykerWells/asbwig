@@ -10,6 +10,7 @@ func InitEvents() {
 	common.Session.AddHandler(guildJoin)
 	common.Session.AddHandler(guildLeave)
 	common.Session.AddHandler(messageCreate)
+	common.Session.AddHandler(guildMemberAdd)
 	common.Session.AddHandler(guildMemberLeave)
 
 	log.Infoln("Event system initialised")
