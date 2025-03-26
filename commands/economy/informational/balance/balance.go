@@ -1,30 +1,31 @@
 package balance
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     []string{"balance"},
 	Description: "Views your balance in the economy",
 	Run: (func(data *dcommand.Data) {
-		const cashquery = `SELECT cash FROM economy_cash WHERE guild_id=$1 AND user_id=$2`
-		var cash int64
-		err := common.PQ.QueryRow(cashquery, data.Message.GuildID, data.Message.Author.ID).Scan(&cash)
-		if err != nil {
-			cash = 0
+		userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.Message.GuildID, data.Message.Author.ID)).One(context.Background(), common.PQ)
+		var cash int64 = 0
+		if err == nil {
+			cash = userCash.Cash
 		}
-		const bankquery = `SELECT balance FROM economy_bank WHERE guild_id=$1 AND user_id=$2`
-		var bank int64
-		err = common.PQ.QueryRow(bankquery, data.Message.GuildID, data.Message.Author.ID).Scan(&bank)
-		if err != nil {
-			bank = 0
+		userBank, err := models.EconomyBanks(qm.Where("guild_id = ? AND user_id = ?", data.Message.GuildID, data.Message.Author.ID)).One(context.Background(), common.PQ)
+		var bank int64 = 0
+		if err == nil {
+			bank = userBank.Balance
 		}
 		networth := cash + bank
 		embed := &discordgo.MessageEmbed {
