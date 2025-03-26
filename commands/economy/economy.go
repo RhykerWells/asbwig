@@ -22,14 +22,14 @@ CREATE TABLE IF NOT EXISTS economy_cash (
 	ID SERIAL PRIMARY KEY,
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
-	cash BIGINT
+	cash BIGINT NOT NULL
 );
 `,`
 CREATE TABLE IF NOT EXISTS economy_bank (
 	ID SERIAL PRIMARY KEY,
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
-	balance BIGINT
+	balance BIGINT NOT NULL
 )`}
 
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
