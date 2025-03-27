@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
+	"github.com/dustin/go-humanize"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -32,7 +32,7 @@ func settings(data *dcommand.Data) {
 		return
 	}
 	setting := strings.ToLower(data.Args[0])
-	o, _ := regexp.Compile("default|s(ymbol|tartbalance)|maxbet")
+	o, _ := regexp.Compile("default|s(ymbol|tartbalance)|m(ax(bet)?|in)")
 	if !o.MatchString(setting) {
 		embed.Description = "Invalid `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -52,13 +52,18 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	guild, _ := models.EconomyConfigs(qm.Select("symbol"), qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)
 	value := strings.ToLower(data.Args[1])
 	switch setting {
-	case "startbalance", "maxbet":
+	case "startbalance", "maxbet", "min", "max":
 		nvalue := functions.ToInt64(value)
-		if nvalue < 0 {
+		if nvalue < 0 || (setting == "max" && nvalue == 0) {
 			embed.Description = "Invalid `Value` argument provided"
+			functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
+		if setting == "max" && nvalue < guild.Min {
+			embed.Description = fmt.Sprintf("You can't set `max` to a value under `min`.\n`min` is currently set to %s%d", guild.Symbol, guild.Min)
 			functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
