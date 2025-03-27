@@ -3,6 +3,8 @@ package economy
 var GuildEconomySchema = []string{`
 CREATE TABLE IF NOT EXISTS economy_config (
 	guild_id TEXT PRIMARY KEY,
+	min BIGINT NOT NULL,
+	MAX BIGINT NOT NULL,
 	maxbet BIGINT NOT NULL DEFAULT '5000',
 	symbol TEXT NOT NULL DEFAULT '£',
 	startbalance BIGINT NOT NULL DEFAULT '200'
