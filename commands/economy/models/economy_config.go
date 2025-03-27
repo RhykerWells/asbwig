@@ -102,8 +102,8 @@ type economyConfigL struct{}
 
 var (
 	economyConfigAllColumns            = []string{"guild_id", "min", "max", "maxbet", "symbol", "startbalance"}
-	economyConfigColumnsWithoutDefault = []string{"guild_id", "min", "max"}
-	economyConfigColumnsWithDefault    = []string{"maxbet", "symbol", "startbalance"}
+	economyConfigColumnsWithoutDefault = []string{"guild_id"}
+	economyConfigColumnsWithDefault    = []string{"min", "max", "maxbet", "symbol", "startbalance"}
 	economyConfigPrimaryKeyColumns     = []string{"guild_id"}
 	economyConfigGeneratedColumns      = []string{}
 )
