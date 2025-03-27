@@ -30,6 +30,13 @@ CREATE TABLE IF NOT EXISTS economy_cooldowns (
 	type TEXT NOT NULL,
 	expires_at TIMESTAMP
 );`,`
-ALTER TABLE economy_cooldowns ADD CONSTRAINT economy_cooldowns_unique UNIQUE (guild_id, user_id, type);
+DO $$
+BEGIN
+  BEGIN
+    ALTER TABLE economy_cooldowns ADD CONSTRAINT economy_cooldowns_unique UNIQUE (guild_id, user_id, type);
+  EXCEPTION
+    WHEN duplicate_table THEN RAISE NOTICE 'Table constraint economy_cooldowns_unique already exists';
+  END;
+END $$;
 `,
 }
