@@ -22,5 +22,14 @@ CREATE TABLE IF NOT EXISTS economy_bank (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
 	balance BIGINT NOT NULL
-)`,
+);`,`
+CREATE TABLE IF NOT EXISTS economy_cooldowns (
+	ID SERIAL PRIMARY KEY,
+	guild_id TEXT NOT NULL,
+	user_id TEXT NOT NULL,
+	type TEXT NOT NULL,
+	expires_at TIMESTAMP
+);`,`
+ALTER TABLE economy_cooldowns ADD CONSTRAINT economy_cooldowns_unique UNIQUE (guild_id, user_id, type);
+`,
 }
