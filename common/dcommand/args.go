@@ -12,6 +12,7 @@ type ArgumentType interface {
 var (
 	String =	&StringArg{}
 	Int =		&IntArg{}
+	User =		&UserArg{}
 )
 
 type StringArg struct{}
@@ -24,4 +25,10 @@ type IntArg struct{}
 var _ ArgumentType = (*IntArg)(nil)
 func (s *IntArg) Help() string {
 	return "Integer"
+}
+
+type UserArg struct{}
+var _ ArgumentType = (*UserArg)(nil)
+func (s *UserArg) Help() string {
+	return "ID/Mention"
 }
