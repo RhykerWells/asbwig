@@ -62,7 +62,7 @@ func GetUser(user string) (interface{}, error) {
 	return u, err
 }
 
-func GetMember(guild string, user string) (interface{}, error) {
+func GetMember(guild string, user string) (*discordgo.Member, error) {
 	// Direct mention
 	if strings.HasPrefix(user, "<@") {
 		user = user[2 : len(user)-1]
