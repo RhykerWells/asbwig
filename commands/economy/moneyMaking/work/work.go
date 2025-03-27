@@ -41,14 +41,15 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		userCash.Cash = cash + functions.ToInt64(payout)
 		_, _ = userCash.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
-		var cooldowns models.EconomyCooldown
-		cooldowns.GuildID = data.Message.GuildID
-		cooldowns.UserID = data.Message.Author.ID
-		cooldowns.Type = "work"
-		var expires null.Time
-		expires.Time = time.Now().Add(time.Second * time.Duration(3600))
-		expires.Valid = true
-		cooldowns.ExpiresAt = expires
+		cooldowns := models.EconomyCooldown{
+			GuildID:  data.Message.GuildID,
+			UserID:   data.Message.Author.ID,
+			Type:     "work",
+			ExpiresAt: null.Time{
+				Time:  time.Now().Add(3600 * time.Second),
+				Valid: true,
+			},
+		}
 		cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
 		functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
