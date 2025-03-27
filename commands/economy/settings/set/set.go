@@ -62,7 +62,7 @@ func settings(data *dcommand.Data) {
 			functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if setting == "max" && nvalue < guild.Min {
+		if setting == "max" && nvalue <= guild.Min {
 			embed.Description = fmt.Sprintf("You can't set `max` to a value under `min`.\n`min` is currently set to %s%d", guild.Symbol, guild.Min)
 			functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
