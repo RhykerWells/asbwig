@@ -4,6 +4,7 @@ package economy
 
 import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/work"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/addMoney"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/deposit"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/removeMoney"
@@ -19,10 +20,11 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 
 	cmdHandler.RegisterCommands(
 		balance.Command,
-		deposit.Command,
-		withdraw.Command,
+		work.Command,
 		addmoney.Command,
 		removemoney.Command,
+		deposit.Command,
+		withdraw.Command,
 		set.Command,
 		viewsettings.Command,
 	)
