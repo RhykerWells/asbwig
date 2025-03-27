@@ -36,6 +36,8 @@ func settings(data *dcommand.Data) {
 	} else {
 		startbalance = fmt.Sprint(symbol, humanize.Comma(guild.Startbalance))
 	}
-	embed.Description = fmt.Sprintf("maxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`", maxBet, symbol, startbalance)
+	min := fmt.Sprint(symbol, humanize.Comma(guild.Min))
+	max := fmt.Sprint(symbol, humanize.Comma(guild.Max))
+	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`", min, max, maxBet, symbol, startbalance)
 	functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
