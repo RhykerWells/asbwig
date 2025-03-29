@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
@@ -10,7 +11,8 @@ import (
 )
 
 var helpCmd = &dcommand.AsbwigCommand{
-	Command: []string{"help"},
+	Command: "help",
+	Aliases: []string{"h"},
 	Args: []*dcommand.Args{
 		{Name: "Command", Type: dcommand.String},
 	},
@@ -53,7 +55,7 @@ func help(command string, channelID string) {
 	}
 	helpEmbed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    fmt.Sprintf("%s help - %s", common.Bot.Username, command),
+			Name:    fmt.Sprintf("%s help - %s/%s", common.Bot.Username, command, strings.Join(cmd.Aliases, "/")),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Description: cmd.Description,
@@ -62,7 +64,7 @@ func help(command string, channelID string) {
 	args := getArgs(cmd)
 	helpEmbed.Description = cmd.Description
 	if args != "" {
-		helpEmbed.Description += "\n```" + cmd.Name[0] + args + "\n```"
+		helpEmbed.Description += "\n```" + cmd.Trigger + args + "\n```"
 	}
 	message := &discordgo.MessageSend{
 		Embed: helpEmbed,

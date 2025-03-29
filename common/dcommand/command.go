@@ -1,7 +1,14 @@
 package dcommand
 
+import (
+	"fmt"
+
+	"github.com/sirupsen/logrus"
+)
+
 type AsbwigCommand struct {
-	Command			[]string
+	Command			string
+	Aliases			[]string
 	Description 	string
 	Args			[]*Args
 	ArgsRequired	int
@@ -15,7 +22,8 @@ type CommandHandler struct {
 }
 
 type RegisteredCommand struct {
-	Name	[]string
+	Trigger		string
+	Aliases		[]string
 	Description string
 	Args		[]*Args
 }
@@ -23,8 +31,13 @@ type RegisteredCommand struct {
 func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
-		for _, command := range cmd.Command {
-			c.cmdMap[command] = *cmd
+		for range cmd.Command {
+			if len(cmd.Aliases) > 3 {
+				aliasOver := len(cmd.Aliases) - 3
+				cmd.Aliases = cmd.Aliases[:len(cmd.Aliases)-aliasOver]
+				logrus.Warnln(fmt.Sprintf("%s has %d too many aliases. Automatically removed the last %d.", cmd.Command, aliasOver, aliasOver))
+			}
+			c.cmdMap[cmd.Command] = *cmd
 		}
 	}
 }
@@ -33,11 +46,12 @@ func (c *CommandHandler) RegisteredCommands() (map[string]RegisteredCommand) {
 	cmdMap := make(map[string]RegisteredCommand)
 	for _, cmd := range c.cmdMap {
 		rcmd := &RegisteredCommand{
-			Name: 		 cmd.Command,
-			Description: cmd.Description,
-			Args: 		 cmd.Args,
+			Trigger: 		 cmd.Command,
+			Aliases:		 cmd.Aliases,
+			Description: 	 cmd.Description,
+			Args: 		 	 cmd.Args,
 		}
-		cmdMap[cmd.Command[0]] = *rcmd
+		cmdMap[cmd.Command] = *rcmd
 	}
 	return cmdMap
 }
