@@ -56,7 +56,7 @@ func DeleteMessage(channelID, messageData string, delay ...any) error {
 }
 
 // User functions
-func GetUser(user string) (interface{}, error) {
+func GetUser(user string) (*discordgo.User, error) {
 	u, err := common.Session.User(user)
 
 	return u, err
@@ -128,7 +128,7 @@ func SetStatus(statusText string) {
 // Helper tools
 
 // ToInt64 takes the value of an int, float or string and returns it as a whole 64-bit integer if possible.
-func ToInt64(conv interface{}) int64 {
+func ToInt64(conv any) int64 {
 	t := reflect.ValueOf(conv)
 	switch {
 	case t.CanInt():
