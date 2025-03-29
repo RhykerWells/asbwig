@@ -55,7 +55,10 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 
 	data := &Data{
 		Session: s,
-		Args:    args,
+		GuildID: event.GuildID,
+		ChannelID: event.ChannelID,
+		Author: event.Author,
+		Args: args,
 		Handler: c,
 		Message: event.Message,
 	}
