@@ -28,7 +28,7 @@ func helpFunc(data *dcommand.Data) {
 
 	// Per-command help
 	if command != "" {
-		help(command, data.Message.ChannelID)
+		help(command, data.ChannelID)
 		return
 	}
 
@@ -44,7 +44,7 @@ func helpFunc(data *dcommand.Data) {
 	message := &discordgo.MessageSend{
 		Embed: basicEmbed,
 	}
-	functions.SendMessage(data.Message.ChannelID, message)
+	functions.SendMessage(data.ChannelID, message)
 }
 
 func help(command string, channelID string) {

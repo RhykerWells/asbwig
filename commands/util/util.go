@@ -9,21 +9,21 @@ import (
 
 func OwnerCommand(inner dcommand.Run) dcommand.Run {
 	return func(data *dcommand.Data) {
-		if data.Message.Author.ID == common.ConfigBotOwner {
+		if data.Author.ID == common.ConfigBotOwner {
 			inner(data)
 		} else {
-			functions.SendBasicMessage(data.Message.ChannelID, "This is a bot-owner only command.")
+			functions.SendBasicMessage(data.ChannelID, "This is a bot-owner only command.")
 		}
 	}
 }
 
 func AdminOrManageServerCommand(inner dcommand.Run) dcommand.Run {
 	return func(data *dcommand.Data) {
-		perms, _ := data.Session.State.UserChannelPermissions(data.Message.Author.ID, data.Message.ChannelID)
+		perms, _ := data.Session.State.UserChannelPermissions(data.Author.ID, data.ChannelID)
 		if perms&discordgo.PermissionAdministrator == 8 || perms&discordgo.PermissionManageServer == 32 {
 			inner(data)
 		} else {
-			functions.SendBasicMessage(data.Message.ChannelID, "You need `Administrator` or `ManageServer` permissions to use this command.")
+			functions.SendBasicMessage(data.ChannelID, "You need `Administrator` or `ManageServer` permissions to use this command.")
 		}
 	}
 }

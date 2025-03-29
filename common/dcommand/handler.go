@@ -39,7 +39,7 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 	command := strings.ToLower(prefixRemoved[0])
 	args := prefixRemoved[1:]
 
-	outer:
+outer:
 	for _, cmd := range c.cmdMap {
 		for _, alias := range cmd.Aliases {
 			if alias == command {
@@ -54,13 +54,13 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 	}
 
 	data := &Data{
-		Session: s,
-		GuildID: event.GuildID,
+		Session:   s,
+		GuildID:   event.GuildID,
 		ChannelID: event.ChannelID,
-		Author: event.Author,
-		Args: args,
-		Handler: c,
-		Message: event.Message,
+		Author:    event.Author,
+		Args:      args,
+		Handler:   c,
+		Message:   event.Message,
 	}
 
 	go runCommand(cmd, data)
@@ -106,15 +106,15 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 func runCommand(cmd AsbwigCommand, data *Data) {
 	argCount := len(data.Args)
 	if argCount < cmd.ArgsRequired {
-		functions.SendBasicMessage(data.Message.ChannelID, "Not enough arguments passed")
+		functions.SendBasicMessage(data.ChannelID, "Not enough arguments passed")
 		return
 	}
 
 	cmd.Run(data)
 
 	logrus.WithFields(logrus.Fields{
-		"Guild":           data.Message.GuildID,
+		"Guild":           data.GuildID,
 		"Command":         cmd.Command,
-		"Triggering user": data.Message.Author.ID},
+		"Triggering user": data.Author.ID},
 	).Infoln("Executed command")
 }

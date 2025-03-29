@@ -21,6 +21,6 @@ var Command = &dcommand.AsbwigCommand{
 		message := &discordgo.MessageSend{
 			Content: "Status changed",
 		}
-		functions.SendMessage(data.Message.ChannelID, message)
+		functions.SendMessage(data.ChannelID, message)
 	}),
 }

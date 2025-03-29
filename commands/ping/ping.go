@@ -11,7 +11,7 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     "ping",
 	Description: "Displays bot latency",
 	Run: (func(data *dcommand.Data) {
-		msg, err := functions.SendBasicMessage(data.Message.ChannelID, "Ping...")
+		msg, err := functions.SendBasicMessage(data.ChannelID, "Ping...")
 		if err != nil {
 			return
 		}

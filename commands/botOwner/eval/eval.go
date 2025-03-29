@@ -29,10 +29,10 @@ func eval(data *dcommand.Data) {
 	}
 	output, err := exec(codeBlock, data.Message.Reference())
 	if err != nil {
-		functions.SendBasicMessage(data.Message.ChannelID, "Something went wrong.")
+		functions.SendBasicMessage(data.ChannelID, "Something went wrong.")
 		return
 	}
-	functions.SendBasicMessage(data.Message.ChannelID, "```"+output.Run.Output+"```")
+	functions.SendBasicMessage(data.ChannelID, "```"+output.Run.Output+"```")
 }
 
 func exec(code string, messageReference *discordgo.MessageReference) (*piston.PistonExecution, error) {

@@ -17,12 +17,12 @@ import (
 var Command = &dcommand.AsbwigCommand{
 	Command:     "viewsettings",
 	Description: "Changes the settings in the economy",
-	Run: settings,
+	Run:         settings,
 }
 
 func settings(data *dcommand.Data) {
-	embed := &discordgo.MessageEmbed {Author: &discordgo.MessageEmbedAuthor{Name: data.Message.Author.Username, IconURL: data.Message.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x00ff7b}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)
+	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x00ff7b}
+	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 	maxBet := ""
 	symbol := guild.Symbol
 	startbalance := ""
@@ -39,5 +39,5 @@ func settings(data *dcommand.Data) {
 	min := fmt.Sprint(symbol, humanize.Comma(guild.Min))
 	max := fmt.Sprint(symbol, humanize.Comma(guild.Max))
 	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`", min, max, maxBet, symbol, startbalance)
-	functions.SendMessage(data.Message.ChannelID, &discordgo.MessageSend{Embed: embed})
+	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
