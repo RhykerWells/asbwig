@@ -13,7 +13,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:      []string{"eval"},
+	Command:      "eval",
 	Description:  "Evaluates Go code",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

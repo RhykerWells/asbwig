@@ -19,7 +19,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"set"},
+	Command:     "set",
 	Description: "Changes the settings in the economy",
 	Args: []*dcommand.Args {
 		{Name: "Setting", Type: dcommand.String},

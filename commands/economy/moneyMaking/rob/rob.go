@@ -18,7 +18,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"rob"},
+	Command:     "rob",
 	Description: "Pew pew pew",
 	Args: []*dcommand.Args {
 		{Name: "Member", Type: dcommand.User},

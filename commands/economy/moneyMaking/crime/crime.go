@@ -18,7 +18,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"crime"},
+	Command:     "crime",
 	Description: "Pew pew pew",
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed {Author: &discordgo.MessageEmbedAuthor{Name: data.Message.Author.Username, IconURL: data.Message.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}

@@ -10,7 +10,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:      []string{"setstatus"},
+	Command:      "setstatus",
 	Description:  "Changes the bot status",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

@@ -7,7 +7,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"invite"},
+	Command:     "invite",
 	Description: "Creates an invite link for the bot",
 	Run: (func(data *dcommand.Data) {
 		functions.SendBasicMessage(data.Message.ChannelID, "[Invite link](<https://discord.com/oauth2/authorize?client_id="+common.ConfigBotClientID+">)")

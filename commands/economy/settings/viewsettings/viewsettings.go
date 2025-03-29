@@ -15,7 +15,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"viewsettings"},
+	Command:     "viewsettings",
 	Description: "Changes the settings in the economy",
 	Run: settings,
 }

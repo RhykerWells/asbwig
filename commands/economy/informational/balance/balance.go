@@ -14,7 +14,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"balance"},
+	Command:     "balance",
 	Description: "Views your balance in the economy",
 	Run: (func(data *dcommand.Data) {
 		userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.Message.GuildID, data.Message.Author.ID)).One(context.Background(), common.PQ)

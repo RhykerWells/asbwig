@@ -17,7 +17,7 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     []string{"removemoney"},
+	Command:     "removemoney",
 	Description: "Removes money from a specified users cash/bank balance",
 	Args: []*dcommand.Args {
 		{Name: "User", Type: dcommand.User},
