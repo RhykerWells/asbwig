@@ -6,13 +6,16 @@ import (
 
 	"github.com/RhykerWells/asbwig/commands/invite"
 	"github.com/RhykerWells/asbwig/commands/ping"
+	"github.com/RhykerWells/asbwig/commands/economy"
 
 	"github.com/RhykerWells/asbwig/commands/botOwner/eval"
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
 
+var cmdHandler *dcommand.CommandHandler
+
 func InitCommands(session *discordgo.Session) {
-	cmdHandler := dcommand.NewCommandHandler()
+	cmdHandler = dcommand.NewCommandHandler()
 
 	cmdHandler.RegisterCommands(
 		helpCmd,
@@ -24,5 +27,7 @@ func InitCommands(session *discordgo.Session) {
 		eval.Command,
 	)
 
+	economy.EconomySetup(cmdHandler)
 	session.AddHandler(cmdHandler.HandleMessageCreate)
-}
+} 
+

@@ -3,6 +3,7 @@ package functions
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/common"
@@ -61,8 +62,12 @@ func GetUser(user string) (interface{}, error) {
 	return u, err
 }
 
-func GetMember(guild *discordgo.Guild, user string) (interface{}, error) {
-	u, err := common.Session.GuildMember(guild.ID, user)
+func GetMember(guild string, user string) (*discordgo.Member, error) {
+	// Direct mention
+	if strings.HasPrefix(user, "<@") {
+		user = user[2 : len(user)-1]
+	}
+	u, err := common.Session.GuildMember(guild, user)
 
 	return u, err
 }
@@ -140,6 +145,7 @@ func ToInt64(conv interface{}) int64 {
 		return 0
 	}
 }
+
 func GetRole(g *discordgo.Guild, id string) *discordgo.Role {
 	for i := range g.Roles {
 		if g.Roles[i].ID == id {
