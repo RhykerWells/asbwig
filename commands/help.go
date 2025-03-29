@@ -38,6 +38,7 @@ func helpFunc(data *dcommand.Data) {
 			Name:    fmt.Sprintf("%s help", common.Bot.Username),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
+		Description: "Hi there, I'm ASBWIG. As of right now I am vastly unpopulated.\nShould probably add somewhere for you to view all commands huh..",
 		Color: 0x00FF7B,
 	}
 	message := &discordgo.MessageSend{
