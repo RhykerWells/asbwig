@@ -24,7 +24,7 @@ var Command = &dcommand.AsbwigCommand{
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		payout := rand.Int63n(guild.Max - guild.Min)
-		userCrime, err := models.EconomyCooldowns(qm.Where("guild_id = ? AND user_id = ? AND type = 'crime'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userCrime, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'crime'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		if err == nil {
 			if userCrime.ExpiresAt.Time.After(time.Now()) {
 				embed.Description = "This command is on cooldown"
@@ -34,7 +34,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		embed.Description = fmt.Sprintf("You commit a crime and stole all their money. You got %s%s from being a horrible person", guild.Symbol, humanize.Comma(payout))
 		embed.Color = 0x00ff7b
-		userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = userCash.Cash

@@ -17,42 +17,42 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     "balance",
 	Description: "Views your balance in the economy",
 	Run: (func(data *dcommand.Data) {
-		userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = userCash.Cash
 		}
-		userBank, err := models.EconomyBanks(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var bank int64 = 0
 		if err == nil {
 			bank = userBank.Balance
 		}
 		networth := cash + bank
-		embed := &discordgo.MessageEmbed {
+		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
 				Name:    data.Author.Username,
 				IconURL: data.Author.AvatarURL("256"),
 			},
 			Description: fmt.Sprintf("%s's balance", data.Author.Mention()),
-			Fields: []*discordgo.MessageEmbedField {
+			Fields: []*discordgo.MessageEmbedField{
 				{
-					Name: "Cash",
-					Value: fmt.Sprint(cash),
+					Name:   "Cash",
+					Value:  fmt.Sprint(cash),
 					Inline: true,
 				},
 				{
-					Name: "Bank",
-					Value: fmt.Sprint(bank),
+					Name:   "Bank",
+					Value:  fmt.Sprint(bank),
 					Inline: true,
 				},
 				{
-					Name: "Networth",
-					Value: fmt.Sprint(networth),
+					Name:   "Networth",
+					Value:  fmt.Sprint(networth),
 					Inline: true,
 				},
 			},
 			Timestamp: time.Now().Format(time.RFC3339),
-			Color: 0x00ff7b,
+			Color:     0x00ff7b,
 		}
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	}),

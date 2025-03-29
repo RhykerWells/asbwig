@@ -25,12 +25,12 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		symbol := guild.Symbol
-		userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = userCash.Cash
 		}
-		userBank, err := models.EconomyBanks(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var bank int64 = 0
 		if err == nil {
 			bank = userBank.Balance

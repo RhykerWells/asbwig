@@ -62,7 +62,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		if destination == "cash" {
-			userCash, err := models.EconomyCashes(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
+			userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
 			var cash int64 = 0
 			if err == nil {
 				cash = userCash.Cash
@@ -70,7 +70,7 @@ var Command = &dcommand.AsbwigCommand{
 			userCash.Cash = cash - functions.ToInt64(amount)
 			_, _ = userCash.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
 		} else {
-			userBank, err := models.EconomyBanks(qm.Where("guild_id = ? AND user_id = ?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
+			userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
 			var bank int64 = 0
 			if err == nil {
 				bank = userBank.Balance
