@@ -52,7 +52,7 @@ var Command = &dcommand.AsbwigCommand{
 				},
 			},
 			Timestamp: time.Now().Format(time.RFC3339),
-			Color:     0x00ff7b,
+			Color:     common.SuccessGreen,
 		}
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	}),

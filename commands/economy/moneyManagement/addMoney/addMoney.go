@@ -27,7 +27,7 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		symbol := guild.Symbol
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		if len(data.Args) <= 0 {
 			embed.Description = "No `User` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -79,7 +79,7 @@ var Command = &dcommand.AsbwigCommand{
 			_, _ = userBank.Update(context.Background(), common.PQ, boil.Whitelist("balance"))
 		}
 		embed.Description = fmt.Sprintf("You added %s%s to %ss %s", symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }

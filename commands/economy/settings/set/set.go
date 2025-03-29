@@ -29,7 +29,7 @@ var Command = &dcommand.AsbwigCommand{
 }
 
 func settings(data *dcommand.Data) {
-	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 	if len(data.Args) <= 0 {
 		embed.Description = "No `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -47,7 +47,7 @@ func settings(data *dcommand.Data) {
 		settings.GuildID = data.GuildID
 		settings.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("maxbet", "symbol", "startbalance"), boil.Infer())
 		embed.Description = "Economy settings have been reset to default values"
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
@@ -76,11 +76,11 @@ func settings(data *dcommand.Data) {
 			displayvalue = "Disabled"
 		}
 		embed.Description = fmt.Sprintf("You set `%s` to %s", setting, displayvalue)
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 		value = fmt.Sprint(nvalue)
 	case "symbol":
 		embed.Description = fmt.Sprintf("You set `symbol` to %s", value)
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 	}
 	query := fmt.Sprintf("UPDATE economy_config SET %s = $1 WHERE guild_id = $2", setting)
 	queries.Raw(query, value, data.GuildID).Exec(common.PQ)

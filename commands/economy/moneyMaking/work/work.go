@@ -21,7 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     "work",
 	Description: "Work work work",
 	Run: func(data *dcommand.Data) {
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		payout := rand.Int63n(guild.Max - guild.Min)
 		userWork, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'work'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
@@ -33,7 +33,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guild.Symbol, humanize.Comma(payout))
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {

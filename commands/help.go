@@ -39,7 +39,7 @@ func helpFunc(data *dcommand.Data) {
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Description: "Hi there, I'm ASBWIG. As of right now I am vastly unpopulated.\nShould probably add somewhere for you to view all commands huh..",
-		Color: 0x00FF7B,
+		Color:       common.SuccessGreen,
 	}
 	message := &discordgo.MessageSend{
 		Embed: basicEmbed,
@@ -60,7 +60,7 @@ func help(command string, channelID string) {
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Description: cmd.Description,
-		Color:       0x00FF7B,
+		Color:       common.SuccessGreen,
 	}
 	args := getArgs(cmd)
 	helpEmbed.Description = cmd.Description

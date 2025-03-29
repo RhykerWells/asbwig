@@ -24,7 +24,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Member", Type: dcommand.User},
 	},
 	Run: func(data *dcommand.Data) {
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		symbol := guild.Symbol
 		userRob, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'rob'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)

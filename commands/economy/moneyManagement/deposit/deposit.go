@@ -35,7 +35,7 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			bank = userBank.Balance
 		}
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0xFF0000}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		if len(data.Args) <= 0 {
 			embed.Description = "No `Amount` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -68,7 +68,7 @@ var Command = &dcommand.AsbwigCommand{
 		_, _ = userCash.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
 		_, _ = userBank.Update(context.Background(), common.PQ, boil.Whitelist("balance"))
 		embed.Description = fmt.Sprintf("You deposited %s%s into your bank\nThere is now %s%s in your bank", symbol, humanize.Comma(amount), symbol, humanize.Comma(userBank.Balance))
-		embed.Color = 0x00ff7b
+		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }
