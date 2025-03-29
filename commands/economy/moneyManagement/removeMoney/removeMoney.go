@@ -20,9 +20,9 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     []string{"removemoney"},
 	Description: "Removes money from a specified users cash/bank balance",
 	Args: []*dcommand.Args {
-		{Name: "user", Type: dcommand.User},
-		{Name: "destination", Type: dcommand.String},
-		{Name: "amount", Type: dcommand.Int},
+		{Name: "User", Type: dcommand.User},
+		{Name: "Place", Type: dcommand.String},
+		{Name: "Amount", Type: dcommand.Int},
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)

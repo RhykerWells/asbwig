@@ -24,11 +24,11 @@ func (s *StringArg) Help() string {
 type IntArg struct{}
 var _ ArgumentType = (*IntArg)(nil)
 func (s *IntArg) Help() string {
-	return "Integer"
+	return "Whole number"
 }
 
 type UserArg struct{}
 var _ ArgumentType = (*UserArg)(nil)
 func (s *UserArg) Help() string {
-	return "ID/Mention"
+	return "Mention/ID"
 }

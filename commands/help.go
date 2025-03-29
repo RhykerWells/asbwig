@@ -12,7 +12,7 @@ import (
 var helpCmd = &dcommand.AsbwigCommand{
 	Command: []string{"help"},
 	Args: []*dcommand.Args{
-		{Name: "command", Type: dcommand.String},
+		{Name: "Command", Type: dcommand.String},
 	},
 	Description: "Displays bot help",
 	Run:         helpFunc,
@@ -62,7 +62,7 @@ func help(command string, channelID string) {
 	args := getArgs(cmd)
 	helpEmbed.Description = cmd.Description
 	if args != "" {
-		helpEmbed.Description += "\n```" + args + "\n```"
+		helpEmbed.Description += "\n```" + cmd.Name[0] + args + "\n```"
 	}
 	message := &discordgo.MessageSend{
 		Embed: helpEmbed,
@@ -72,8 +72,7 @@ func help(command string, channelID string) {
 
 func getArgs(command dcommand.RegisteredCommand) (str string) {
 	for _, arg := range command.Args {
-		str += command.Name[0]
-		str += " <" + argHelp(arg) + ">\n"
+		str += " <" + argHelp(arg) + ">"
 	}
 	return
 }

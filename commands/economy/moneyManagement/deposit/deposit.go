@@ -20,7 +20,7 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     []string{"deposit"},
 	Description: "Deposits a given amount into your bank",
 	Args: []*dcommand.Args {
-		{Name: "amount", Type: dcommand.Int},
+		{Name: "Amount", Type: dcommand.Int},
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.Message.GuildID)).One(context.Background(), common.PQ)
