@@ -67,16 +67,26 @@ var Command = &dcommand.AsbwigCommand{
 			if err == nil {
 				cash = userCash.Cash
 			}
-			userCash.Cash = cash + functions.ToInt64(amount)
-			_, _ = userCash.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
+			cash = cash + functions.ToInt64(amount)
+			cashEntry := models.EconomyCash{
+				GuildID: data.GuildID,
+				UserID: member.User.ID,
+				Cash: cash,
+			}
+			_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
 		} else {
 			userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
 			var bank int64 = 0
 			if err == nil {
 				bank = userBank.Balance
 			}
-			userBank.Balance = bank + functions.ToInt64(amount)
-			_, _ = userBank.Update(context.Background(), common.PQ, boil.Whitelist("balance"))
+			bank = bank + functions.ToInt64(amount)
+			bankEntry := models.EconomyBank{
+				GuildID: data.GuildID,
+				UserID: member.User.ID,
+				Balance: bank,
+			}
+			_ = bankEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("balance"), boil.Infer())
 		}
 		embed.Description = fmt.Sprintf("You added %s%s to %ss %s", symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
 		embed.Color = common.SuccessGreen
