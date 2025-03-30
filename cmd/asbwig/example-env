@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export ASBWIG_TOKEN="tokenXXXX"
+export ASBWIG_PGHOST="localhost"
+export ASBWIG_PGDB="asbwig"
+export ASBWIG_PGUSER="asbwig"
+export ASBWIG_OWNERID="userID"
