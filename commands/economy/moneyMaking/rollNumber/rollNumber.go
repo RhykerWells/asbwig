@@ -12,6 +12,7 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -25,7 +26,7 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		userRoll, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'work'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		userRoll, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'rollnumber' WHERE expires_at > NOW()", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		if err == nil {
 			if userRoll.ExpiresAt.Time.After(time.Now()) {
 				embed.Description = "This command is on cooldown"
@@ -89,12 +90,22 @@ var Command = &dcommand.AsbwigCommand{
 			embed.Color = common.ErrorRed
 		}
 		embed.Description = fmt.Sprintf("The ball landed on %d, and you %s %s%s", roll, condition, guild.Symbol, humanize.Comma(bet))
+		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		cashEntry := models.EconomyCash{
 			GuildID: data.GuildID,
 			UserID: data.Author.ID,
 			Cash: cash,
 		}
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+		cooldowns := models.EconomyCooldown{
+			GuildID: data.GuildID,
+			UserID:  data.Author.ID,
+			Type:    "rollnumber",
+			ExpiresAt: null.Time{
+				Time:  time.Now().Add(300 * time.Second),
+				Valid: true,
+			},
+		}
+		cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
 	},
 }
