@@ -9,7 +9,7 @@
     </h1>
   </a>
 </p>
-ASBWIG is a bot I've decided to write to give myself a reason and an idea on how the Go language works.
+ASBWIG is a bot I've decided to write to give myself a reason to learn Go and how the language works.
 It by all means will not be perfect as I am teaching myself this language as I progress in this.
 A lot of the inspiration for command structure and the like comes from <a href="https://github.com/botlabs-gg/yagpdb">YAGPDB</a>
 
