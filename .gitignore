@@ -1,8 +1,8 @@
 # Binary
 cmd/asbwig/asbwig
 
-# Vscode debug
-app.env
+# Env files 
+*.env
 
 # Bash helpers
 *.sh
