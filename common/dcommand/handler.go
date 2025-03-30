@@ -110,11 +110,11 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 		return
 	}
 
-	cmd.Run(data)
-
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
 		"Command":         cmd.Command,
 		"Triggering user": data.Author.ID},
 	).Infoln("Executed command")
+
+	cmd.Run(data)
 }
