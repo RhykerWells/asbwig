@@ -7,6 +7,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/leaderboard"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/crime"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rob"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rollNumber"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/work"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/addMoney"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/deposit"
@@ -27,6 +28,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		work.Command,
 		crime.Command,
 		rob.Command,
+		rollnumber.Command,
 		addmoney.Command,
 		removemoney.Command,
 		deposit.Command,
