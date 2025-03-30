@@ -40,6 +40,18 @@ func EditBasicMessage(channelID, messageID, message string) error {
 	return err
 }
 
+func EditMessage(channelID string, messageID string, message *discordgo.MessageSend) {
+	edit := &discordgo.MessageEdit{
+		ID:	messageID,
+		Channel: channelID,
+	}
+	if message.Content != "" {edit.Content = &message.Content}
+	if message.Embed != nil {edit.Embed = message.Embed}
+	if message.Embeds != nil {edit.Embeds = &message.Embeds}
+	if message.Components != nil {edit.Components = &message.Components}
+	_, _ = common.Session.ChannelMessageEditComplex(edit)
+}
+
 func DeleteMessage(channelID, messageData string, delay ...any) error {
 	duration := 0
 	if len(delay) > 0 {
