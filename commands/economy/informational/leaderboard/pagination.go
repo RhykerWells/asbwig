@@ -38,19 +38,23 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	} else {
 		embed[0].Color = common.SuccessGreen
 	}
-	rank := 0
+	rank := (page - 1) * 10
 	for i, entry := range guildCash {
 		if i == 10 {
 			break
 		}
+		cash := humanize.Comma(entry.Cash)
+		rank ++
+		drank := ""
 		user, _ := functions.GetUser(entry.UserID)
 		pos := map[int]string{1: "🥇", 2: "🥈", 3: "🥉"}
-		rank = i + 1
-		drank, exists := pos[rank]
-		if !exists {
+		_, exists := pos[rank]
+		if exists {
+			drank = pos[rank]
+		} else {
 			drank = fmt.Sprintf("  %d.", rank) // Default to number if no medal
 		}
-		display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, humanize.Comma(entry.Cash))
+		display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, cash)
 	}
 	embed[0].Description = display
 	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}

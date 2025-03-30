@@ -39,19 +39,23 @@ var Command = &dcommand.AsbwigCommand{
 		} else {
 			embed.Color = common.SuccessGreen
 		}
-		rank := 0
+		rank := (page - 1) * 10
 		for i, entry := range guildCash {
 			if i == 10 {
 				break
 			}
+			cash := humanize.Comma(entry.Cash)
+			rank ++
+			drank := ""
 			user, _ := functions.GetUser(entry.UserID)
 			pos := map[int]string{1: "🥇", 2: "🥈", 3: "🥉"}
-			rank = i + 1
-			drank, exists := pos[rank]
-			if !exists {
+			_, exists := pos[rank]
+			if exists {
+				drank = pos[rank]
+			} else {
 				drank = fmt.Sprintf("  %d.", rank) // Default to number if no medal
 			}
-			display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, humanize.Comma(entry.Cash))
+			display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, cash)
 		}
 		embed.Description = display
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
@@ -70,14 +74,14 @@ var Command = &dcommand.AsbwigCommand{
 			components[0] = row		
 		}
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
-		disableButtons(msg.ChannelID, msg.ID)
+		go disableButtons(msg.ChannelID, msg.ID)
 	}),
 }
 
 func disableButtons(channelID, messageID string) {
+	time.Sleep(10 * time.Second)
 	lbMessage, _ := common.Session.ChannelMessage(channelID, messageID)
 	components := lbMessage.Components
-	time.Sleep(10 * time.Second)
 	row := components[0].(*discordgo.ActionsRow)
 	btnPrev := row.Components[0].(*discordgo.Button)
 	btnNext := row.Components[1].(*discordgo.Button)
