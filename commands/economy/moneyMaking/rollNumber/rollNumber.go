@@ -73,7 +73,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		roll := rand.Int63n(100)
+		roll := rand.Int63n(100) + 1
 		embed.Color = common.SuccessGreen
 		condition := "won"
 		if roll >= 65 && roll < 90 {
