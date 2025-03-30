@@ -21,7 +21,8 @@ var Command = &dcommand.AsbwigCommand{
 	Description: "Views your server leaderboard",
 	Run: (func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+		components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "economy_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "economy_forward"}}}}
 		guildSettings, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		page := 1
 		if len(data.Args) > 0 {
@@ -31,7 +32,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		offset :=  (page - 1) * 10
-		guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Limit(10), qm.Offset(offset)).All(context.Background(), common.PQ)
+		guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		display := ""
 		if err != nil || len(guildCash) == 0 {
 			display = "No users are in the leaderboard"
@@ -40,17 +41,54 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		rank := 0
 		for i, entry := range guildCash {
+			if i == 10 {
+				break
+			}
 			user, _ := functions.GetUser(entry.UserID)
 			pos := map[int]string{1: "🥇", 2: "🥈", 3: "🥉"}
 			rank = i + 1
 			drank, exists := pos[rank]
 			if !exists {
-				drank = fmt.Sprintf("%d.", rank) // Default to number if no medal
+				drank = fmt.Sprintf("  %d.", rank) // Default to number if no medal
 			}
 			display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, humanize.Comma(entry.Cash))
 		}
 		embed.Description = display
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		if page != 1 {
+			row := components[0].(discordgo.ActionsRow)
+			btnPrev := row.Components[0].(discordgo.Button)
+			btnPrev.Disabled = false
+			row.Components[0] = btnPrev
+			components[0] = row	
+		}
+		if len(guildCash) > rank {
+			row := components[0].(discordgo.ActionsRow)
+			btnNext := row.Components[1].(discordgo.Button)
+			btnNext.Disabled = false
+			row.Components[1] = btnNext
+			components[0] = row		
+		}
+		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
+		disableButtons(msg.ChannelID, msg.ID)
 	}),
+}
+
+func disableButtons(channelID, messageID string) {
+	lbMessage, _ := common.Session.ChannelMessage(channelID, messageID)
+	components := lbMessage.Components
+	time.Sleep(10 * time.Second)
+	row := components[0].(*discordgo.ActionsRow)
+	btnPrev := row.Components[0].(*discordgo.Button)
+	btnNext := row.Components[1].(*discordgo.Button)
+	btnPrev.Disabled = true
+	btnNext.Disabled = true
+	row.Components[0] = btnPrev
+	row.Components[1] = btnNext
+	components[0] = row	
+	message := &discordgo.MessageSend{
+		Embed: lbMessage.Embeds[0],
+		Components: components,
+	}
+	functions.EditMessage(channelID, messageID, message)
 }
