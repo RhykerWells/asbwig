@@ -20,7 +20,7 @@ import (
 var Command = &dcommand.AsbwigCommand{
 	Command:     "rollnumber",
 	Aliases: 	 []string{"roll", "num"},
-	Description: "Rolls a number, 1-100 with a max chance of 5*<bet>",
+	Description: "Rolls a number, 1-100 with a max payout of 5*<bet>",
 	Args: []*dcommand.Args{
 		{Name: "Bet", Type: dcommand.Int},
 	},
