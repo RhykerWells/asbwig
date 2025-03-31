@@ -30,12 +30,12 @@ var Command = &dcommand.AsbwigCommand{
 func settings(data *dcommand.Data) {
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 	if len(data.Args) <= 0 {
-		embed.Description = "No `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
+		embed.Description = "No `settings` argument provided. Available arguments:\n`maxBet`, `startBalance`, `symbol` `workResponses`, `crimeResponses`\nTo set it with the default settings use `default`"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
 	setting := data.Args[0]
-	o, _ := regexp.Compile("default|s(ymbol|tartbalance)|m(ax(bet)?|in)")
+	o, _ := regexp.Compile("default|s(ymbol|tartbalance)|m(ax(bet)?|in)|(work|crime)responses")
 	if !o.MatchString(setting) {
 		embed.Description = "Invalid `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -50,8 +50,17 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
+	var arg string
+	switch setting {
+	case "startbalance", "maxbet", "min", "max":
+		arg = "<Value:Amount>"
+	case "symbol":
+		arg = "<Value:Emoji/CurrencySymbol>"
+	case "workresponses", "crimeresponses":
+		arg = "<Value:Enabled/Disable"
+	}
 	if len(data.Args) <= 1 {
-		embed.Description = "No `Value` argument provided"
+		embed.Description = fmt.Sprintf("No `Value` argument provided for `%s`. Available arguments:\n`%s`", setting, arg)
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
@@ -61,7 +70,7 @@ func settings(data *dcommand.Data) {
 	case "startbalance", "maxbet", "min", "max":
 		nvalue := functions.ToInt64(value)
 		if nvalue < 0 || (setting == "max" && nvalue == 0) {
-			embed.Description = "Invalid `Value` argument provided"
+			embed.Description = fmt.Sprintf("Invalid `Value` argument provided for %s. Available arguments:\n`%s`", setting, arg)
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -80,6 +89,26 @@ func settings(data *dcommand.Data) {
 	case "symbol":
 		embed.Description = fmt.Sprintf("You set `symbol` to %s", value)
 		embed.Color = common.SuccessGreen
+	case "workresponses", "crimeresponses":
+		if value != "enabled" && value != "disabled" {
+			embed.Description = fmt.Sprintf("Invalid `Value` argument provided for %s. Available arguments:\n`%s`", setting, arg)
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
+		embed.Description = fmt.Sprintf("You set `%s` to `%s`", setting, value)
+		embed.Color = common.SuccessGreen
+		switch setting {
+		case "workresponses":
+			setting = "customworkresponses"
+		case "crimeresponses":
+			setting = "customcrimeresponses"
+		}
+		switch value {
+		case "enabled":
+			value = "true"
+		case "disabled":
+			value = "false"
+		}
 	}
 	query := fmt.Sprintf("UPDATE economy_config SET %s = $1 WHERE guild_id = $2", setting)
 	queries.Raw(query, value, data.GuildID).Exec(common.PQ)

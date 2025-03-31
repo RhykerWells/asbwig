@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -38,6 +39,9 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		payout := rand.Int63n(guild.Max - guild.Min)
 		embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guild.Symbol, humanize.Comma(payout))
+		if guild.Customworkresponses && len(guild.Workresponses) > 0 {
+			embed.Description = strings.ReplaceAll(guild.Workresponses[rand.Intn(len(guild.Workresponses))], "(amount)", fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(payout)))
+		}
 		embed.Color = common.SuccessGreen
 		cash = cash + functions.ToInt64(payout)
 		cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}

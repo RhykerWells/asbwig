@@ -21,23 +21,38 @@ var Command = &dcommand.AsbwigCommand{
 }
 
 func settings(data *dcommand.Data) {
-	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+	guild, _ := common.Session.Guild(data.GuildID)
+	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " settings", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
+	guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 	maxBet := ""
-	symbol := guild.Symbol
+	symbol := guildConfig.Symbol
 	startbalance := ""
-	if guild.Maxbet == 0 {
+	if guildConfig.Maxbet == 0 {
 		maxBet = "Disabled"
 	} else {
-		maxBet = fmt.Sprint(symbol, humanize.Comma(guild.Maxbet))
+		maxBet = fmt.Sprint(symbol, humanize.Comma(guildConfig.Maxbet))
 	}
-	if guild.Startbalance == 0 {
+	if guildConfig.Startbalance == 0 {
 		startbalance = "Disabled"
 	} else {
-		startbalance = fmt.Sprint(symbol, humanize.Comma(guild.Startbalance))
+		startbalance = fmt.Sprint(symbol, humanize.Comma(guildConfig.Startbalance))
 	}
-	min := fmt.Sprint(symbol, humanize.Comma(guild.Min))
-	max := fmt.Sprint(symbol, humanize.Comma(guild.Max))
-	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`", min, max, maxBet, symbol, startbalance)
+	var workResponsesEnabled, crimeResponsesEnabled string = "Disabled", "Disabled"
+	var workResponsesNum, crimeResponsesNum int = 0, 0
+	if guildConfig.Customworkresponses {
+		workResponsesEnabled = "Enabled"
+	}
+	if len(guildConfig.Workresponses) > 0 {
+		workResponsesNum = len(guildConfig.Workresponses)
+	}
+	if guildConfig.Customcrimeresponses {
+		crimeResponsesEnabled = "Enabled"
+	}
+	if len(guildConfig.Workresponses) > 0 {
+		crimeResponsesNum = len(guildConfig.Crimeresponses)
+	}
+	min := fmt.Sprint(symbol, humanize.Comma(guildConfig.Min))
+	max := fmt.Sprint(symbol, humanize.Comma(guildConfig.Max))
+	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`\nWork responses: `%s` (%d)\nCrime responses: `%s` (%d)", min, max, maxBet, symbol, startbalance, workResponsesEnabled, workResponsesNum, crimeResponsesEnabled, crimeResponsesNum)
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }

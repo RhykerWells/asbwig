@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -36,10 +37,18 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = userCash.Cash
 		}
-		payout := rand.Int63n(guild.Max - guild.Min)
-		embed.Description = fmt.Sprintf("You commit a crime and stole all their money. You got %s%s from being a horrible person", guild.Symbol, humanize.Comma(payout))
-		embed.Color = common.SuccessGreen
-		cash = cash + payout
+		amount := rand.Int63n(guild.Max - guild.Min)
+		if rand.Int63n(2) == 1 {
+			embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guild.Symbol, humanize.Comma(amount))
+			if guild.Customcrimeresponses && len(guild.Crimeresponses) > 0 {
+				embed.Description = strings.ReplaceAll(guild.Crimeresponses[rand.Intn(len(guild.Crimeresponses))], "(amount)", fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(amount)))
+			}
+			embed.Color = common.SuccessGreen
+			cash = cash + amount
+		} else {
+			embed.Description = fmt.Sprintf("You broke the law and got caught! You were arrested and lost %s%s", guild.Symbol, humanize.Comma(amount))
+			cash = cash - amount
+		}
 		cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
 		_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
 		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "crime", ExpiresAt: null.Time{Time: time.Now().Add(3600 * time.Second), Valid: true}}
