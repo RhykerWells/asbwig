@@ -46,7 +46,7 @@ func addResponse(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return 
 	}
-	response := strings.Join(data.Args[1:], " ")
+	response := strings.Join(data.ArgsNotLowered[1:], " ")
 	for _, char := range "\"" {
 		response = strings.ReplaceAll(response, string(char), "")
 	}
