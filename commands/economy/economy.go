@@ -47,6 +47,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		viewsettings.Command,
 	)
 	common.Session.AddHandler(leaderboard.Pagination)
+	common.Session.AddHandler(listresponses.Pagination)
 }
 
 func GuildEconomyAdd(guild_id string) {
