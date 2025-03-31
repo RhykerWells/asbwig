@@ -13,10 +13,11 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/work"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/addMoney"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/deposit"
-	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/removeMoney"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/giveMoney"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/removeMoney"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/withdraw"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/addResponse"
+	"github.com/RhykerWells/asbwig/commands/economy/settings/listResponses"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
 	"github.com/RhykerWells/asbwig/common"
@@ -41,6 +42,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		withdraw.Command,
 		givemoney.Command,
 		addresponse.Command,
+		listResponses.Command,
 		set.Command,
 		viewsettings.Command,
 	)
