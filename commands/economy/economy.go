@@ -42,7 +42,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		withdraw.Command,
 		givemoney.Command,
 		addresponse.Command,
-		listResponses.Command,
+		listresponses.Command,
 		set.Command,
 		viewsettings.Command,
 	)
