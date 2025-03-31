@@ -24,9 +24,8 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Amount", Type: dcommand.Int},
 	},
 	Run: func(data *dcommand.Data) {
-		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-		symbol := guild.Symbol
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		if len(data.Args) <= 0 {
 			embed.Description = "No `User` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -67,11 +66,7 @@ var Command = &dcommand.AsbwigCommand{
 				cash = userCash.Cash
 			}
 			cash = cash + functions.ToInt64(amount)
-			cashEntry := models.EconomyCash{
-				GuildID: data.GuildID,
-				UserID: member.User.ID,
-				Cash: cash,
-			}
+			cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: member.User.ID, Cash: cash}
 			_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
 		} else {
 			userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
@@ -80,14 +75,10 @@ var Command = &dcommand.AsbwigCommand{
 				bank = userBank.Balance
 			}
 			bank = bank + functions.ToInt64(amount)
-			bankEntry := models.EconomyBank{
-				GuildID: data.GuildID,
-				UserID: member.User.ID,
-				Balance: bank,
-			}
+			bankEntry := models.EconomyBank{GuildID: data.GuildID, UserID: member.User.ID, Balance: bank}
 			_ = bankEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("balance"), boil.Infer())
 		}
-		embed.Description = fmt.Sprintf("You added %s%s to %ss %s", symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
+		embed.Description = fmt.Sprintf("You added %s%s to %ss %s", guild.Symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},

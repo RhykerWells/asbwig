@@ -25,8 +25,6 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-		symbol := guild.Symbol
 		cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'rob'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		if err == nil {
 			if cooldown.ExpiresAt.Time.After(time.Now()) {
@@ -34,6 +32,12 @@ var Command = &dcommand.AsbwigCommand{
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 				return
 			}
+		}
+		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		var cash int64 = 0
+		if err == nil {
+			cash = userCash.Cash
 		}
 		if len(data.Args) <= 0 {
 			embed.Description = "No `User` argument provided"
@@ -52,31 +56,24 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		victim, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
-		if err != nil || victim.Cash < 0 {
+		var victimCash int64 = 0
+		if err == nil {
+			victimCash = userCash.Cash
+		}
+		if victimCash < 0 {
 			embed.Description = "This user has no cash to steal :("
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		payout := rand.Int63n(victim.Cash)
-		embed.Description = fmt.Sprintf("You stole %s%s from %s", symbol, humanize.Comma(payout), member.Mention())
-		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
-		var cash int64 = 0
-		if err == nil {
-			cash = userCash.Cash
-		}
-		userCash.Cash = cash + payout
-		victim.Cash = victim.Cash - payout
-		_, _ = victim.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
-		_, _ = userCash.Update(context.Background(), common.PQ, boil.Whitelist("cash"))
-		cooldowns := models.EconomyCooldown{
-			GuildID: data.GuildID,
-			UserID:  data.Author.ID,
-			Type:    "work",
-			ExpiresAt: null.Time{
-				Time:  time.Now().Add(18000 * time.Second),
-				Valid: true,
-			},
-		}
+		payout := rand.Int63n(victim.Cash) +1
+		embed.Description = fmt.Sprintf("You stole %s%s from %s", guild.Symbol, humanize.Comma(payout), member.Mention())
+		cash = cash + payout
+		victimCash = victimCash - payout
+		cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+		_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+		victimEntry := models.EconomyCash{GuildID: data.GuildID, UserID: member.User.ID, Cash: victimCash}
+		_ = victimEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "work", ExpiresAt: null.Time{Time: time.Now().Add(18000 * time.Second), Valid: true}}
 		cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},

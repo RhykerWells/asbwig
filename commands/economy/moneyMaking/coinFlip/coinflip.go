@@ -93,22 +93,10 @@ var Command = &dcommand.AsbwigCommand{
 			cash = cash + bet
 			embed.Description = fmt.Sprintf("You flipped %s and lost", betSide)
 		}
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		cashEntry := models.EconomyCash{
-			GuildID: data.GuildID,
-			UserID:  data.Author.ID,
-			Cash:    cash,
-		}
+		cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
 		_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
-		cooldowns := models.EconomyCooldown{
-			GuildID: data.GuildID,
-			UserID:  data.Author.ID,
-			Type:    "coinflip",
-			ExpiresAt: null.Time{
-				Time:  time.Now().Add(300 * time.Second),
-				Valid: true,
-			},
-		}
+		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "coinflip", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
 		cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
+		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }
