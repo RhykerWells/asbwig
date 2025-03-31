@@ -11,6 +11,7 @@ type Data struct {
 
 	Message 				*discordgo.Message
 	Args    				[]string
+	ArgsNotLowered			[]string
 
 	Handler 				*CommandHandler
 }
