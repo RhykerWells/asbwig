@@ -8,7 +8,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/ping"
 	"github.com/RhykerWells/asbwig/commands/economy"
 
-	"github.com/RhykerWells/asbwig/commands/botOwner/eval"
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
 
@@ -24,7 +23,6 @@ func InitCommands(session *discordgo.Session) {
 		invite.Command,
 
 		setstatus.Command,
-		eval.Command,
 	)
 
 	economy.EconomySetup(cmdHandler)
