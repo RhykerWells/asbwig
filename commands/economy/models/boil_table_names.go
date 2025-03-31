@@ -8,9 +8,11 @@ var TableNames = struct {
 	EconomyCash      string
 	EconomyConfig    string
 	EconomyCooldowns string
+	EconomyShop      string
 }{
 	EconomyBank:      "economy_bank",
 	EconomyCash:      "economy_cash",
 	EconomyConfig:    "economy_config",
 	EconomyCooldowns: "economy_cooldowns",
+	EconomyShop:      "economy_shop",
 }

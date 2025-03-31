@@ -8,4 +8,4 @@ dbname = "asbwig"
 user="asbwig"
 pass="icantsee"
 sslmode = "disable"
-whitelist = ["economy_cash", "economy_bank", "economy_config", "economy_cooldowns"]
+whitelist = ["economy_cash", "economy_bank", "economy_config", "economy_cooldowns", "economy_shop"]
