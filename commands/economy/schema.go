@@ -4,10 +4,12 @@ var GuildEconomySchema = []string{`
 CREATE TABLE IF NOT EXISTS economy_config (
 	guild_id TEXT PRIMARY KEY,
 	min BIGINT NOT NULL DEFAULT '200',
-	MAX BIGINT NOT NULL DEFAULT '500',
+	max BIGINT NOT NULL DEFAULT '500',
 	maxbet BIGINT NOT NULL DEFAULT '5000',
 	symbol TEXT NOT NULL DEFAULT '£',
-	startbalance BIGINT NOT NULL DEFAULT '200'
+	startbalance BIGINT NOT NULL DEFAULT '200',
+	workresponses TEXT[],
+	crimeresponses TEXT[]
 );
 `,`
 CREATE TABLE IF NOT EXISTS economy_cash (
