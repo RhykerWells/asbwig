@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS economy_config (
 	maxbet BIGINT NOT NULL DEFAULT '5000',
 	symbol TEXT NOT NULL DEFAULT '£',
 	startbalance BIGINT NOT NULL DEFAULT '200',
+	customworkresponses BOOL NOT NULL DEFAULT 'false',
+	customcrimeresponses BOOL NOT NULL DEFAULT 'false',
 	workresponses TEXT[],
 	crimeresponses TEXT[]
 );
