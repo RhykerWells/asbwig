@@ -36,8 +36,22 @@ func settings(data *dcommand.Data) {
 	} else {
 		startbalance = fmt.Sprint(symbol, humanize.Comma(guild.Startbalance))
 	}
+	var workResponsesEnabled, crimeResponsesEnabled string = "Disabled", "Disabled"
+	var workResponsesNum, crimeResponsesNum int = 0, 0
+	if guild.Customworkresponses {
+		workResponsesEnabled = "Enabled"
+	}
+	if len(guild.Workresponses) > 0 {
+		workResponsesNum = len(guild.Workresponses)
+	}
+	if guild.Customcrimeresponses {
+		crimeResponsesEnabled = "Enabled"
+	}
+	if len(guild.Workresponses) > 0 {
+		crimeResponsesNum = len(guild.Crimeresponses)
+	}
 	min := fmt.Sprint(symbol, humanize.Comma(guild.Min))
 	max := fmt.Sprint(symbol, humanize.Comma(guild.Max))
-	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`", min, max, maxBet, symbol, startbalance)
+	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`\nWork responses: `%s` (%d)\nCrime responses: `%s` (%d)", min, max, maxBet, symbol, startbalance, workResponsesEnabled, workResponsesNum, crimeResponsesEnabled, crimeResponsesNum)
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
