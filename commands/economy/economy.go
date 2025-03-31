@@ -5,6 +5,7 @@ package economy
 import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
 	"github.com/RhykerWells/asbwig/commands/economy/informational/leaderboard"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/coinFlip"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/crime"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rob"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rollNumber"
@@ -31,6 +32,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		rob.Command,
 		rollnumber.Command,
 		snakeeyes.Command,
+		coinflip.Command,
 		addmoney.Command,
 		removemoney.Command,
 		deposit.Command,
