@@ -32,8 +32,8 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		offset :=  (page - 1) * 10
-		guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		display := ""
+		guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		if err != nil || len(guildCash) == 0 {
 			display = "No users are in the leaderboard"
 		} else {
