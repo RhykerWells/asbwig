@@ -1,4 +1,4 @@
-package withdraw
+package givemoney
 
 import (
 	"context"
@@ -16,9 +16,10 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     "withdraw",
-	Description: "Withdraws a given amount from your bank",
+	Command:     "givemoney",
+	Description: "Gives money to a specified users cash balance from your cash",
 	Args: []*dcommand.Args{
+		{Name: "User", Type: dcommand.User},
 		{Name: "Amount", Type: dcommand.Int},
 	},
 	Run: func(data *dcommand.Data) {
@@ -29,46 +30,47 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = userCash.Cash
 		}
-		userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
-		var bank int64 = 0
-		if err == nil {
-			bank = userBank.Balance
-		}
 		if len(data.Args) <= 0 {
+			embed.Description = "No `User` argument provided"
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
+		receiving, err := functions.GetMember(data.GuildID, data.Args[0])
+		if err != nil {
+			embed.Description = "Invalid `User` argument provided"
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
+		if len(data.Args) <= 1 {
 			embed.Description = "No `Amount` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		value := data.Args[0]
-		if functions.ToInt64(value) <= 0 && value != "all" {
+		amount := data.Args[1]
+		if functions.ToInt64(amount) <= 0 {
 			embed.Description = "Invalid `Amount` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		var amount int64
-		if value == "all" {
-			amount = bank
-		} else {
-			amount = functions.ToInt64(value)
-		}
-		if amount > bank {
-			embed.Description = fmt.Sprintf("You're unable to withdraw more than you have in your bank\nYou currently have %s%s", guild.Symbol, humanize.Comma(bank))
+		conversionAmount := functions.ToInt64(amount)
+		if conversionAmount > cash {
+			embed.Description = fmt.Sprintf("You don't have enough cash to give. You have %s%s", guild.Symbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if bank < 0 {
-			embed.Description = fmt.Sprintf("You're unable to withdraw from your overdraft\nYou are currently %s%s in arrears", guild.Symbol, humanize.Comma(bank))
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
+		embed.Description = fmt.Sprintf("You gave %s%s to %s!", guild.Symbol, humanize.Comma(functions.ToInt64(amount)), receiving.Mention())
+		embed.Color = common.SuccessGreen
+		cash = cash - conversionAmount
+		receivingUser, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		var receivingCash int64 = 0
+		if err == nil {
+			receivingCash = receivingUser.Cash
 		}
-		userCash.Cash = cash + amount
-		userBank.Balance = bank - amount
+		receivingCash = receivingCash + conversionAmount
 		cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
 		_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
-		bankEntry := models.EconomyBank{GuildID: data.GuildID, UserID: data.Author.ID, Balance: bank}
-		_ = bankEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
-		embed.Description = fmt.Sprintf("You Withdrew %s%s from your bank\nThere is now %s%s in your bank", guild.Symbol, humanize.Comma(amount), guild.Symbol, humanize.Comma(userBank.Balance))
-		embed.Color = common.SuccessGreen
+		receivingEntry := models.EconomyCash{GuildID: data.GuildID, UserID: data.Author.ID, Cash: receivingCash}
+		_ = receivingEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }
