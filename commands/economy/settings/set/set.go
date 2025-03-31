@@ -50,8 +50,15 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
+	var arg string
+	switch setting {
+	case "startbalance", "maxbet", "min", "max":
+		arg = "<Value:Amount>"
+	case "symbol":
+		arg = "<Value:Emoji/CurrencySymbol>"
+	}
 	if len(data.Args) <= 1 {
-		embed.Description = "No `Value` argument provided"
+		embed.Description = fmt.Sprintf("No `Value` argument provided for `%s`. Available arguments:\n`%s`", setting, arg)
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
@@ -61,7 +68,7 @@ func settings(data *dcommand.Data) {
 	case "startbalance", "maxbet", "min", "max":
 		nvalue := functions.ToInt64(value)
 		if nvalue < 0 || (setting == "max" && nvalue == 0) {
-			embed.Description = "Invalid `Value` argument provided"
+			embed.Description = fmt.Sprintf("Invalid `Value` argument provided for %s. Available arguments:\n`%s`", setting, arg)
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
