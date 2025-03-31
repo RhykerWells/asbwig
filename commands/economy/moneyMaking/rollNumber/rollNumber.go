@@ -20,16 +20,16 @@ import (
 var Command = &dcommand.AsbwigCommand{
 	Command:     "rollnumber",
 	Aliases: 	 []string{"roll", "num"},
-	Description: "Rolls a number, 1-100 with a max payout of 5*<bet>",
+	Description: "Rolls a number\n**100** = payout of `<bet>*5`\n**90-99** = payout of `<Bet>*3`\n**65-89** = payout of `<Bet>`\n**64 and under** = Loss of `<Bet>`",
 	Args: []*dcommand.Args{
 		{Name: "Bet", Type: dcommand.Int},
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		userRoll, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'rollnumber' WHERE expires_at > NOW()", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'rollnumber'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		if err == nil {
-			if userRoll.ExpiresAt.Time.After(time.Now()) {
-				embed.Description = "This command is on cooldown"
+			if cooldown.ExpiresAt.Time.After(time.Now()) {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", (time.Now().Unix() + int64(time.Until(cooldown.ExpiresAt.Time).Seconds())))
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 				return
 			}

@@ -26,10 +26,10 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		userRoll, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'snakeeyes' WHERE expires_at > NOW()", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type = 'snakeeyes'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		if err == nil {
-			if userRoll.ExpiresAt.Time.After(time.Now()) {
-				embed.Description = "This command is on cooldown"
+			if cooldown.ExpiresAt.Time.After(time.Now()) {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", (time.Now().Unix() + int64(time.Until(cooldown.ExpiresAt.Time).Seconds())))
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 				return
 			}
