@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -35,7 +34,7 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	setting := strings.ToLower(data.Args[0])
+	setting := data.Args[0]
 	o, _ := regexp.Compile("default|s(ymbol|tartbalance)|m(ax(bet)?|in)")
 	if !o.MatchString(setting) {
 		embed.Description = "Invalid `settings` argument provided. Available arguments:\n`maxBet`, `startbalance`, `symbol` \nTo set it with the default settings use `default`"
@@ -57,7 +56,7 @@ func settings(data *dcommand.Data) {
 		return
 	}
 	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-	value := strings.ToLower(data.Args[1])
+	value := data.Args[1]
 	switch setting {
 	case "startbalance", "maxbet", "min", "max":
 		nvalue := functions.ToInt64(value)

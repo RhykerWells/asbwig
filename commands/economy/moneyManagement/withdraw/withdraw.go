@@ -3,7 +3,6 @@ package withdraw
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -42,13 +41,13 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		value := data.Args[0]
-		if functions.ToInt64(value) <= 0 && strings.ToLower(value) != "all" {
+		if functions.ToInt64(value) <= 0 && value != "all" {
 			embed.Description = "Invalid `Amount` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
 		var amount int64
-		if strings.ToLower(value) == "all" {
+		if value == "all" {
 			amount = bank
 		} else {
 			amount = functions.ToInt64(value)

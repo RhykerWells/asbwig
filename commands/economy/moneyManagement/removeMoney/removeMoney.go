@@ -3,7 +3,6 @@ package removemoney
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -44,7 +43,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		destination := strings.ToLower(data.Args[1])
+		destination := data.Args[1]
 		if destination != "cash" && destination != "bank" {
 			embed.Description = "Invalid `Destination` argument provided\nPlease use `cash` or `bank`"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
