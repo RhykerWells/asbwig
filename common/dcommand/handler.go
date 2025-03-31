@@ -37,7 +37,11 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 	}
 
 	command := strings.ToLower(prefixRemoved[0])
-	args := prefixRemoved[1:]
+	argsNotLowered := prefixRemoved[1:]
+	var args []string
+	for _, arg := range argsNotLowered {
+		args = append(args, strings.ToLower(arg))
+	}
 
 outer:
 	for _, cmd := range c.cmdMap {
