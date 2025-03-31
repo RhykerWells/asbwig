@@ -1,4 +1,4 @@
-package listResponses
+package listresponses
 
 import (
 	"context"
@@ -26,7 +26,7 @@ var Command = &dcommand.AsbwigCommand{
 func addResponse(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + "responses", IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "economy_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "economy_forward"}}}}
+	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "responses_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "responses_forward"}}}}
 	if len(data.Args) <= 0 {
 		embed.Description = "No `Type` argument provided. Available arguments:\n`Work`, `Crime`"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -41,8 +41,8 @@ func addResponse(data *dcommand.Data) {
 	embedAuthor := fmt.Sprintf("%s %s-responses", guild.Name, responseType)
 	responseType = fmt.Sprintf("%sresponses", responseType)
 	page := 1
-	if len(data.Args) > 0 {
-		page, _ = strconv.Atoi(data.Args[0])
+	if len(data.Args) > 1 {
+		page, _ = strconv.Atoi(data.Args[1])
 		if page < 1 {
 			page = 1
 		}
