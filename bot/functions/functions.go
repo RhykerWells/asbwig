@@ -12,8 +12,11 @@ import (
 )
 
 // Message functions
-func SendBasicMessage(channelID string, message string) (msg *discordgo.Message, err error) {
+func SendBasicMessage(channelID string, message string, delay ...any) (msg *discordgo.Message, err error) {
 	msg, err = common.Session.ChannelMessageSend(channelID, message)
+	if delay != nil {
+		DeleteMessage(channelID, msg.ID, delay)
+	}
 	return msg, err
 }
 
