@@ -26,21 +26,6 @@ CREATE TABLE IF NOT EXISTS economy_shop (
     UNIQUE (guild_id, name)
 );
 `,`
-CREATE OR REPLACE FUNCTION deleteItemWhenOut()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.quantity = 0 THEN
-        DELETE FROM economy_shop WHERE guild_id = NEW.guild_id;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-CREATE OR REPLACE TRIGGER trigger_delete_item_when_quantity_zero
-AFTER UPDATE ON economy_shop
-FOR EACH ROW
-WHEN (NEW.quantity = 0)
-EXECUTE FUNCTION deleteItemWhenOut();
-`,`
 CREATE TABLE IF NOT EXISTS economy_createitem (
 	guild_id TEXT PRIMARY KEY,
 	user_id TEXT NOT NULL,
