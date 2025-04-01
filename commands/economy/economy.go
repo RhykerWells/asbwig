@@ -29,22 +29,26 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
 
 	cmdHandler.RegisterCommands(
+		//Info
 		balance.Command,
 		leaderboard.Command,
-		work.Command,
+		//Moneymaking
+		coinflip.Command,
 		crime.Command,
 		rob.Command,
 		rollnumber.Command,
 		snakeeyes.Command,
-		coinflip.Command,
+		work.Command,
+		//Moneymanagement
 		addmoney.Command,
-		removemoney.Command,
 		deposit.Command,
-		withdraw.Command,
 		givemoney.Command,
+		removemoney.Command,
+		withdraw.Command,
+		//Settings
 		addresponse.Command,
-		removeresponse.Command,
 		listresponses.Command,
+		removeresponse.Command,
 		set.Command,
 		viewsettings.Command,
 	)
