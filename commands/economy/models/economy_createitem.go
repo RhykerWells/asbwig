@@ -33,6 +33,7 @@ type EconomyCreateitem struct {
 	Role        null.String `boil:"role" json:"role,omitempty" toml:"role" yaml:"role,omitempty"`
 	Reply       null.String `boil:"reply" json:"reply,omitempty" toml:"reply" yaml:"reply,omitempty"`
 	ExpiresAt   null.Time   `boil:"expires_at" json:"expires_at,omitempty" toml:"expires_at" yaml:"expires_at,omitempty"`
+	MSGID       string      `boil:"msg_id" json:"msg_id" toml:"msg_id" yaml:"msg_id"`
 
 	R *economyCreateitemR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyCreateitemL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -48,6 +49,7 @@ var EconomyCreateitemColumns = struct {
 	Role        string
 	Reply       string
 	ExpiresAt   string
+	MSGID       string
 }{
 	GuildID:     "guild_id",
 	UserID:      "user_id",
@@ -58,6 +60,7 @@ var EconomyCreateitemColumns = struct {
 	Role:        "role",
 	Reply:       "reply",
 	ExpiresAt:   "expires_at",
+	MSGID:       "msg_id",
 }
 
 var EconomyCreateitemTableColumns = struct {
@@ -70,6 +73,7 @@ var EconomyCreateitemTableColumns = struct {
 	Role        string
 	Reply       string
 	ExpiresAt   string
+	MSGID       string
 }{
 	GuildID:     "economy_createitem.guild_id",
 	UserID:      "economy_createitem.user_id",
@@ -80,6 +84,7 @@ var EconomyCreateitemTableColumns = struct {
 	Role:        "economy_createitem.role",
 	Reply:       "economy_createitem.reply",
 	ExpiresAt:   "economy_createitem.expires_at",
+	MSGID:       "economy_createitem.msg_id",
 }
 
 // Generated where
@@ -188,6 +193,7 @@ var EconomyCreateitemWhere = struct {
 	Role        whereHelpernull_String
 	Reply       whereHelpernull_String
 	ExpiresAt   whereHelpernull_Time
+	MSGID       whereHelperstring
 }{
 	GuildID:     whereHelperstring{field: "\"economy_createitem\".\"guild_id\""},
 	UserID:      whereHelperstring{field: "\"economy_createitem\".\"user_id\""},
@@ -198,6 +204,7 @@ var EconomyCreateitemWhere = struct {
 	Role:        whereHelpernull_String{field: "\"economy_createitem\".\"role\""},
 	Reply:       whereHelpernull_String{field: "\"economy_createitem\".\"reply\""},
 	ExpiresAt:   whereHelpernull_Time{field: "\"economy_createitem\".\"expires_at\""},
+	MSGID:       whereHelperstring{field: "\"economy_createitem\".\"msg_id\""},
 }
 
 // EconomyCreateitemRels is where relationship names are stored.
@@ -217,8 +224,8 @@ func (*economyCreateitemR) NewStruct() *economyCreateitemR {
 type economyCreateitemL struct{}
 
 var (
-	economyCreateitemAllColumns            = []string{"guild_id", "user_id", "name", "description", "price", "quantity", "role", "reply", "expires_at"}
-	economyCreateitemColumnsWithoutDefault = []string{"guild_id", "user_id"}
+	economyCreateitemAllColumns            = []string{"guild_id", "user_id", "name", "description", "price", "quantity", "role", "reply", "expires_at", "msg_id"}
+	economyCreateitemColumnsWithoutDefault = []string{"guild_id", "user_id", "msg_id"}
 	economyCreateitemColumnsWithDefault    = []string{"name", "description", "price", "quantity", "role", "reply", "expires_at"}
 	economyCreateitemPrimaryKeyColumns     = []string{"guild_id"}
 	economyCreateitemGeneratedColumns      = []string{}

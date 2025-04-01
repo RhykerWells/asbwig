@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS economy_createitem (
 	role TEXT,
 	reply TEXT,
 	expires_at TIMESTAMP,
+	msg_id TEXT NOT NULL,
 	UNIQUE (guild_id, user_id)
 )
 `,`
