@@ -41,6 +41,19 @@ FOR EACH ROW
 WHEN (NEW.quantity = 0)
 EXECUTE FUNCTION deleteItemWhenOut();
 `,`
+CREATE TABLE IF NOT EXISTS economy_createitem (
+	guild_id TEXT PRIMARY KEY,
+	user_id TEXT NOT NULL,
+	name TEXT,
+	description TEXT,
+	price BIGINT,
+	quantity BIGINT,
+	role TEXT,
+	reply TEXT,
+	expires_at TIMESTAMP,
+	UNIQUE (guild_id, user_id)
+)
+`,`
 CREATE TABLE IF NOT EXISTS economy_cash (
 	ID SERIAL PRIMARY KEY,
 	guild_id TEXT NOT NULL,
