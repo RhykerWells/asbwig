@@ -8,7 +8,6 @@ import (
 
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
-	"github.com/sirupsen/logrus"
 )
 
 // Message functions
@@ -56,16 +55,11 @@ func EditMessage(channelID string, messageID string, message *discordgo.MessageS
 }
 
 func DeleteMessage(channelID, messageData string, delay ...any) error {
-	duration := 0
+	var duration int
 	if len(delay) > 0 {
-		if int(ToInt64(delay[0])) < 1 {
-			return nil
-		}
-		duration = int(ToInt64(delay[0]))
-	}
-	time.Sleep(time.Duration(duration))
-
-	logrus.Infoln(duration)
+		duration = delay[0].([]any)[0].(int)
+    }
+	time.Sleep(time.Duration(duration * int(time.Second)))
 	err := common.Session.ChannelMessageDelete(channelID, messageData)
 	return err
 }
