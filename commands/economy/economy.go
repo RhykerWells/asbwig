@@ -21,6 +21,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/settings/removeResponse"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 )
@@ -51,6 +52,8 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		removeresponse.Command,
 		set.Command,
 		viewsettings.Command,
+		//Shop
+		createitem.Command,
 	)
 	common.Session.AddHandler(leaderboard.Pagination)
 	common.Session.AddHandler(listresponses.Pagination)
