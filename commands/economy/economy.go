@@ -22,6 +22,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/editItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/itemInfo"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/removeItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/shop"
@@ -57,6 +58,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		viewsettings.Command,
 		//Shop
 		createitem.Command,
+		edititem.Command,
 		iteminfo.Command,
 		removeitem.Command,
 		shop.Command,
