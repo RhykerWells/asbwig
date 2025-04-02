@@ -23,6 +23,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/itemInfo"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/removeItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/shop"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
@@ -57,6 +58,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		//Shop
 		createitem.Command,
 		iteminfo.Command,
+		removeitem.Command,
 		shop.Command,
 	)
 	common.Session.AddHandler(leaderboard.Pagination)
