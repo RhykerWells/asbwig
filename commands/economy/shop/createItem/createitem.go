@@ -22,7 +22,6 @@ var (
 	activeSessions = make(map[string]string)
 	activeTimers   = make(map[string]*time.Timer)
 )
-
 var Command = &dcommand.AsbwigCommand{
 	Command:     "createitem",
 	Description: "Guided create item",
@@ -48,10 +47,15 @@ var Command = &dcommand.AsbwigCommand{
 			resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 			return
 		}
-		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: data.Args[0]}}
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+		if itemExists != nil {
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Content: "Please start again and enter a name that doesn't already exist"})
+			return
+		}
+		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: data.ArgsNotLowered[0]}}
 		activeSessions[data.Author.ID] = data.ChannelID
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for the item", Embed: embed})
-		item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, Name: null.StringFrom(data.Args[0]), MSGID: msg.ID}
+		item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, Name: null.StringFrom(data.ArgsNotLowered[0]), MSGID: msg.ID}
 		_ = item.Insert(context.Background(), common.PQ, boil.Infer())
 		resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 		common.Session.AddHandler(handleMessageCreate)
@@ -91,6 +95,12 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if len(name) > 60 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, 10)
+			return
+		}
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=?", m.GuildID), qm.Where("name=?", name)).One(context.Background(), common.PQ)
+		if itemExists != nil {
+			functions.DeleteMessage(m.ChannelID, m.ID)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, 10)
 			return
 		}
 		createItem.Name = null.StringFrom(name)
