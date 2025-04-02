@@ -39,7 +39,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		if len(data.Args) <= 0 || len(data.Args[0]) > 60 {
-			embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: "⠀⠀"}}
+			embed.Fields = []*discordgo.MessageEmbedField{{Name: "name", Value: "⠀⠀"}}
 			activeSessions[data.Author.ID] = data.ChannelID
 			msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)", Embed: embed})
 			item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, MSGID: msg.ID}
@@ -136,7 +136,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		displayQuantity := quantity
 		if quantity == "skip" || quantity == "inf" {
 			displayQuantity = "Infinite"
-			quantity = ""
+			quantity = "0"
 		}
 		createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
 		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
@@ -190,6 +190,9 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	item.Insert(context.Background(), common.PQ, boil.Infer())
 	delete(activeSessions, m.Author.ID)
+	if timer, exists := activeTimers[m.Author.ID]; exists {
+		timer.Stop()
+	}
 	models.EconomyCreateitems(qm.Where("guild_id=?", m.GuildID), qm.Where("user_id=?", m.Author.ID)).DeleteAll(context.Background(), common.PQ)
 	functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Item created! ✅", Embed: embed})
 }
