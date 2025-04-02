@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS economy_shop (
     guild_id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    price BIGINT NOT NULL CHECK (price > 0),
+    price BIGINT NOT NULL,
     quantity BIGINT,
     role TEXT,
     reply TEXT,
