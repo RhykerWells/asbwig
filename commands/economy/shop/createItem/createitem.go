@@ -63,7 +63,7 @@ func resetTimeout(guildID, channelID, userID string) {
 		timer.Stop()
 	}
 
-	activeTimers[userID] = time.AfterFunc(20 * time.Second, func() {
+	activeTimers[userID] = time.AfterFunc(2 * time.Minute, func() {
 		delete(activeSessions, userID)
 		models.EconomyCreateitems(qm.Where("guild_id=?", guildID), qm.Where("user_id=?", userID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(channelID, "The item creation session has timed out due to inactivity. Please try again")
@@ -92,13 +92,12 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, 10)
 			return
-		} else {
-			createItem.Name = null.StringFrom(name)
-			_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
-			embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: name, Inline: true}}
-			functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a price for this item", Embed: embed})
-			return
 		}
+		createItem.Name = null.StringFrom(name)
+		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
+		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: name, Inline: true}}
+		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a price for this item", Embed: embed})
+		return
 	}
 	if !createItem.Price.Valid {
 		price := strings.Split(m.Content, " ")[0]
@@ -106,28 +105,26 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for this item"}, 10)
 			return
-		} else {
-			createItem.Price = null.Int64From(functions.ToInt64(price))
-			_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("price"))
-			priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
-			embed.Fields = append(embed.Fields, priceField)
-			functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)", Embed: embed})
-			return
 		}
+		createItem.Price = null.Int64From(functions.ToInt64(price))
+		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("price"))
+		priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
+		embed.Fields = append(embed.Fields, priceField)
+		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)", Embed: embed})
+		return
 	}
 	if !createItem.Description.Valid {
 		if utf8.RuneCountInString(m.Content) > 200 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)"}, 10)
 			return
-		} else {
-			createItem.Description = null.StringFrom(m.Content)
-			_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("description"))
-			descriptionField := &discordgo.MessageEmbedField{Name: "Description", Value: m.Content}
-			embed.Fields = append(embed.Fields, descriptionField)
-			functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step", Embed: embed})
-			return
 		}
+		createItem.Description = null.StringFrom(m.Content)
+		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("description"))
+		descriptionField := &discordgo.MessageEmbedField{Name: "Description", Value: m.Content}
+		embed.Fields = append(embed.Fields, descriptionField)
+		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step", Embed: embed})
+		return
 	}
 	if !createItem.Quantity.Valid {
 		quantity := strings.Split(m.Content, " ")[0]
@@ -135,19 +132,18 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step"}, 10)
 			return
-		} else {
-			displayQuantity := quantity
-			if quantity == "skip" || quantity == "inf" {
-				displayQuantity = "Infinite"
-				quantity = ""
-			}
-			createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
-			_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
-			quantityField := &discordgo.MessageEmbedField{Name: "Stock", Value: displayQuantity}
-			embed.Fields = append(embed.Fields, quantityField)
-			functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID)\nType `skip` to skip this step", Embed: embed})
-			return
 		}
+		displayQuantity := quantity
+		if quantity == "skip" || quantity == "inf" {
+			displayQuantity = "Infinite"
+			quantity = ""
+		}
+		createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
+		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
+		quantityField := &discordgo.MessageEmbedField{Name: "Stock", Value: displayQuantity}
+		embed.Fields = append(embed.Fields, quantityField)
+		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID)\nType `skip` to skip this step", Embed: embed})
+		return
 	}
 	if !createItem.Role.Valid {
 		guildObj, _ := common.Session.State.Guild(m.GuildID)
@@ -175,12 +171,11 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a reply message for when this item is used (under 200 chars)"}, 10)
 			return
-		} else {
-			createItem.Reply = null.StringFrom(m.Content)
-			_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("reply"))
-			replyField := &discordgo.MessageEmbedField{Name: "Reply message", Value: m.Content}
-			embed.Fields = append(embed.Fields, replyField)
 		}
+		createItem.Reply = null.StringFrom(m.Content)
+		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("reply"))
+		replyField := &discordgo.MessageEmbedField{Name: "Reply message", Value: m.Content}
+		embed.Fields = append(embed.Fields, replyField)
 	}
 	embed.Footer = nil
 	embed.Color = common.SuccessGreen
