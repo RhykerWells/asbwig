@@ -10,10 +10,18 @@ type ArgumentType interface {
 }
 
 var (
+	Any = 		&AnyArg{}
 	String =	&StringArg{}
 	Int =		&IntArg{}
 	User =		&UserArg{}
 )
+
+type AnyArg struct{}
+var _ ArgumentType = (*AnyArg)(nil)
+func (s *AnyArg) Help() string {
+	return "Any"
+}
+
 
 type StringArg struct{}
 var _ ArgumentType = (*StringArg)(nil)
