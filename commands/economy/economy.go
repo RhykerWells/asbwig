@@ -24,6 +24,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/shop/buyItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/editItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/inventory"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/itemInfo"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/removeItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/shop"
@@ -61,12 +62,14 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		buyitem.Command,
 		createitem.Command,
 		edititem.Command,
+		inventory.Command,
 		iteminfo.Command,
 		removeitem.Command,
 		shop.Command,
 	)
 	common.Session.AddHandler(leaderboard.Pagination)
 	common.Session.AddHandler(listresponses.Pagination)
+	common.Session.AddHandler(inventory.Pagination)
 	common.Session.AddHandler(shop.Pagination)
 }
 
