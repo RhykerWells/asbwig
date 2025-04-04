@@ -99,8 +99,7 @@ func GetMember(guildID string, userID string) (*discordgo.Member, error) {
 	if strings.HasPrefix(userID, "<@") {
 		userID = userID[2 : len(userID)-1]
 	}
-	u, err := common.Session.GuildMember(userID, userID)
-
+	u, err := common.Session.GuildMember(guildID, userID)
 	return u, err
 }
 
