@@ -17,9 +17,9 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "shop",
-	Description: "Guided create item",
+	Description: "Views the shop for the server",
 	Args: []*dcommand.Args{
-		{Name: "Page", Type: dcommand.Int},
+		{Name: "Page", Type: dcommand.Int, Optional: true},
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)

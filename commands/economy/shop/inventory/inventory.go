@@ -19,7 +19,7 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     "inventory",
 	Description: "Guided create item",
 	Args: []*dcommand.Args{
-		{Name: "Page", Type: dcommand.Int},
+		{Name: "Page", Type: dcommand.Int, Optional: true},
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username + " Inventory", IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}

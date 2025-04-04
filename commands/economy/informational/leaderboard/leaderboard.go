@@ -18,6 +18,9 @@ import (
 var Command = &dcommand.AsbwigCommand{
 	Command:     "leaderboard",
 	Aliases:     []string{"lb", "top"},
+	Args: []*dcommand.Args{
+		{Name: "Page", Type: dcommand.Int, Optional: true},
+	},
 	Description: "Views your server leaderboard",
 	Run: (func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)

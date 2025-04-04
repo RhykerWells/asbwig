@@ -21,7 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 	Description: "Buys an item from the shop",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},
-		{Name: "Quantity", Type: dcommand.Int},
+		{Name: "Quantity", Type: dcommand.Int, Optional: true},
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
