@@ -55,7 +55,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 			price := humanize.Comma(item.Price)
 			fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.Symbol, price, item.Name, quantity)
-			itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: item.Description.String, Inline: false}
+			itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: item.Description, Inline: false}
 			fields = append(fields, itemField)
 		}
 		embed.Description = display

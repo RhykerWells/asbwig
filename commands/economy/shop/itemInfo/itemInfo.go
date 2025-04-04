@@ -29,7 +29,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", name)).One(context.Background(), common.PQ)
+		item, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).One(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "This item doesn't exist"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -48,11 +48,11 @@ var Command = &dcommand.AsbwigCommand{
 			{Name: "Name", Value: item.Name, Inline: true},
 			{Name: "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", Value: "⠀⠀", Inline: true},
 			{Name: "Price", Value: price, Inline: true},
-			{Name: "Description", Value: item.Description.String, Inline: true},
+			{Name: "Description", Value: item.Description, Inline: true},
 			{Name: "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", Value: "⠀⠀", Inline: true},
 			{Name: "Quantity", Value: quantity, Inline: true},
 			{Name: "Role given", Value: role, Inline: true},
-			{Name: "Reply message", Value: item.Reply.String, Inline: false},
+			{Name: "Reply message", Value: item.Reply, Inline: false},
 		}
 		if item.Soldby.Valid {
 			soldField := &discordgo.MessageEmbedField{Name: "On market by", Value: item.Soldby.String}

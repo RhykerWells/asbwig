@@ -110,7 +110,7 @@ func settings(data *dcommand.Data) {
 			value = "false"
 		}
 	}
-	query := fmt.Sprintf("UPDATE economy_config SET %s = $1 WHERE guild_id = $2", setting)
+	query := fmt.Sprintf("UPDATE economy_config SET %s=$1 WHERE guild_id=$2", setting)
 	queries.Raw(query, value, data.GuildID).Exec(common.PQ)
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }

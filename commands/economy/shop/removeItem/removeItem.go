@@ -27,7 +27,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", name)).One(context.Background(), common.PQ)
+		item, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).One(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "This item doesn't exist"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

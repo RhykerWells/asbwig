@@ -39,7 +39,6 @@ func addResponse(data *dcommand.Data) {
 		return
 	}
 	embedAuthor := fmt.Sprintf("%s %s-responses", guild.Name, responseType)
-	responseType = fmt.Sprintf("%sresponses", responseType)
 	page := 1
 	if len(data.Args) > 1 {
 		page, _ = strconv.Atoi(data.Args[1])
@@ -49,30 +48,17 @@ func addResponse(data *dcommand.Data) {
 	}
 	offset :=  (page - 1) * 10
 	display := ""
-	guildConfig, err := models.EconomyConfigs(qm.Select("workresponses", "crimeresponses"), qm.Where("guild_id=?", data.GuildID), qm.Offset(offset)).One(context.Background(), common.PQ)
-	var responses []string
-	if err != nil {
-		display = "There are no responses on this page"
-	}  else {
-		switch responseType {
-		case "workresponses":
-			responses = guildConfig.Workresponses
-		case "crimeresponses":
-			responses = guildConfig.Crimeresponses
-		}
+	guildResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", data.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
+	if len(guildResponses) <= 0 {
+		display = "There are no responses on this page\nAdd some with `addresponse <Type> <Responses>`"
 	}
-	if len(responses) == 0 {
-        display = "There are no responses on this page"
-    } else {
-        embed.Color = common.SuccessGreen
-    }
 	responseNumber := (page - 1) * 10
-	for i, response := range responses {
+	for i, responses := range guildResponses {
 		if i == 10 {
 			break
 		}
 		responseNumber ++
-		display += fmt.Sprintf("%d) `%s`\n", responseNumber, response)
+		display += fmt.Sprintf("%d) `%s`\n", responseNumber, responses.Response)
 	}
 	embed.Author = &discordgo.MessageEmbedAuthor{Name: embedAuthor, IconURL: guild.IconURL("256")}
 	embed.Description = display
@@ -84,7 +70,7 @@ func addResponse(data *dcommand.Data) {
 		row.Components[0] = btnPrev
 		components[0] = row	
 	}
-	if len(responses) > responseNumber {
+	if len(guildResponses) > responseNumber {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false

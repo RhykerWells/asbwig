@@ -31,7 +31,7 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Title: "Item info" , Footer: &discordgo.MessageEmbedFooter{Text: "Type cancel to cancel the setup"}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x0088CC}
-		_, err := models.EconomyCreateitems(qm.Where("guild_id=?", data.GuildID), qm.Where("user_id=?", data.Author.ID)).One(context.Background(), common.PQ)
+		_, err := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		channel, activeSession := activeSessions[data.Author.ID]
 		if err == nil || activeSession {
 			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("You are already creating an item in <#%s>", channel))
@@ -47,7 +47,7 @@ var Command = &dcommand.AsbwigCommand{
 			resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 			return
 		}
-		itemExists, _ := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Content: "Please start again and enter a name that doesn't already exist"})
 			return
@@ -69,7 +69,7 @@ func resetTimeout(guildID, channelID, userID string) {
 
 	activeTimers[userID] = time.AfterFunc(2 * time.Minute, func() {
 		delete(activeSessions, userID)
-		models.EconomyCreateitems(qm.Where("guild_id=?", guildID), qm.Where("user_id=?", userID)).DeleteAll(context.Background(), common.PQ)
+		models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", guildID, userID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(channelID, "The item creation session has timed out due to inactivity. Please try again")
 	})
 }
@@ -82,12 +82,12 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if m.Content == "cancel" {
 		delete(activeSessions, m.Author.ID)
-		models.EconomyCreateitems(qm.Where("guild_id=?", m.GuildID), qm.Where("user_id=?", m.Author.ID)).DeleteAll(context.Background(), common.PQ)
+		models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.Author.ID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(m.ChannelID, "Create item cancelled")
 		return
 	}
 	resetTimeout(m.GuildID, m.ChannelID, m.Author.ID)
-	createItem, _ := models.EconomyCreateitems(qm.Where("guild_id=?", m.GuildID), qm.Where("user_id=?", m.Author.ID)).One(context.Background(), common.PQ)
+	createItem, _ := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.Author.ID)).One(context.Background(), common.PQ)
 	message, _ := common.Session.ChannelMessage(m.ChannelID, createItem.MSGID)
 	embed := message.Embeds[0]
 	if !createItem.Name.Valid {
@@ -97,7 +97,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, 10)
 			return
 		}
-		itemExists, _ := models.EconomyShops(qm.Where("guild_id=?", m.GuildID), qm.Where("name=?", name)).One(context.Background(), common.PQ)
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", m.GuildID, name)).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, 10)
@@ -192,17 +192,17 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	item := models.EconomyShop {
 		GuildID: createItem.GuildID,
 		Name: createItem.Name.String,
-		Description: createItem.Description,
+		Description: createItem.Description.String,
 		Price: createItem.Price.Int64,
 		Quantity: createItem.Quantity,
 		Role: createItem.Role,
-		Reply: createItem.Reply,
+		Reply: createItem.Reply.String,
 	}
 	item.Insert(context.Background(), common.PQ, boil.Infer())
 	delete(activeSessions, m.Author.ID)
 	if timer, exists := activeTimers[m.Author.ID]; exists {
 		timer.Stop()
 	}
-	models.EconomyCreateitems(qm.Where("guild_id=?", m.GuildID), qm.Where("user_id=?", m.Author.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyCreateitems(qm.Where("guild_id=? AND user=?", m.GuildID, m.Author.ID)).DeleteAll(context.Background(), common.PQ)
 	functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Item created! ✅", Embed: embed})
 }

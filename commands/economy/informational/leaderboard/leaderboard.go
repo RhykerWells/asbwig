@@ -33,14 +33,14 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		offset :=  (page - 1) * 10
 		display := ""
-		guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
-		if err != nil || len(guildCash) == 0 {
+		economyUsers, err := models.EconomyUsers(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+		if err != nil || len(economyUsers) == 0 {
 			display = "No users are in the leaderboard"
 		} else {
 			embed.Color = common.SuccessGreen
 		}
 		rank := (page - 1) * 10
-		for i, entry := range guildCash {
+		for i, entry := range economyUsers {
 			if i == 10 {
 				break
 			}
@@ -66,7 +66,7 @@ var Command = &dcommand.AsbwigCommand{
 			row.Components[0] = btnPrev
 			components[0] = row	
 		}
-		if len(guildCash) > rank {
+		if len(economyUsers) > rank {
 			row := components[0].(discordgo.ActionsRow)
 			btnNext := row.Components[1].(discordgo.Button)
 			btnNext.Disabled = false

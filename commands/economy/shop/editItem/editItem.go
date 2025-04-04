@@ -37,7 +37,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", name)).One(context.Background(), common.PQ)
+		item, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).One(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "This item doesn't exist"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -65,7 +65,7 @@ var Command = &dcommand.AsbwigCommand{
 		switch option {
 		case "name":
 			value = data.ArgsNotLowered[2]
-			itemExists, _ := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.Where("name=?", value)).One(context.Background(), common.PQ)
+			itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, value)).One(context.Background(), common.PQ)
 			if itemExists != nil {
 				embed.Description = "There is already an item with this name"
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -109,9 +109,9 @@ var Command = &dcommand.AsbwigCommand{
 			}
 			switch option{
 			case "description":
-				item.Description = null.StringFrom(value)
+				item.Description = value
 			case "reply":
-				item.Reply = null.StringFrom(value)
+				item.Reply = value
 			}
 			item.Update(context.Background(), common.PQ, boil.Infer())
 		case "role":

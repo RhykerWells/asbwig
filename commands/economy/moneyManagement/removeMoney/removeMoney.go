@@ -59,25 +59,19 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if destination == "cash" {
-			userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
-			var cash int64 = 0
-			if err == nil {
-				cash = userCash.Cash
-			}
-			cash = cash - functions.ToInt64(amount)
-			cashEntry := models.EconomyCash{GuildID: data.GuildID, UserID: member.User.ID, Cash: cash}
-			_ = cashEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
-		} else {
-			userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
-			var bank int64 = 0
-			if err == nil {
-				bank = userBank.Balance
-			}
-			bank = bank - functions.ToInt64(amount)
-			bankEntry := models.EconomyBank{GuildID: data.GuildID, UserID: member.User.ID, Balance: bank}
-			_ = bankEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("balance"), boil.Infer())
+		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", data.GuildID, member.User.ID)).One(context.Background(), common.PQ)
+		var cash, bank int64
+		if err == nil {
+			cash = economyUser.Cash
+			bank = economyUser.Bank
 		}
+		if destination == "cash" {
+			cash = cash - functions.ToInt64(amount)
+		} else {
+			bank = bank - functions.ToInt64(amount)
+		}
+		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: member.User.ID, Cash: cash, Bank: bank}
+		_ = userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash", "bank"), boil.Infer())
 		embed.Description = fmt.Sprintf("You removed %s%s from %ss %s", guild.Symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
