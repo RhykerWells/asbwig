@@ -24,6 +24,8 @@ func settings(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " settings", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
 	guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+	customWorkResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type='work'", data.GuildID)).All(context.Background(), common.PQ)
+	customCrimeResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type='crime'", data.GuildID)).All(context.Background(), common.PQ)
 	maxBet := ""
 	symbol := guildConfig.Symbol
 	startbalance := ""
@@ -39,17 +41,13 @@ func settings(data *dcommand.Data) {
 	}
 	var workResponsesEnabled, crimeResponsesEnabled string = "Disabled", "Disabled"
 	var workResponsesNum, crimeResponsesNum int = 0, 0
-	if guildConfig.Customworkresponses {
+	if len(customWorkResponses) > 0 {
 		workResponsesEnabled = "Enabled"
+		workResponsesNum = len(customWorkResponses)
 	}
-	if len(guildConfig.Workresponses) > 0 {
-		workResponsesNum = len(guildConfig.Workresponses)
-	}
-	if guildConfig.Customcrimeresponses {
+	if len(customCrimeResponses) > 0 {
 		crimeResponsesEnabled = "Enabled"
-	}
-	if len(guildConfig.Workresponses) > 0 {
-		crimeResponsesNum = len(guildConfig.Crimeresponses)
+		crimeResponsesNum = len(customCrimeResponses)
 	}
 	min := fmt.Sprint(symbol, humanize.Comma(guildConfig.Min))
 	max := fmt.Sprint(symbol, humanize.Comma(guildConfig.Max))

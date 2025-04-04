@@ -21,6 +21,14 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/settings/removeResponse"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/buyItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/editItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/inventory"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/itemInfo"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/removeItem"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/shop"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/useItem"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 )
@@ -29,27 +37,42 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
 
 	cmdHandler.RegisterCommands(
+		//Info
 		balance.Command,
 		leaderboard.Command,
-		work.Command,
+		//Moneymaking
+		coinflip.Command,
 		crime.Command,
 		rob.Command,
 		rollnumber.Command,
 		snakeeyes.Command,
-		coinflip.Command,
+		work.Command,
+		//Moneymanagement
 		addmoney.Command,
-		removemoney.Command,
 		deposit.Command,
-		withdraw.Command,
 		givemoney.Command,
+		removemoney.Command,
+		withdraw.Command,
+		//Settings
 		addresponse.Command,
-		removeresponse.Command,
 		listresponses.Command,
+		removeresponse.Command,
 		set.Command,
 		viewsettings.Command,
+		//Shop
+		buyitem.Command,
+		createitem.Command,
+		edititem.Command,
+		inventory.Command,
+		iteminfo.Command,
+		removeitem.Command,
+		shop.Command,
+		useItem.Command,
 	)
 	common.Session.AddHandler(leaderboard.Pagination)
 	common.Session.AddHandler(listresponses.Pagination)
+	common.Session.AddHandler(inventory.Pagination)
+	common.Session.AddHandler(shop.Pagination)
 }
 
 func GuildEconomyAdd(guild_id string) {

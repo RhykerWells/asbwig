@@ -23,41 +23,28 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 	re := regexp.MustCompile(`\d+`)
 	page, _ := strconv.Atoi(re.FindString(b.Message.Embeds[0].Footer.Text))
-	if b.MessageComponentData().CustomID == "economy_forward" {
+	if b.MessageComponentData().CustomID == "responses_forward" {
 		page = page + 1
 	} else {
 		page = page - 1
 	}
-	responseType := "workresponses"
+	responseType := "type"
 	if strings.Contains(embed[0].Author.Name, "crime-responses") {
-		responseType = "crimeresponses"
+		responseType = "crime"
 	}
 	offset :=  (page - 1) * 10
 	display := ""
-	guildConfig, err := models.EconomyConfigs(qm.Select("workresponses", "crimeresponses"), qm.Where("guild_id=?", b.GuildID), qm.Offset(offset)).One(context.Background(), common.PQ)
-	var responses []string
+	guildResponses, err := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", b.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if err != nil {
-		display = "There are no responses on this page"
-	}  else {
-		switch responseType {
-		case "workresponses":
-			responses = guildConfig.Workresponses
-		case "crimeresponses":
-			responses = guildConfig.Crimeresponses
-		}
+		display = "There are no responses on this page\nAdd some with `addresponse <Type> <Responses>`"
 	}
-	if len(responses) == 0 {
-        display = "There are no responses on this page"
-    } else {
-        embed[0].Color = common.SuccessGreen
-    }
 	responseNumber := (page - 1) * 10
-	for i, response := range responses {
+	for i, responses := range guildResponses {
 		if i == 10 {
 			break
 		}
 		responseNumber ++
-		display += fmt.Sprintf("%d) `%s`\n", responseNumber, response)
+		display += fmt.Sprintf("%d) `%s`\n", responseNumber, responses.Response)
 	}
 	embed[0].Description = display
 	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
@@ -75,7 +62,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		row.Components[0] = btnPrev
 		components[0] = row	
 	}
-	if len(responses) > responseNumber {
+	if len(guildResponses) > responseNumber {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false

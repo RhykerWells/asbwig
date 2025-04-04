@@ -31,15 +31,15 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		page = page - 1
 	}
 	offset :=  (page - 1) * 10
-	guildCash, err := models.EconomyCashes(qm.Where("guild_id=?", b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	economyUsers, err := models.EconomyUsers(qm.Where("guild_id=?", b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 	display := ""
-	if err != nil || len(guildCash) == 0 {
+	if err != nil || len(economyUsers) == 0 {
 		display = "No users are in the leaderboard"
 	} else {
 		embed[0].Color = common.SuccessGreen
 	}
 	rank := (page - 1) * 10
-	for i, entry := range guildCash {
+	for i, entry := range economyUsers {
 		if i == 10 {
 			break
 		}
@@ -65,7 +65,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		row.Components[0] = btnPrev
 		components[0] = row	
 	}
-	if len(guildCash) > rank {
+	if len(economyUsers) > rank {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false

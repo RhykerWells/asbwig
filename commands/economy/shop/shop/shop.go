@@ -1,4 +1,4 @@
-package leaderboard
+package shop
 
 import (
 	"context"
@@ -16,13 +16,15 @@ import (
 )
 
 var Command = &dcommand.AsbwigCommand{
-	Command:     "leaderboard",
-	Aliases:     []string{"lb", "top"},
-	Description: "Views your server leaderboard",
-	Run: (func(data *dcommand.Data) {
+	Command:     "shop",
+	Description: "Guided create item",
+	Args: []*dcommand.Args{
+		{Name: "Page", Type: dcommand.Int},
+	},
+	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "economy_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "economy_forward"}}}}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+		components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
 		guildSettings, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		page := 1
 		if len(data.Args) > 0 {
@@ -33,31 +35,31 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		offset :=  (page - 1) * 10
 		display := ""
-		economyUsers, err := models.EconomyUsers(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
-		if err != nil || len(economyUsers) == 0 {
-			display = "No users are in the leaderboard"
+		guildShop, err := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+		if err != nil || len(guildShop) == 0 {
+			display = "No items are in the shop for this page.\nAdd some with `createitem`"
 		} else {
+			display = "Buy an item with `buyitem <Name> [Quantity:Int]`\nFor more information about an item, use `iteminfo <Name>`"
 			embed.Color = common.SuccessGreen
 		}
-		rank := (page - 1) * 10
-		for i, entry := range economyUsers {
+		fields := []*discordgo.MessageEmbedField{}
+		var shopNumber = 1
+		for i, item := range guildShop {
 			if i == 10 {
 				break
 			}
-			cash := humanize.Comma(entry.Cash)
-			rank ++
-			drank := ""
-			user, _ := functions.GetUser(entry.UserID)
-			pos := map[int]string{1: "🥇", 2: "🥈", 3: "🥉"}
-			_, exists := pos[rank]
-			if exists {
-				drank = pos[rank]
-			} else {
-				drank = fmt.Sprintf("  %d.", rank) // Default to number if no medal
+			shopNumber ++
+			quantity := "Infinite"
+			if item.Quantity > 0 {
+				quantity = humanize.Comma(item.Quantity)
 			}
-			display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, cash)
+			price := humanize.Comma(item.Price)
+			fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.Symbol, price, item.Name, quantity)
+			itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: item.Description, Inline: false}
+			fields = append(fields, itemField)
 		}
 		embed.Description = display
+		embed.Fields = fields
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
 		if page != 1 {
 			row := components[0].(discordgo.ActionsRow)
@@ -66,7 +68,7 @@ var Command = &dcommand.AsbwigCommand{
 			row.Components[0] = btnPrev
 			components[0] = row	
 		}
-		if len(economyUsers) > rank {
+		if len(guildShop) > shopNumber {
 			row := components[0].(discordgo.ActionsRow)
 			btnNext := row.Components[1].(discordgo.Button)
 			btnNext.Disabled = false
@@ -75,7 +77,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
 		go disableButtons(msg.ChannelID, msg.ID)
-	}),
+	},
 }
 
 func disableButtons(channelID, messageID string) {

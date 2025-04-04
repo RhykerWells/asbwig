@@ -21,17 +21,13 @@ var Command = &dcommand.AsbwigCommand{
 	Aliases: 	 []string{"bal"},
 	Description: "Views your balance in the economy",
 	Run: (func(data *dcommand.Data) {
-		userCash, err := models.EconomyCashes(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
-		var cash int64 = 0
+		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		var cash, bank int64 = 0, 0
 		if err == nil {
-			cash = userCash.Cash
+			cash = economyUser.Cash
+			bank = economyUser.Bank
 		}
-		userBank, err := models.EconomyBanks(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
-		var bank int64 = 0
-		if err == nil {
-			bank = userBank.Balance
-		}
-		rankQuery := `SELECT position FROM (SELECT user_id, RANK() OVER (ORDER BY cash DESC) AS position FROM economy_cash WHERE guild_id = $1) AS s WHERE user_id = $2`
+		rankQuery := `SELECT position FROM (SELECT user_id, RANK() OVER (ORDER BY cash DESC) AS position FROM economy_cashs WHERE guild_id=$1) AS s WHERE user_id=$2`
 		var rank int64
 		drank := ""
 		row := common.PQ.QueryRow(rankQuery, data.GuildID, data.Author.ID).Scan(&rank)

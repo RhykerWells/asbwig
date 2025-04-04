@@ -1,11 +1,13 @@
 package run
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/RhykerWells/asbwig/bot"
+	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	log "github.com/sirupsen/logrus"
 )
@@ -30,5 +32,14 @@ func shutdown() {
 
 	// Cleanly close down the Discord session.
 	log.Infoln("Exiting now....")
+	shutdownCleanup()
 	os.Exit(0)
+}
+
+func shutdownCleanup() {
+	log.Warnln("Running cleanup functions")
+	ok, err := models.EconomyCreateitems().DeleteAllG(context.Background())
+	if err != nil {
+		log.Errorln("Error running cleanup for economy:", ok)
+	}
 }

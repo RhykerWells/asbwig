@@ -13,20 +13,19 @@ import (
 func guildMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 	guildid := m.GuildID
 	userid := m.Member.User.ID
-	_, _ = models.EconomyCashes(qm.Where("guild_id=?", guildid), qm.Where("user_id=?", userid)).DeleteAll(context.Background(), common.PQ)
-	_, _ = models.EconomyBanks(qm.Where("guild_id=?", guildid), qm.Where("user_id=?", userid)).DeleteAll(context.Background(), common.PQ)
-	_, _ = models.EconomyCooldowns(qm.Where("guild_id=?", guildid), qm.Where("user_id=?", userid)).DeleteAll(context.Background(), common.PQ)
+	_, _ = models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
+	_, _ = models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
 }
 
 func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	guildid := m.GuildID
 	userid := m.Member.User.ID
 	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", guildid)).One(context.Background(), common.PQ)
-	
-	cash := models.EconomyCash{
+	userEntry := models.EconomyUser{
 		GuildID: guildid,
 		UserID: userid,
 		Cash: guild.Startbalance,
+		Bank: 0,
 	}
-	_ = cash.Insert(context.Background(), common.PQ, boil.Infer())
+	_ = userEntry.Insert(context.Background(), common.PQ, boil.Infer())
 }

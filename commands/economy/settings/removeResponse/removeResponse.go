@@ -10,9 +10,7 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 var Command = &dcommand.AsbwigCommand{
@@ -49,39 +47,21 @@ func addResponse(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	guildConfig, err := models.EconomyConfigs(qm.Select("workresponses", "crimeresponses"), qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-	var responses []string
+	guildResponses, err := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", data.GuildID, responseType)).All(context.Background(), common.PQ)
 	if err != nil {
-		embed.Description = "There are no responses to delete."
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}  else {
-		switch responseType {
-		case "work":
-			responses = guildConfig.Workresponses
-			responseType = "workresponses"
-		case "crime":
-			responses = guildConfig.Crimeresponses
-			responseType = "crimeresponses"
-		}
-	}
-	if len(responses) == 0 {
 		embed.Description = "There are no responses to delete."
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
 	var responseNumber int64 = 1
-	var newResponses types.StringArray
-	for _, response := range responses {
+	for _, responses := range guildResponses {
 		if responseNumber == functions.ToInt64(responseToDelete) {
-			responseToDelete = response
+			responseToDelete = responses.Response
+			responses.Delete(context.Background(), common.PQ)
 			continue
 		}
-		newResponses = append(newResponses, response)
 		responseNumber ++
 	}
-	query := fmt.Sprintf("UPDATE economy_config SET %s = $1 WHERE guild_id = $2", responseType)
-	queries.Raw(query, newResponses, data.GuildID).Exec(common.PQ)
 	embed.Description = fmt.Sprintf("Successfully removed `%s` from your list of responses", responseToDelete)
 	embed.Color = common.SuccessGreen
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

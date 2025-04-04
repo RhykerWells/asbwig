@@ -24,7 +24,6 @@ import (
 
 // EconomyCooldown is an object representing the database table.
 type EconomyCooldown struct {
-	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	GuildID   string    `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	Type      string    `boil:"type" json:"type" toml:"type" yaml:"type"`
@@ -35,13 +34,11 @@ type EconomyCooldown struct {
 }
 
 var EconomyCooldownColumns = struct {
-	ID        string
 	GuildID   string
 	UserID    string
 	Type      string
 	ExpiresAt string
 }{
-	ID:        "id",
 	GuildID:   "guild_id",
 	UserID:    "user_id",
 	Type:      "type",
@@ -49,13 +46,11 @@ var EconomyCooldownColumns = struct {
 }
 
 var EconomyCooldownTableColumns = struct {
-	ID        string
 	GuildID   string
 	UserID    string
 	Type      string
 	ExpiresAt string
 }{
-	ID:        "economy_cooldowns.id",
 	GuildID:   "economy_cooldowns.guild_id",
 	UserID:    "economy_cooldowns.user_id",
 	Type:      "economy_cooldowns.type",
@@ -89,13 +84,11 @@ func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var EconomyCooldownWhere = struct {
-	ID        whereHelperint
 	GuildID   whereHelperstring
 	UserID    whereHelperstring
 	Type      whereHelperstring
 	ExpiresAt whereHelpernull_Time
 }{
-	ID:        whereHelperint{field: "\"economy_cooldowns\".\"id\""},
 	GuildID:   whereHelperstring{field: "\"economy_cooldowns\".\"guild_id\""},
 	UserID:    whereHelperstring{field: "\"economy_cooldowns\".\"user_id\""},
 	Type:      whereHelperstring{field: "\"economy_cooldowns\".\"type\""},
@@ -104,10 +97,14 @@ var EconomyCooldownWhere = struct {
 
 // EconomyCooldownRels is where relationship names are stored.
 var EconomyCooldownRels = struct {
-}{}
+	Guild string
+}{
+	Guild: "Guild",
+}
 
 // economyCooldownR is where relationships are stored.
 type economyCooldownR struct {
+	Guild *EconomyConfig `boil:"Guild" json:"Guild" toml:"Guild" yaml:"Guild"`
 }
 
 // NewStruct creates a new relationship struct
@@ -115,14 +112,21 @@ func (*economyCooldownR) NewStruct() *economyCooldownR {
 	return &economyCooldownR{}
 }
 
+func (r *economyCooldownR) GetGuild() *EconomyConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Guild
+}
+
 // economyCooldownL is where Load methods for each relationship are stored.
 type economyCooldownL struct{}
 
 var (
-	economyCooldownAllColumns            = []string{"id", "guild_id", "user_id", "type", "expires_at"}
+	economyCooldownAllColumns            = []string{"guild_id", "user_id", "type", "expires_at"}
 	economyCooldownColumnsWithoutDefault = []string{"guild_id", "user_id", "type"}
-	economyCooldownColumnsWithDefault    = []string{"id", "expires_at"}
-	economyCooldownPrimaryKeyColumns     = []string{"id"}
+	economyCooldownColumnsWithDefault    = []string{"expires_at"}
+	economyCooldownPrimaryKeyColumns     = []string{"guild_id", "user_id", "type"}
 	economyCooldownGeneratedColumns      = []string{}
 )
 
@@ -237,6 +241,184 @@ func (q economyCooldownQuery) Exists(ctx context.Context, exec boil.ContextExecu
 	return count > 0, nil
 }
 
+// Guild pointed to by the foreign key.
+func (o *EconomyCooldown) Guild(mods ...qm.QueryMod) economyConfigQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"guild_id\" = ?", o.GuildID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EconomyConfigs(queryMods...)
+}
+
+// LoadGuild allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (economyCooldownL) LoadGuild(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyCooldown interface{}, mods queries.Applicator) error {
+	var slice []*EconomyCooldown
+	var object *EconomyCooldown
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyCooldown.(*EconomyCooldown)
+		if !ok {
+			object = new(EconomyCooldown)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyCooldown)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyCooldown))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyCooldown.(*[]*EconomyCooldown)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyCooldown)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyCooldown))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyCooldownR{}
+		}
+		args[object.GuildID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyCooldownR{}
+			}
+
+			args[obj.GuildID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_config`),
+		qm.WhereIn(`economy_config.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EconomyConfig")
+	}
+
+	var resultSlice []*EconomyConfig
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EconomyConfig")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for economy_config")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_config")
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Guild = foreign
+		if foreign.R == nil {
+			foreign.R = &economyConfigR{}
+		}
+		foreign.R.GuildEconomyCooldowns = append(foreign.R.GuildEconomyCooldowns, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.GuildID == foreign.GuildID {
+				local.R.Guild = foreign
+				if foreign.R == nil {
+					foreign.R = &economyConfigR{}
+				}
+				foreign.R.GuildEconomyCooldowns = append(foreign.R.GuildEconomyCooldowns, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetGuildG of the economyCooldown to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyCooldowns.
+// Uses the global database handle.
+func (o *EconomyCooldown) SetGuildG(ctx context.Context, insert bool, related *EconomyConfig) error {
+	return o.SetGuild(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetGuild of the economyCooldown to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyCooldowns.
+func (o *EconomyCooldown) SetGuild(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EconomyConfig) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"economy_cooldowns\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+		strmangle.WhereClause("\"", "\"", 2, economyCooldownPrimaryKeyColumns),
+	)
+	values := []interface{}{related.GuildID, o.GuildID, o.UserID, o.Type}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.GuildID = related.GuildID
+	if o.R == nil {
+		o.R = &economyCooldownR{
+			Guild: related,
+		}
+	} else {
+		o.R.Guild = related
+	}
+
+	if related.R == nil {
+		related.R = &economyConfigR{
+			GuildEconomyCooldowns: EconomyCooldownSlice{o},
+		}
+	} else {
+		related.R.GuildEconomyCooldowns = append(related.R.GuildEconomyCooldowns, o)
+	}
+
+	return nil
+}
+
 // EconomyCooldowns retrieves all the records using an executor.
 func EconomyCooldowns(mods ...qm.QueryMod) economyCooldownQuery {
 	mods = append(mods, qm.From("\"economy_cooldowns\""))
@@ -249,13 +431,13 @@ func EconomyCooldowns(mods ...qm.QueryMod) economyCooldownQuery {
 }
 
 // FindEconomyCooldownG retrieves a single record by ID.
-func FindEconomyCooldownG(ctx context.Context, iD int, selectCols ...string) (*EconomyCooldown, error) {
-	return FindEconomyCooldown(ctx, boil.GetContextDB(), iD, selectCols...)
+func FindEconomyCooldownG(ctx context.Context, guildID string, userID string, type_ string, selectCols ...string) (*EconomyCooldown, error) {
+	return FindEconomyCooldown(ctx, boil.GetContextDB(), guildID, userID, type_, selectCols...)
 }
 
 // FindEconomyCooldown retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyCooldown(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*EconomyCooldown, error) {
+func FindEconomyCooldown(ctx context.Context, exec boil.ContextExecutor, guildID string, userID string, type_ string, selectCols ...string) (*EconomyCooldown, error) {
 	economyCooldownObj := &EconomyCooldown{}
 
 	sel := "*"
@@ -263,10 +445,10 @@ func FindEconomyCooldown(ctx context.Context, exec boil.ContextExecutor, iD int,
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"economy_cooldowns\" where \"id\"=$1", sel,
+		"select %s from \"economy_cooldowns\" where \"guild_id\"=$1 AND \"user_id\"=$2 AND \"type\"=$3", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, guildID, userID, type_)
 
 	err := q.Bind(ctx, exec, economyCooldownObj)
 	if err != nil {
@@ -637,7 +819,7 @@ func (o *EconomyCooldown) Delete(ctx context.Context, exec boil.ContextExecutor)
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), economyCooldownPrimaryKeyMapping)
-	sql := "DELETE FROM \"economy_cooldowns\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"economy_cooldowns\" WHERE \"guild_id\"=$1 AND \"user_id\"=$2 AND \"type\"=$3"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -732,7 +914,7 @@ func (o *EconomyCooldown) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *EconomyCooldown) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEconomyCooldown(ctx, exec, o.ID)
+	ret, err := FindEconomyCooldown(ctx, exec, o.GuildID, o.UserID, o.Type)
 	if err != nil {
 		return err
 	}
@@ -781,21 +963,21 @@ func (o *EconomyCooldownSlice) ReloadAll(ctx context.Context, exec boil.ContextE
 }
 
 // EconomyCooldownExistsG checks if the EconomyCooldown row exists.
-func EconomyCooldownExistsG(ctx context.Context, iD int) (bool, error) {
-	return EconomyCooldownExists(ctx, boil.GetContextDB(), iD)
+func EconomyCooldownExistsG(ctx context.Context, guildID string, userID string, type_ string) (bool, error) {
+	return EconomyCooldownExists(ctx, boil.GetContextDB(), guildID, userID, type_)
 }
 
 // EconomyCooldownExists checks if the EconomyCooldown row exists.
-func EconomyCooldownExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func EconomyCooldownExists(ctx context.Context, exec boil.ContextExecutor, guildID string, userID string, type_ string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"economy_cooldowns\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"economy_cooldowns\" where \"guild_id\"=$1 AND \"user_id\"=$2 AND \"type\"=$3 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+		fmt.Fprintln(writer, guildID, userID, type_)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, guildID, userID, type_)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -807,5 +989,5 @@ func EconomyCooldownExists(ctx context.Context, exec boil.ContextExecutor, iD in
 
 // Exists checks if the EconomyCooldown row exists.
 func (o *EconomyCooldown) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return EconomyCooldownExists(ctx, exec, o.ID)
+	return EconomyCooldownExists(ctx, exec, o.GuildID, o.UserID, o.Type)
 }
