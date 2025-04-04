@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS economy_user_inventories (
 	quantity BIGINT NOT NULL,
 	role TEXT NOT NULL,
 	reply TEXT NOT NULL,
-	PRIMARY KEY (guild_id, user_id),
+	PRIMARY KEY (guild_id, user_id, name),
 	CONSTRAINT fk_guild_user_inventory FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );

@@ -1348,7 +1348,7 @@ func (o *EconomyConfig) AddGuildEconomyUserInventories(ctx context.Context, exec
 				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
 				strmangle.WhereClause("\"", "\"", 2, economyUserInventoryPrimaryKeyColumns),
 			)
-			values := []interface{}{o.GuildID, rel.GuildID, rel.UserID}
+			values := []interface{}{o.GuildID, rel.GuildID, rel.UserID, rel.Name}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)
