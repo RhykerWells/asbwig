@@ -155,11 +155,10 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if !createItem.Role.Valid {
-		guildObj, _ := common.Session.State.Guild(m.GuildID)
 		roleID := "0"
 		displayRole := ""
-		role := functions.GetRole(guildObj, strings.Split(m.Content, " ")[0])
-		if strings.Split(m.Content, " ")[0] != "skip" && role == nil  {
+		role, _ := functions.GetRole(m.GuildID, strings.Split(m.Content, " ")[0])
+		if strings.Split(m.Content, " ")[0] != "skip" && role == nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID)\nType `skip` to skip this step"}, 10)
 			return

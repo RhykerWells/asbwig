@@ -114,8 +114,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 			item.Update(context.Background(), common.PQ, boil.Infer())
 		case "role":
-			guildObj, _ := common.Session.State.Guild(data.GuildID)
-			role := functions.GetRole(guildObj, value)
+			role, _ := functions.GetRole(data.GuildID, value)
 			if role != nil && value != "none" {
 				embed.Description = "Invalid `Value` argument provided. Please supply a role ID or `none` for no role"
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
