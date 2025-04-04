@@ -100,13 +100,18 @@ func GetMember(guildID string, userID string) (*discordgo.Member, error) {
 
 // Role functions
 
-func GetRole(guildID, roleID string) (role *discordgo.Role, err error) {
+// GetRole returns the full guild role object for a role ID/mention
+func GetRole(guildID, roleStr string) (role *discordgo.Role, err error) {
 	guild, err := common.Session.Guild(guildID)
 	if err != nil {
 		return nil, err
 	}
+	// Role mention
+	if strings.HasPrefix(roleStr, "<@") {
+		roleStr = roleStr[3 : len(roleStr)-1]
+	}
 	for i := range guild.Roles {
-		if guild.Roles[i].ID == roleID {
+		if guild.Roles[i].ID == roleStr {
 			role = guild.Roles[i]
 			break
 		}
