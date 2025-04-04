@@ -87,6 +87,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	resetTimeout(m.GuildID, m.ChannelID, m.Author.ID)
+	delay := 10 * time.Second
 	createItem, _ := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.Author.ID)).One(context.Background(), common.PQ)
 	message, _ := common.Session.ChannelMessage(m.ChannelID, createItem.MSGID)
 	embed := message.Embeds[0]
@@ -94,13 +95,13 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		name := strings.Split(m.Content, " ")[0]
 		if len(name) > 60 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, delay)
 			return
 		}
 		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", m.GuildID, name)).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, delay)
 			return
 		}
 		createItem.Name = null.StringFrom(name)
@@ -113,7 +114,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		price := strings.Split(m.Content, " ")[0]
 		if functions.ToInt64(price) <= 0 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for this item"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for this item"}, delay)
 			return
 		}
 		createItem.Price = null.Int64From(functions.ToInt64(price))
@@ -126,7 +127,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !createItem.Description.Valid {
 		if utf8.RuneCountInString(m.Content) > 200 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)"}, delay)
 			return
 		}
 		createItem.Description = null.StringFrom(m.Content)
@@ -140,7 +141,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		quantity := strings.Split(m.Content, " ")[0]
 		if quantity != "skip" && quantity != "inf" && functions.ToInt64(quantity) <= 0 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step"}, delay)
 			return
 		}
 		displayQuantity := quantity
@@ -160,7 +161,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		role, _ := functions.GetRole(m.GuildID, strings.Split(m.Content, " ")[0])
 		if strings.Split(m.Content, " ")[0] != "skip" && role == nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step"}, delay)
 			return
 		}
 		if role != nil {
@@ -177,7 +178,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !createItem.Reply.Valid {
 		if utf8.RuneCountInString(m.Content) > 200 {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a reply message for when this item is used (under 200 chars)"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a reply message for when this item is used (under 200 chars)"}, delay)
 			return
 		}
 		createItem.Reply = null.StringFrom(m.Content)
