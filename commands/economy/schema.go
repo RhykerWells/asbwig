@@ -60,6 +60,9 @@ CREATE TABLE IF NOT EXISTS economy_shop (
 		REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
 `,`
+CREATE INDEX IF NOT EXISTS idx_item_name
+    ON economy_shop (name)
+`,`
 CREATE TABLE IF NOT EXISTS economy_createitem (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
