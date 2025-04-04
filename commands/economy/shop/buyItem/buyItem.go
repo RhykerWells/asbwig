@@ -96,6 +96,7 @@ var Command = &dcommand.AsbwigCommand{
 			item.Quantity = newQuantity
 			item.Update(context.Background(), common.PQ, boil.Infer())
 		}
+		newQuantity = buyQuantity
 		for _, inventoryItem := range economyUserInventory {
 			if inventoryItem.Name == name {
 				newQuantity = inventoryItem.Quantity + buyQuantity
