@@ -24,7 +24,6 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username + " Inventory", IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "inventory_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "inventory_forward"}}}}
-		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		page := 1
 		if len(data.Args) > 0 {
 			page, _ = strconv.Atoi(data.Args[0])
@@ -52,7 +51,7 @@ var Command = &dcommand.AsbwigCommand{
 			if item.Role != "0" {
 				role = "<@&" + item.Role + ">"
 			}
-			itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s%s\nRole given: %s", item.Description, guild.Symbol, humanize.Comma(item.Quantity), role), Inline: false}
+			itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s\nRole given: %s", item.Description, humanize.Comma(item.Quantity), role), Inline: false}
 			fields = append(fields, itemField)
 		}
 		embed.Description = display
