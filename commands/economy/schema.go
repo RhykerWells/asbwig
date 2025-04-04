@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS economy_shop (
     role TEXT NOT NULL,
     reply TEXT NOT NULL,
     soldby TEXT,
-    PRIMARY KEY (guild_id, name),
+    PRIMARY KEY (guild_id, name, soldby),
 	CONSTRAINT fk_guild_shop FOREIGN KEY (guild_id)
 		REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
