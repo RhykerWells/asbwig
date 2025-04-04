@@ -24,7 +24,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 	re := regexp.MustCompile(`\d+`)
 	page, _ := strconv.Atoi(re.FindString(b.Message.Embeds[0].Footer.Text))
-	if b.MessageComponentData().CustomID == "economy_forward" {
+	if b.MessageComponentData().CustomID == "shop_forward" {
 		page = page + 1
 	} else {
 		page = page - 1
