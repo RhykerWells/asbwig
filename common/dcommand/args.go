@@ -1,8 +1,9 @@
 package dcommand
 
 type Args struct {
-	Name	string
-	Type	ArgumentType
+	Name		string
+	Type		ArgumentType
+	Optional	bool
 }
 
 type ArgumentType interface {

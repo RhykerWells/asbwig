@@ -14,7 +14,7 @@ var helpCmd = &dcommand.AsbwigCommand{
 	Command: "help",
 	Aliases: []string{"h"},
 	Args: []*dcommand.Args{
-		{Name: "Command", Type: dcommand.String},
+		{Name: "Command", Type: dcommand.String, Optional: true},
 	},
 	Description: "Displays bot help",
 	Run:         helpFunc,
@@ -75,7 +75,11 @@ func help(command string, channelID string) {
 
 func getArgs(command dcommand.RegisteredCommand) (str string) {
 	for _, arg := range command.Args {
-		str += " <" + argHelp(arg) + ">"
+		if arg.Optional {
+			str += " [" + argHelp(arg) + "]"
+		} else {
+			str += " <" + argHelp(arg) + ">"
+		}
 	}
 	return
 }
