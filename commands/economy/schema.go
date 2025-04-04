@@ -33,6 +33,21 @@ CREATE TABLE IF NOT EXISTS economy_users (
 CREATE INDEX IF NOT EXISTS idx_guild_users
 	ON economy_users (guild_id, user_id);
 `,`
+CREATE TABLE IF NOT EXISTS economy_user_inventories (
+	guild_id TEXT NOT NULL,
+	user_id TEXT NOT NULL,
+	name TEXT NOT NULL,
+	quantity BIGINT NOT NULL,
+	role TEXT NOT NULL,
+	reply TEXT NOT NULL,
+	PRIMARY KEY (guild_id, user_id),
+	CONSTRAINT fk_guild_user_inventory FOREIGN KEY (guild_id)
+        REFERENCES economy_config (guild_id) ON DELETE CASCADE
+);
+`,`
+CREATE INDEX IF NOT EXISTS idx_guild_users
+	ON economy_users (guild_id, user_id);
+`,`
 CREATE TABLE IF NOT EXISTS economy_cooldowns (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
@@ -51,8 +66,8 @@ CREATE TABLE IF NOT EXISTS economy_shop (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     price BIGINT NOT NULL,
-    quantity BIGINT,
-    role TEXT,
+    quantity BIGINT NOT NULL,
+    role TEXT NOT NULL,
     reply TEXT NOT NULL,
     soldby TEXT,
     PRIMARY KEY (guild_id, name),

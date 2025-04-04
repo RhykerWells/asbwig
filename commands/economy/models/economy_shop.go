@@ -28,8 +28,8 @@ type EconomyShop struct {
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description string      `boil:"description" json:"description" toml:"description" yaml:"description"`
 	Price       int64       `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Quantity    null.Int64  `boil:"quantity" json:"quantity,omitempty" toml:"quantity" yaml:"quantity,omitempty"`
-	Role        null.String `boil:"role" json:"role,omitempty" toml:"role" yaml:"role,omitempty"`
+	Quantity    int64       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
+	Role        string      `boil:"role" json:"role" toml:"role" yaml:"role"`
 	Reply       string      `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
 	Soldby      null.String `boil:"soldby" json:"soldby,omitempty" toml:"soldby" yaml:"soldby,omitempty"`
 
@@ -84,8 +84,8 @@ var EconomyShopWhere = struct {
 	Name        whereHelperstring
 	Description whereHelperstring
 	Price       whereHelperint64
-	Quantity    whereHelpernull_Int64
-	Role        whereHelpernull_String
+	Quantity    whereHelperint64
+	Role        whereHelperstring
 	Reply       whereHelperstring
 	Soldby      whereHelpernull_String
 }{
@@ -93,8 +93,8 @@ var EconomyShopWhere = struct {
 	Name:        whereHelperstring{field: "\"economy_shop\".\"name\""},
 	Description: whereHelperstring{field: "\"economy_shop\".\"description\""},
 	Price:       whereHelperint64{field: "\"economy_shop\".\"price\""},
-	Quantity:    whereHelpernull_Int64{field: "\"economy_shop\".\"quantity\""},
-	Role:        whereHelpernull_String{field: "\"economy_shop\".\"role\""},
+	Quantity:    whereHelperint64{field: "\"economy_shop\".\"quantity\""},
+	Role:        whereHelperstring{field: "\"economy_shop\".\"role\""},
 	Reply:       whereHelperstring{field: "\"economy_shop\".\"reply\""},
 	Soldby:      whereHelpernull_String{field: "\"economy_shop\".\"soldby\""},
 }
@@ -128,8 +128,8 @@ type economyShopL struct{}
 
 var (
 	economyShopAllColumns            = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply", "soldby"}
-	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "description", "price", "reply"}
-	economyShopColumnsWithDefault    = []string{"quantity", "role", "soldby"}
+	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply"}
+	economyShopColumnsWithDefault    = []string{"soldby"}
 	economyShopPrimaryKeyColumns     = []string{"guild_id", "name"}
 	economyShopGeneratedColumns      = []string{}
 )
