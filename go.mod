@@ -1,6 +1,6 @@
 module github.com/RhykerWells/asbwig
 
-go 1.20
+go 1.21.0
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
@@ -13,16 +13,19 @@ require (
 	github.com/volatiletech/strmangle v0.0.6
 )
 
-require github.com/ericlagergren/decimal v0.0.0-20190420051523-6335edbaa640 // indirect
+require (
+	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
-	golang.org/x/crypto v0.0.0-20220826181053-bd7e27e6170d // indirect
-	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 )

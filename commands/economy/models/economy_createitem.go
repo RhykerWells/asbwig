@@ -32,7 +32,6 @@ type EconomyCreateitem struct {
 	Quantity    null.Int64  `boil:"quantity" json:"quantity,omitempty" toml:"quantity" yaml:"quantity,omitempty"`
 	Role        null.String `boil:"role" json:"role,omitempty" toml:"role" yaml:"role,omitempty"`
 	Reply       null.String `boil:"reply" json:"reply,omitempty" toml:"reply" yaml:"reply,omitempty"`
-	ExpiresAt   null.Time   `boil:"expires_at" json:"expires_at,omitempty" toml:"expires_at" yaml:"expires_at,omitempty"`
 	MSGID       string      `boil:"msg_id" json:"msg_id" toml:"msg_id" yaml:"msg_id"`
 
 	R *economyCreateitemR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -48,7 +47,6 @@ var EconomyCreateitemColumns = struct {
 	Quantity    string
 	Role        string
 	Reply       string
-	ExpiresAt   string
 	MSGID       string
 }{
 	GuildID:     "guild_id",
@@ -59,7 +57,6 @@ var EconomyCreateitemColumns = struct {
 	Quantity:    "quantity",
 	Role:        "role",
 	Reply:       "reply",
-	ExpiresAt:   "expires_at",
 	MSGID:       "msg_id",
 }
 
@@ -72,7 +69,6 @@ var EconomyCreateitemTableColumns = struct {
 	Quantity    string
 	Role        string
 	Reply       string
-	ExpiresAt   string
 	MSGID       string
 }{
 	GuildID:     "economy_createitem.guild_id",
@@ -83,7 +79,6 @@ var EconomyCreateitemTableColumns = struct {
 	Quantity:    "economy_createitem.quantity",
 	Role:        "economy_createitem.role",
 	Reply:       "economy_createitem.reply",
-	ExpiresAt:   "economy_createitem.expires_at",
 	MSGID:       "economy_createitem.msg_id",
 }
 
@@ -192,7 +187,6 @@ var EconomyCreateitemWhere = struct {
 	Quantity    whereHelpernull_Int64
 	Role        whereHelpernull_String
 	Reply       whereHelpernull_String
-	ExpiresAt   whereHelpernull_Time
 	MSGID       whereHelperstring
 }{
 	GuildID:     whereHelperstring{field: "\"economy_createitem\".\"guild_id\""},
@@ -203,16 +197,19 @@ var EconomyCreateitemWhere = struct {
 	Quantity:    whereHelpernull_Int64{field: "\"economy_createitem\".\"quantity\""},
 	Role:        whereHelpernull_String{field: "\"economy_createitem\".\"role\""},
 	Reply:       whereHelpernull_String{field: "\"economy_createitem\".\"reply\""},
-	ExpiresAt:   whereHelpernull_Time{field: "\"economy_createitem\".\"expires_at\""},
 	MSGID:       whereHelperstring{field: "\"economy_createitem\".\"msg_id\""},
 }
 
 // EconomyCreateitemRels is where relationship names are stored.
 var EconomyCreateitemRels = struct {
-}{}
+	Guild string
+}{
+	Guild: "Guild",
+}
 
 // economyCreateitemR is where relationships are stored.
 type economyCreateitemR struct {
+	Guild *EconomyConfig `boil:"Guild" json:"Guild" toml:"Guild" yaml:"Guild"`
 }
 
 // NewStruct creates a new relationship struct
@@ -220,14 +217,21 @@ func (*economyCreateitemR) NewStruct() *economyCreateitemR {
 	return &economyCreateitemR{}
 }
 
+func (r *economyCreateitemR) GetGuild() *EconomyConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Guild
+}
+
 // economyCreateitemL is where Load methods for each relationship are stored.
 type economyCreateitemL struct{}
 
 var (
-	economyCreateitemAllColumns            = []string{"guild_id", "user_id", "name", "description", "price", "quantity", "role", "reply", "expires_at", "msg_id"}
+	economyCreateitemAllColumns            = []string{"guild_id", "user_id", "name", "description", "price", "quantity", "role", "reply", "msg_id"}
 	economyCreateitemColumnsWithoutDefault = []string{"guild_id", "user_id", "msg_id"}
-	economyCreateitemColumnsWithDefault    = []string{"name", "description", "price", "quantity", "role", "reply", "expires_at"}
-	economyCreateitemPrimaryKeyColumns     = []string{"guild_id"}
+	economyCreateitemColumnsWithDefault    = []string{"name", "description", "price", "quantity", "role", "reply"}
+	economyCreateitemPrimaryKeyColumns     = []string{"guild_id", "user_id"}
 	economyCreateitemGeneratedColumns      = []string{}
 )
 
@@ -342,6 +346,184 @@ func (q economyCreateitemQuery) Exists(ctx context.Context, exec boil.ContextExe
 	return count > 0, nil
 }
 
+// Guild pointed to by the foreign key.
+func (o *EconomyCreateitem) Guild(mods ...qm.QueryMod) economyConfigQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"guild_id\" = ?", o.GuildID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EconomyConfigs(queryMods...)
+}
+
+// LoadGuild allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (economyCreateitemL) LoadGuild(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyCreateitem interface{}, mods queries.Applicator) error {
+	var slice []*EconomyCreateitem
+	var object *EconomyCreateitem
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyCreateitem.(*EconomyCreateitem)
+		if !ok {
+			object = new(EconomyCreateitem)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyCreateitem)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyCreateitem))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyCreateitem.(*[]*EconomyCreateitem)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyCreateitem)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyCreateitem))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyCreateitemR{}
+		}
+		args[object.GuildID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyCreateitemR{}
+			}
+
+			args[obj.GuildID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_config`),
+		qm.WhereIn(`economy_config.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EconomyConfig")
+	}
+
+	var resultSlice []*EconomyConfig
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EconomyConfig")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for economy_config")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_config")
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Guild = foreign
+		if foreign.R == nil {
+			foreign.R = &economyConfigR{}
+		}
+		foreign.R.GuildEconomyCreateitems = append(foreign.R.GuildEconomyCreateitems, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.GuildID == foreign.GuildID {
+				local.R.Guild = foreign
+				if foreign.R == nil {
+					foreign.R = &economyConfigR{}
+				}
+				foreign.R.GuildEconomyCreateitems = append(foreign.R.GuildEconomyCreateitems, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetGuildG of the economyCreateitem to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyCreateitems.
+// Uses the global database handle.
+func (o *EconomyCreateitem) SetGuildG(ctx context.Context, insert bool, related *EconomyConfig) error {
+	return o.SetGuild(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetGuild of the economyCreateitem to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyCreateitems.
+func (o *EconomyCreateitem) SetGuild(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EconomyConfig) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"economy_createitem\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+		strmangle.WhereClause("\"", "\"", 2, economyCreateitemPrimaryKeyColumns),
+	)
+	values := []interface{}{related.GuildID, o.GuildID, o.UserID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.GuildID = related.GuildID
+	if o.R == nil {
+		o.R = &economyCreateitemR{
+			Guild: related,
+		}
+	} else {
+		o.R.Guild = related
+	}
+
+	if related.R == nil {
+		related.R = &economyConfigR{
+			GuildEconomyCreateitems: EconomyCreateitemSlice{o},
+		}
+	} else {
+		related.R.GuildEconomyCreateitems = append(related.R.GuildEconomyCreateitems, o)
+	}
+
+	return nil
+}
+
 // EconomyCreateitems retrieves all the records using an executor.
 func EconomyCreateitems(mods ...qm.QueryMod) economyCreateitemQuery {
 	mods = append(mods, qm.From("\"economy_createitem\""))
@@ -354,13 +536,13 @@ func EconomyCreateitems(mods ...qm.QueryMod) economyCreateitemQuery {
 }
 
 // FindEconomyCreateitemG retrieves a single record by ID.
-func FindEconomyCreateitemG(ctx context.Context, guildID string, selectCols ...string) (*EconomyCreateitem, error) {
-	return FindEconomyCreateitem(ctx, boil.GetContextDB(), guildID, selectCols...)
+func FindEconomyCreateitemG(ctx context.Context, guildID string, userID string, selectCols ...string) (*EconomyCreateitem, error) {
+	return FindEconomyCreateitem(ctx, boil.GetContextDB(), guildID, userID, selectCols...)
 }
 
 // FindEconomyCreateitem retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyCreateitem(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*EconomyCreateitem, error) {
+func FindEconomyCreateitem(ctx context.Context, exec boil.ContextExecutor, guildID string, userID string, selectCols ...string) (*EconomyCreateitem, error) {
 	economyCreateitemObj := &EconomyCreateitem{}
 
 	sel := "*"
@@ -368,10 +550,10 @@ func FindEconomyCreateitem(ctx context.Context, exec boil.ContextExecutor, guild
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"economy_createitem\" where \"guild_id\"=$1", sel,
+		"select %s from \"economy_createitem\" where \"guild_id\"=$1 AND \"user_id\"=$2", sel,
 	)
 
-	q := queries.Raw(query, guildID)
+	q := queries.Raw(query, guildID, userID)
 
 	err := q.Bind(ctx, exec, economyCreateitemObj)
 	if err != nil {
@@ -742,7 +924,7 @@ func (o *EconomyCreateitem) Delete(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), economyCreateitemPrimaryKeyMapping)
-	sql := "DELETE FROM \"economy_createitem\" WHERE \"guild_id\"=$1"
+	sql := "DELETE FROM \"economy_createitem\" WHERE \"guild_id\"=$1 AND \"user_id\"=$2"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -837,7 +1019,7 @@ func (o *EconomyCreateitem) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *EconomyCreateitem) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEconomyCreateitem(ctx, exec, o.GuildID)
+	ret, err := FindEconomyCreateitem(ctx, exec, o.GuildID, o.UserID)
 	if err != nil {
 		return err
 	}
@@ -886,21 +1068,21 @@ func (o *EconomyCreateitemSlice) ReloadAll(ctx context.Context, exec boil.Contex
 }
 
 // EconomyCreateitemExistsG checks if the EconomyCreateitem row exists.
-func EconomyCreateitemExistsG(ctx context.Context, guildID string) (bool, error) {
-	return EconomyCreateitemExists(ctx, boil.GetContextDB(), guildID)
+func EconomyCreateitemExistsG(ctx context.Context, guildID string, userID string) (bool, error) {
+	return EconomyCreateitemExists(ctx, boil.GetContextDB(), guildID, userID)
 }
 
 // EconomyCreateitemExists checks if the EconomyCreateitem row exists.
-func EconomyCreateitemExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
+func EconomyCreateitemExists(ctx context.Context, exec boil.ContextExecutor, guildID string, userID string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"economy_createitem\" where \"guild_id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"economy_createitem\" where \"guild_id\"=$1 AND \"user_id\"=$2 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, guildID)
+		fmt.Fprintln(writer, guildID, userID)
 	}
-	row := exec.QueryRowContext(ctx, sql, guildID)
+	row := exec.QueryRowContext(ctx, sql, guildID, userID)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -912,5 +1094,5 @@ func EconomyCreateitemExists(ctx context.Context, exec boil.ContextExecutor, gui
 
 // Exists checks if the EconomyCreateitem row exists.
 func (o *EconomyCreateitem) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return EconomyCreateitemExists(ctx, exec, o.GuildID)
+	return EconomyCreateitemExists(ctx, exec, o.GuildID, o.UserID)
 }

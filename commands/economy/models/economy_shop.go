@@ -26,11 +26,11 @@ import (
 type EconomyShop struct {
 	GuildID     string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
+	Description string      `boil:"description" json:"description" toml:"description" yaml:"description"`
 	Price       int64       `boil:"price" json:"price" toml:"price" yaml:"price"`
 	Quantity    null.Int64  `boil:"quantity" json:"quantity,omitempty" toml:"quantity" yaml:"quantity,omitempty"`
 	Role        null.String `boil:"role" json:"role,omitempty" toml:"role" yaml:"role,omitempty"`
-	Reply       null.String `boil:"reply" json:"reply,omitempty" toml:"reply" yaml:"reply,omitempty"`
+	Reply       string      `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
 	Soldby      null.String `boil:"soldby" json:"soldby,omitempty" toml:"soldby" yaml:"soldby,omitempty"`
 
 	R *economyShopR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -82,29 +82,33 @@ var EconomyShopTableColumns = struct {
 var EconomyShopWhere = struct {
 	GuildID     whereHelperstring
 	Name        whereHelperstring
-	Description whereHelpernull_String
+	Description whereHelperstring
 	Price       whereHelperint64
 	Quantity    whereHelpernull_Int64
 	Role        whereHelpernull_String
-	Reply       whereHelpernull_String
+	Reply       whereHelperstring
 	Soldby      whereHelpernull_String
 }{
 	GuildID:     whereHelperstring{field: "\"economy_shop\".\"guild_id\""},
 	Name:        whereHelperstring{field: "\"economy_shop\".\"name\""},
-	Description: whereHelpernull_String{field: "\"economy_shop\".\"description\""},
+	Description: whereHelperstring{field: "\"economy_shop\".\"description\""},
 	Price:       whereHelperint64{field: "\"economy_shop\".\"price\""},
 	Quantity:    whereHelpernull_Int64{field: "\"economy_shop\".\"quantity\""},
 	Role:        whereHelpernull_String{field: "\"economy_shop\".\"role\""},
-	Reply:       whereHelpernull_String{field: "\"economy_shop\".\"reply\""},
+	Reply:       whereHelperstring{field: "\"economy_shop\".\"reply\""},
 	Soldby:      whereHelpernull_String{field: "\"economy_shop\".\"soldby\""},
 }
 
 // EconomyShopRels is where relationship names are stored.
 var EconomyShopRels = struct {
-}{}
+	Guild string
+}{
+	Guild: "Guild",
+}
 
 // economyShopR is where relationships are stored.
 type economyShopR struct {
+	Guild *EconomyConfig `boil:"Guild" json:"Guild" toml:"Guild" yaml:"Guild"`
 }
 
 // NewStruct creates a new relationship struct
@@ -112,14 +116,21 @@ func (*economyShopR) NewStruct() *economyShopR {
 	return &economyShopR{}
 }
 
+func (r *economyShopR) GetGuild() *EconomyConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Guild
+}
+
 // economyShopL is where Load methods for each relationship are stored.
 type economyShopL struct{}
 
 var (
 	economyShopAllColumns            = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply", "soldby"}
-	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "price"}
-	economyShopColumnsWithDefault    = []string{"description", "quantity", "role", "reply", "soldby"}
-	economyShopPrimaryKeyColumns     = []string{"guild_id"}
+	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "description", "price", "reply"}
+	economyShopColumnsWithDefault    = []string{"quantity", "role", "soldby"}
+	economyShopPrimaryKeyColumns     = []string{"guild_id", "name"}
 	economyShopGeneratedColumns      = []string{}
 )
 
@@ -234,6 +245,184 @@ func (q economyShopQuery) Exists(ctx context.Context, exec boil.ContextExecutor)
 	return count > 0, nil
 }
 
+// Guild pointed to by the foreign key.
+func (o *EconomyShop) Guild(mods ...qm.QueryMod) economyConfigQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"guild_id\" = ?", o.GuildID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EconomyConfigs(queryMods...)
+}
+
+// LoadGuild allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (economyShopL) LoadGuild(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyShop interface{}, mods queries.Applicator) error {
+	var slice []*EconomyShop
+	var object *EconomyShop
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyShop.(*EconomyShop)
+		if !ok {
+			object = new(EconomyShop)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyShop)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyShop))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyShop.(*[]*EconomyShop)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyShop)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyShop))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyShopR{}
+		}
+		args[object.GuildID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyShopR{}
+			}
+
+			args[obj.GuildID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_config`),
+		qm.WhereIn(`economy_config.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EconomyConfig")
+	}
+
+	var resultSlice []*EconomyConfig
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EconomyConfig")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for economy_config")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_config")
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Guild = foreign
+		if foreign.R == nil {
+			foreign.R = &economyConfigR{}
+		}
+		foreign.R.GuildEconomyShops = append(foreign.R.GuildEconomyShops, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.GuildID == foreign.GuildID {
+				local.R.Guild = foreign
+				if foreign.R == nil {
+					foreign.R = &economyConfigR{}
+				}
+				foreign.R.GuildEconomyShops = append(foreign.R.GuildEconomyShops, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetGuildG of the economyShop to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyShops.
+// Uses the global database handle.
+func (o *EconomyShop) SetGuildG(ctx context.Context, insert bool, related *EconomyConfig) error {
+	return o.SetGuild(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetGuild of the economyShop to the related item.
+// Sets o.R.Guild to related.
+// Adds o to related.R.GuildEconomyShops.
+func (o *EconomyShop) SetGuild(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EconomyConfig) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"economy_shop\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+		strmangle.WhereClause("\"", "\"", 2, economyShopPrimaryKeyColumns),
+	)
+	values := []interface{}{related.GuildID, o.GuildID, o.Name}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.GuildID = related.GuildID
+	if o.R == nil {
+		o.R = &economyShopR{
+			Guild: related,
+		}
+	} else {
+		o.R.Guild = related
+	}
+
+	if related.R == nil {
+		related.R = &economyConfigR{
+			GuildEconomyShops: EconomyShopSlice{o},
+		}
+	} else {
+		related.R.GuildEconomyShops = append(related.R.GuildEconomyShops, o)
+	}
+
+	return nil
+}
+
 // EconomyShops retrieves all the records using an executor.
 func EconomyShops(mods ...qm.QueryMod) economyShopQuery {
 	mods = append(mods, qm.From("\"economy_shop\""))
@@ -246,13 +435,13 @@ func EconomyShops(mods ...qm.QueryMod) economyShopQuery {
 }
 
 // FindEconomyShopG retrieves a single record by ID.
-func FindEconomyShopG(ctx context.Context, guildID string, selectCols ...string) (*EconomyShop, error) {
-	return FindEconomyShop(ctx, boil.GetContextDB(), guildID, selectCols...)
+func FindEconomyShopG(ctx context.Context, guildID string, name string, selectCols ...string) (*EconomyShop, error) {
+	return FindEconomyShop(ctx, boil.GetContextDB(), guildID, name, selectCols...)
 }
 
 // FindEconomyShop retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*EconomyShop, error) {
+func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID string, name string, selectCols ...string) (*EconomyShop, error) {
 	economyShopObj := &EconomyShop{}
 
 	sel := "*"
@@ -260,10 +449,10 @@ func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID str
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"economy_shop\" where \"guild_id\"=$1", sel,
+		"select %s from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2", sel,
 	)
 
-	q := queries.Raw(query, guildID)
+	q := queries.Raw(query, guildID, name)
 
 	err := q.Bind(ctx, exec, economyShopObj)
 	if err != nil {
@@ -634,7 +823,7 @@ func (o *EconomyShop) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), economyShopPrimaryKeyMapping)
-	sql := "DELETE FROM \"economy_shop\" WHERE \"guild_id\"=$1"
+	sql := "DELETE FROM \"economy_shop\" WHERE \"guild_id\"=$1 AND \"name\"=$2"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -729,7 +918,7 @@ func (o *EconomyShop) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *EconomyShop) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEconomyShop(ctx, exec, o.GuildID)
+	ret, err := FindEconomyShop(ctx, exec, o.GuildID, o.Name)
 	if err != nil {
 		return err
 	}
@@ -778,21 +967,21 @@ func (o *EconomyShopSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 }
 
 // EconomyShopExistsG checks if the EconomyShop row exists.
-func EconomyShopExistsG(ctx context.Context, guildID string) (bool, error) {
-	return EconomyShopExists(ctx, boil.GetContextDB(), guildID)
+func EconomyShopExistsG(ctx context.Context, guildID string, name string) (bool, error) {
+	return EconomyShopExists(ctx, boil.GetContextDB(), guildID, name)
 }
 
 // EconomyShopExists checks if the EconomyShop row exists.
-func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
+func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID string, name string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"economy_shop\" where \"guild_id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, guildID)
+		fmt.Fprintln(writer, guildID, name)
 	}
-	row := exec.QueryRowContext(ctx, sql, guildID)
+	row := exec.QueryRowContext(ctx, sql, guildID, name)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -804,5 +993,5 @@ func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID s
 
 // Exists checks if the EconomyShop row exists.
 func (o *EconomyShop) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return EconomyShopExists(ctx, exec, o.GuildID)
+	return EconomyShopExists(ctx, exec, o.GuildID, o.Name)
 }

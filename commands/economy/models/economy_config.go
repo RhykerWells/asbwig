@@ -18,22 +18,19 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
-	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // EconomyConfig is an object representing the database table.
 type EconomyConfig struct {
-	GuildID              string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	Min                  int64             `boil:"min" json:"min" toml:"min" yaml:"min"`
-	Max                  int64             `boil:"max" json:"max" toml:"max" yaml:"max"`
-	Maxbet               int64             `boil:"maxbet" json:"maxbet" toml:"maxbet" yaml:"maxbet"`
-	Symbol               string            `boil:"symbol" json:"symbol" toml:"symbol" yaml:"symbol"`
-	Startbalance         int64             `boil:"startbalance" json:"startbalance" toml:"startbalance" yaml:"startbalance"`
-	Customworkresponses  bool              `boil:"customworkresponses" json:"customworkresponses" toml:"customworkresponses" yaml:"customworkresponses"`
-	Customcrimeresponses bool              `boil:"customcrimeresponses" json:"customcrimeresponses" toml:"customcrimeresponses" yaml:"customcrimeresponses"`
-	Workresponses        types.StringArray `boil:"workresponses" json:"workresponses,omitempty" toml:"workresponses" yaml:"workresponses,omitempty"`
-	Crimeresponses       types.StringArray `boil:"crimeresponses" json:"crimeresponses,omitempty" toml:"crimeresponses" yaml:"crimeresponses,omitempty"`
+	GuildID              string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	Min                  int64  `boil:"min" json:"min" toml:"min" yaml:"min"`
+	Max                  int64  `boil:"max" json:"max" toml:"max" yaml:"max"`
+	Maxbet               int64  `boil:"maxbet" json:"maxbet" toml:"maxbet" yaml:"maxbet"`
+	Symbol               string `boil:"symbol" json:"symbol" toml:"symbol" yaml:"symbol"`
+	Startbalance         int64  `boil:"startbalance" json:"startbalance" toml:"startbalance" yaml:"startbalance"`
+	Customworkresponses  bool   `boil:"customworkresponses" json:"customworkresponses" toml:"customworkresponses" yaml:"customworkresponses"`
+	Customcrimeresponses bool   `boil:"customcrimeresponses" json:"customcrimeresponses" toml:"customcrimeresponses" yaml:"customcrimeresponses"`
 
 	R *economyConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -48,8 +45,6 @@ var EconomyConfigColumns = struct {
 	Startbalance         string
 	Customworkresponses  string
 	Customcrimeresponses string
-	Workresponses        string
-	Crimeresponses       string
 }{
 	GuildID:              "guild_id",
 	Min:                  "min",
@@ -59,8 +54,6 @@ var EconomyConfigColumns = struct {
 	Startbalance:         "startbalance",
 	Customworkresponses:  "customworkresponses",
 	Customcrimeresponses: "customcrimeresponses",
-	Workresponses:        "workresponses",
-	Crimeresponses:       "crimeresponses",
 }
 
 var EconomyConfigTableColumns = struct {
@@ -72,8 +65,6 @@ var EconomyConfigTableColumns = struct {
 	Startbalance         string
 	Customworkresponses  string
 	Customcrimeresponses string
-	Workresponses        string
-	Crimeresponses       string
 }{
 	GuildID:              "economy_config.guild_id",
 	Min:                  "economy_config.min",
@@ -83,11 +74,63 @@ var EconomyConfigTableColumns = struct {
 	Startbalance:         "economy_config.startbalance",
 	Customworkresponses:  "economy_config.customworkresponses",
 	Customcrimeresponses: "economy_config.customcrimeresponses",
-	Workresponses:        "economy_config.workresponses",
-	Crimeresponses:       "economy_config.crimeresponses",
 }
 
 // Generated where
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod      { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) LIKE(x string) qm.QueryMod    { return qm.Where(w.field+" LIKE ?", x) }
+func (w whereHelperstring) NLIKE(x string) qm.QueryMod   { return qm.Where(w.field+" NOT LIKE ?", x) }
+func (w whereHelperstring) ILIKE(x string) qm.QueryMod   { return qm.Where(w.field+" ILIKE ?", x) }
+func (w whereHelperstring) NILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT ILIKE ?", x) }
+func (w whereHelperstring) SIMILAR(x string) qm.QueryMod { return qm.Where(w.field+" SIMILAR TO ?", x) }
+func (w whereHelperstring) NSIMILAR(x string) qm.QueryMod {
+	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
+}
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelperint64 struct{ field string }
+
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelperbool struct{ field string }
 
@@ -98,32 +141,6 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelpertypes_StringArray struct{ field string }
-
-func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
-	return qmhelper.WhereIsNotNull(w.field)
-}
-
 var EconomyConfigWhere = struct {
 	GuildID              whereHelperstring
 	Min                  whereHelperint64
@@ -133,8 +150,6 @@ var EconomyConfigWhere = struct {
 	Startbalance         whereHelperint64
 	Customworkresponses  whereHelperbool
 	Customcrimeresponses whereHelperbool
-	Workresponses        whereHelpertypes_StringArray
-	Crimeresponses       whereHelpertypes_StringArray
 }{
 	GuildID:              whereHelperstring{field: "\"economy_config\".\"guild_id\""},
 	Min:                  whereHelperint64{field: "\"economy_config\".\"min\""},
@@ -144,16 +159,30 @@ var EconomyConfigWhere = struct {
 	Startbalance:         whereHelperint64{field: "\"economy_config\".\"startbalance\""},
 	Customworkresponses:  whereHelperbool{field: "\"economy_config\".\"customworkresponses\""},
 	Customcrimeresponses: whereHelperbool{field: "\"economy_config\".\"customcrimeresponses\""},
-	Workresponses:        whereHelpertypes_StringArray{field: "\"economy_config\".\"workresponses\""},
-	Crimeresponses:       whereHelpertypes_StringArray{field: "\"economy_config\".\"crimeresponses\""},
 }
 
 // EconomyConfigRels is where relationship names are stored.
 var EconomyConfigRels = struct {
-}{}
+	GuildEconomyCustomResponse string
+	GuildEconomyCooldowns      string
+	GuildEconomyCreateitems    string
+	GuildEconomyShops          string
+	GuildEconomyUsers          string
+}{
+	GuildEconomyCustomResponse: "GuildEconomyCustomResponse",
+	GuildEconomyCooldowns:      "GuildEconomyCooldowns",
+	GuildEconomyCreateitems:    "GuildEconomyCreateitems",
+	GuildEconomyShops:          "GuildEconomyShops",
+	GuildEconomyUsers:          "GuildEconomyUsers",
+}
 
 // economyConfigR is where relationships are stored.
 type economyConfigR struct {
+	GuildEconomyCustomResponse *EconomyCustomResponse `boil:"GuildEconomyCustomResponse" json:"GuildEconomyCustomResponse" toml:"GuildEconomyCustomResponse" yaml:"GuildEconomyCustomResponse"`
+	GuildEconomyCooldowns      EconomyCooldownSlice   `boil:"GuildEconomyCooldowns" json:"GuildEconomyCooldowns" toml:"GuildEconomyCooldowns" yaml:"GuildEconomyCooldowns"`
+	GuildEconomyCreateitems    EconomyCreateitemSlice `boil:"GuildEconomyCreateitems" json:"GuildEconomyCreateitems" toml:"GuildEconomyCreateitems" yaml:"GuildEconomyCreateitems"`
+	GuildEconomyShops          EconomyShopSlice       `boil:"GuildEconomyShops" json:"GuildEconomyShops" toml:"GuildEconomyShops" yaml:"GuildEconomyShops"`
+	GuildEconomyUsers          EconomyUserSlice       `boil:"GuildEconomyUsers" json:"GuildEconomyUsers" toml:"GuildEconomyUsers" yaml:"GuildEconomyUsers"`
 }
 
 // NewStruct creates a new relationship struct
@@ -161,13 +190,48 @@ func (*economyConfigR) NewStruct() *economyConfigR {
 	return &economyConfigR{}
 }
 
+func (r *economyConfigR) GetGuildEconomyCustomResponse() *EconomyCustomResponse {
+	if r == nil {
+		return nil
+	}
+	return r.GuildEconomyCustomResponse
+}
+
+func (r *economyConfigR) GetGuildEconomyCooldowns() EconomyCooldownSlice {
+	if r == nil {
+		return nil
+	}
+	return r.GuildEconomyCooldowns
+}
+
+func (r *economyConfigR) GetGuildEconomyCreateitems() EconomyCreateitemSlice {
+	if r == nil {
+		return nil
+	}
+	return r.GuildEconomyCreateitems
+}
+
+func (r *economyConfigR) GetGuildEconomyShops() EconomyShopSlice {
+	if r == nil {
+		return nil
+	}
+	return r.GuildEconomyShops
+}
+
+func (r *economyConfigR) GetGuildEconomyUsers() EconomyUserSlice {
+	if r == nil {
+		return nil
+	}
+	return r.GuildEconomyUsers
+}
+
 // economyConfigL is where Load methods for each relationship are stored.
 type economyConfigL struct{}
 
 var (
-	economyConfigAllColumns            = []string{"guild_id", "min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses", "workresponses", "crimeresponses"}
+	economyConfigAllColumns            = []string{"guild_id", "min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses"}
 	economyConfigColumnsWithoutDefault = []string{"guild_id"}
-	economyConfigColumnsWithDefault    = []string{"min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses", "workresponses", "crimeresponses"}
+	economyConfigColumnsWithDefault    = []string{"min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses"}
 	economyConfigPrimaryKeyColumns     = []string{"guild_id"}
 	economyConfigGeneratedColumns      = []string{}
 )
@@ -281,6 +345,912 @@ func (q economyConfigQuery) Exists(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	return count > 0, nil
+}
+
+// GuildEconomyCustomResponse pointed to by the foreign key.
+func (o *EconomyConfig) GuildEconomyCustomResponse(mods ...qm.QueryMod) economyCustomResponseQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"guild_id\" = ?", o.GuildID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EconomyCustomResponses(queryMods...)
+}
+
+// GuildEconomyCooldowns retrieves all the economy_cooldown's EconomyCooldowns with an executor via guild_id column.
+func (o *EconomyConfig) GuildEconomyCooldowns(mods ...qm.QueryMod) economyCooldownQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"economy_cooldowns\".\"guild_id\"=?", o.GuildID),
+	)
+
+	return EconomyCooldowns(queryMods...)
+}
+
+// GuildEconomyCreateitems retrieves all the economy_createitem's EconomyCreateitems with an executor via guild_id column.
+func (o *EconomyConfig) GuildEconomyCreateitems(mods ...qm.QueryMod) economyCreateitemQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"economy_createitem\".\"guild_id\"=?", o.GuildID),
+	)
+
+	return EconomyCreateitems(queryMods...)
+}
+
+// GuildEconomyShops retrieves all the economy_shop's EconomyShops with an executor via guild_id column.
+func (o *EconomyConfig) GuildEconomyShops(mods ...qm.QueryMod) economyShopQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"economy_shop\".\"guild_id\"=?", o.GuildID),
+	)
+
+	return EconomyShops(queryMods...)
+}
+
+// GuildEconomyUsers retrieves all the economy_user's EconomyUsers with an executor via guild_id column.
+func (o *EconomyConfig) GuildEconomyUsers(mods ...qm.QueryMod) economyUserQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"economy_users\".\"guild_id\"=?", o.GuildID),
+	)
+
+	return EconomyUsers(queryMods...)
+}
+
+// LoadGuildEconomyCustomResponse allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (economyConfigL) LoadGuildEconomyCustomResponse(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
+	var slice []*EconomyConfig
+	var object *EconomyConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyConfig.(*EconomyConfig)
+		if !ok {
+			object = new(EconomyConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyConfigR{}
+		}
+		args[object.GuildID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyConfigR{}
+			}
+
+			args[obj.GuildID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_custom_responses`),
+		qm.WhereIn(`economy_custom_responses.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EconomyCustomResponse")
+	}
+
+	var resultSlice []*EconomyCustomResponse
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EconomyCustomResponse")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for economy_custom_responses")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_custom_responses")
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.GuildEconomyCustomResponse = foreign
+		if foreign.R == nil {
+			foreign.R = &economyCustomResponseR{}
+		}
+		foreign.R.Guild = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.GuildID == foreign.GuildID {
+				local.R.GuildEconomyCustomResponse = foreign
+				if foreign.R == nil {
+					foreign.R = &economyCustomResponseR{}
+				}
+				foreign.R.Guild = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadGuildEconomyCooldowns allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (economyConfigL) LoadGuildEconomyCooldowns(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
+	var slice []*EconomyConfig
+	var object *EconomyConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyConfig.(*EconomyConfig)
+		if !ok {
+			object = new(EconomyConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyConfigR{}
+		}
+		args[object.GuildID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyConfigR{}
+			}
+			args[obj.GuildID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_cooldowns`),
+		qm.WhereIn(`economy_cooldowns.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load economy_cooldowns")
+	}
+
+	var resultSlice []*EconomyCooldown
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice economy_cooldowns")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on economy_cooldowns")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_cooldowns")
+	}
+
+	if singular {
+		object.R.GuildEconomyCooldowns = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &economyCooldownR{}
+			}
+			foreign.R.Guild = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.GuildID == foreign.GuildID {
+				local.R.GuildEconomyCooldowns = append(local.R.GuildEconomyCooldowns, foreign)
+				if foreign.R == nil {
+					foreign.R = &economyCooldownR{}
+				}
+				foreign.R.Guild = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadGuildEconomyCreateitems allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (economyConfigL) LoadGuildEconomyCreateitems(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
+	var slice []*EconomyConfig
+	var object *EconomyConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyConfig.(*EconomyConfig)
+		if !ok {
+			object = new(EconomyConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyConfigR{}
+		}
+		args[object.GuildID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyConfigR{}
+			}
+			args[obj.GuildID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_createitem`),
+		qm.WhereIn(`economy_createitem.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load economy_createitem")
+	}
+
+	var resultSlice []*EconomyCreateitem
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice economy_createitem")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on economy_createitem")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_createitem")
+	}
+
+	if singular {
+		object.R.GuildEconomyCreateitems = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &economyCreateitemR{}
+			}
+			foreign.R.Guild = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.GuildID == foreign.GuildID {
+				local.R.GuildEconomyCreateitems = append(local.R.GuildEconomyCreateitems, foreign)
+				if foreign.R == nil {
+					foreign.R = &economyCreateitemR{}
+				}
+				foreign.R.Guild = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadGuildEconomyShops allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (economyConfigL) LoadGuildEconomyShops(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
+	var slice []*EconomyConfig
+	var object *EconomyConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyConfig.(*EconomyConfig)
+		if !ok {
+			object = new(EconomyConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyConfigR{}
+		}
+		args[object.GuildID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyConfigR{}
+			}
+			args[obj.GuildID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_shop`),
+		qm.WhereIn(`economy_shop.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load economy_shop")
+	}
+
+	var resultSlice []*EconomyShop
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice economy_shop")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on economy_shop")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_shop")
+	}
+
+	if singular {
+		object.R.GuildEconomyShops = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &economyShopR{}
+			}
+			foreign.R.Guild = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.GuildID == foreign.GuildID {
+				local.R.GuildEconomyShops = append(local.R.GuildEconomyShops, foreign)
+				if foreign.R == nil {
+					foreign.R = &economyShopR{}
+				}
+				foreign.R.Guild = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadGuildEconomyUsers allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (economyConfigL) LoadGuildEconomyUsers(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
+	var slice []*EconomyConfig
+	var object *EconomyConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeEconomyConfig.(*EconomyConfig)
+		if !ok {
+			object = new(EconomyConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
+			}
+		}
+	} else {
+		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &economyConfigR{}
+		}
+		args[object.GuildID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &economyConfigR{}
+			}
+			args[obj.GuildID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`economy_users`),
+		qm.WhereIn(`economy_users.guild_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load economy_users")
+	}
+
+	var resultSlice []*EconomyUser
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice economy_users")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on economy_users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_users")
+	}
+
+	if singular {
+		object.R.GuildEconomyUsers = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &economyUserR{}
+			}
+			foreign.R.Guild = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.GuildID == foreign.GuildID {
+				local.R.GuildEconomyUsers = append(local.R.GuildEconomyUsers, foreign)
+				if foreign.R == nil {
+					foreign.R = &economyUserR{}
+				}
+				foreign.R.Guild = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetGuildEconomyCustomResponseG of the economyConfig to the related item.
+// Sets o.R.GuildEconomyCustomResponse to related.
+// Adds o to related.R.Guild.
+// Uses the global database handle.
+func (o *EconomyConfig) SetGuildEconomyCustomResponseG(ctx context.Context, insert bool, related *EconomyCustomResponse) error {
+	return o.SetGuildEconomyCustomResponse(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetGuildEconomyCustomResponse of the economyConfig to the related item.
+// Sets o.R.GuildEconomyCustomResponse to related.
+// Adds o to related.R.Guild.
+func (o *EconomyConfig) SetGuildEconomyCustomResponse(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EconomyCustomResponse) error {
+	var err error
+
+	if insert {
+		related.GuildID = o.GuildID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"economy_custom_responses\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+			strmangle.WhereClause("\"", "\"", 2, economyCustomResponsePrimaryKeyColumns),
+		)
+		values := []interface{}{o.GuildID, related.GuildID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.GuildID = o.GuildID
+	}
+
+	if o.R == nil {
+		o.R = &economyConfigR{
+			GuildEconomyCustomResponse: related,
+		}
+	} else {
+		o.R.GuildEconomyCustomResponse = related
+	}
+
+	if related.R == nil {
+		related.R = &economyCustomResponseR{
+			Guild: o,
+		}
+	} else {
+		related.R.Guild = o
+	}
+	return nil
+}
+
+// AddGuildEconomyCooldownsG adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyCooldowns.
+// Sets related.R.Guild appropriately.
+// Uses the global database handle.
+func (o *EconomyConfig) AddGuildEconomyCooldownsG(ctx context.Context, insert bool, related ...*EconomyCooldown) error {
+	return o.AddGuildEconomyCooldowns(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// AddGuildEconomyCooldowns adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyCooldowns.
+// Sets related.R.Guild appropriately.
+func (o *EconomyConfig) AddGuildEconomyCooldowns(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EconomyCooldown) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.GuildID = o.GuildID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"economy_cooldowns\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+				strmangle.WhereClause("\"", "\"", 2, economyCooldownPrimaryKeyColumns),
+			)
+			values := []interface{}{o.GuildID, rel.GuildID, rel.UserID, rel.Type}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.GuildID = o.GuildID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &economyConfigR{
+			GuildEconomyCooldowns: related,
+		}
+	} else {
+		o.R.GuildEconomyCooldowns = append(o.R.GuildEconomyCooldowns, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &economyCooldownR{
+				Guild: o,
+			}
+		} else {
+			rel.R.Guild = o
+		}
+	}
+	return nil
+}
+
+// AddGuildEconomyCreateitemsG adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyCreateitems.
+// Sets related.R.Guild appropriately.
+// Uses the global database handle.
+func (o *EconomyConfig) AddGuildEconomyCreateitemsG(ctx context.Context, insert bool, related ...*EconomyCreateitem) error {
+	return o.AddGuildEconomyCreateitems(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// AddGuildEconomyCreateitems adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyCreateitems.
+// Sets related.R.Guild appropriately.
+func (o *EconomyConfig) AddGuildEconomyCreateitems(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EconomyCreateitem) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.GuildID = o.GuildID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"economy_createitem\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+				strmangle.WhereClause("\"", "\"", 2, economyCreateitemPrimaryKeyColumns),
+			)
+			values := []interface{}{o.GuildID, rel.GuildID, rel.UserID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.GuildID = o.GuildID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &economyConfigR{
+			GuildEconomyCreateitems: related,
+		}
+	} else {
+		o.R.GuildEconomyCreateitems = append(o.R.GuildEconomyCreateitems, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &economyCreateitemR{
+				Guild: o,
+			}
+		} else {
+			rel.R.Guild = o
+		}
+	}
+	return nil
+}
+
+// AddGuildEconomyShopsG adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyShops.
+// Sets related.R.Guild appropriately.
+// Uses the global database handle.
+func (o *EconomyConfig) AddGuildEconomyShopsG(ctx context.Context, insert bool, related ...*EconomyShop) error {
+	return o.AddGuildEconomyShops(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// AddGuildEconomyShops adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyShops.
+// Sets related.R.Guild appropriately.
+func (o *EconomyConfig) AddGuildEconomyShops(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EconomyShop) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.GuildID = o.GuildID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"economy_shop\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+				strmangle.WhereClause("\"", "\"", 2, economyShopPrimaryKeyColumns),
+			)
+			values := []interface{}{o.GuildID, rel.GuildID, rel.Name}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.GuildID = o.GuildID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &economyConfigR{
+			GuildEconomyShops: related,
+		}
+	} else {
+		o.R.GuildEconomyShops = append(o.R.GuildEconomyShops, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &economyShopR{
+				Guild: o,
+			}
+		} else {
+			rel.R.Guild = o
+		}
+	}
+	return nil
+}
+
+// AddGuildEconomyUsersG adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyUsers.
+// Sets related.R.Guild appropriately.
+// Uses the global database handle.
+func (o *EconomyConfig) AddGuildEconomyUsersG(ctx context.Context, insert bool, related ...*EconomyUser) error {
+	return o.AddGuildEconomyUsers(ctx, boil.GetContextDB(), insert, related...)
+}
+
+// AddGuildEconomyUsers adds the given related objects to the existing relationships
+// of the economy_config, optionally inserting them as new records.
+// Appends related to o.R.GuildEconomyUsers.
+// Sets related.R.Guild appropriately.
+func (o *EconomyConfig) AddGuildEconomyUsers(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EconomyUser) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.GuildID = o.GuildID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"economy_users\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
+				strmangle.WhereClause("\"", "\"", 2, economyUserPrimaryKeyColumns),
+			)
+			values := []interface{}{o.GuildID, rel.GuildID, rel.UserID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.GuildID = o.GuildID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &economyConfigR{
+			GuildEconomyUsers: related,
+		}
+	} else {
+		o.R.GuildEconomyUsers = append(o.R.GuildEconomyUsers, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &economyUserR{
+				Guild: o,
+			}
+		} else {
+			rel.R.Guild = o
+		}
+	}
+	return nil
 }
 
 // EconomyConfigs retrieves all the records using an executor.
