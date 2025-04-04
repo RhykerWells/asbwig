@@ -79,7 +79,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if item.Soldby.String ==  data.Author.ID {
+		if item.Soldby ==  data.Author.ID {
 			embed.Description = "You can't buy an item that you have listed"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return

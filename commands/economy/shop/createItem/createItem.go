@@ -13,6 +13,7 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
+	"github.com/sirupsen/logrus"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -196,8 +197,10 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Quantity: createItem.Quantity.Int64,
 		Role: createItem.Role.String,
 		Reply: createItem.Reply.String,
+		Soldby: "0",
 	}
-	item.Insert(context.Background(), common.PQ, boil.Infer())
+	err := item.Insert(context.Background(), common.PQ, boil.Infer())
+	logrus.Warnln(err)
 	delete(activeSessions, m.Author.ID)
 	if timer, exists := activeTimers[m.Author.ID]; exists {
 		timer.Stop()

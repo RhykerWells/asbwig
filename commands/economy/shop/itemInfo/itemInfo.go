@@ -22,7 +22,7 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x0088CC}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		if len(data.Args) <= 0 {
 			embed.Description = "No `Item` argument provided\nUse `shop [Page]` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -54,8 +54,8 @@ var Command = &dcommand.AsbwigCommand{
 			{Name: "Role given", Value: role, Inline: true},
 			{Name: "Reply message", Value: item.Reply, Inline: false},
 		}
-		if item.Soldby.Valid {
-			soldField := &discordgo.MessageEmbedField{Name: "On market by", Value: item.Soldby.String}
+		if item.Soldby != "0" {
+			soldField := &discordgo.MessageEmbedField{Name: "On market by", Value: item.Soldby}
 			fields = append(fields, soldField)
 		}
 		embed.Fields = fields
