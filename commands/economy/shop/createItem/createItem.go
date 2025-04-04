@@ -146,7 +146,6 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		displayQuantity := quantity
 		if quantity == "skip" || quantity == "inf" {
 			displayQuantity = "Infinite"
-			quantity = "0"
 		}
 		createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
 		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
