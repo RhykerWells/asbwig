@@ -72,7 +72,7 @@ func EditMessage(channelID string, messageID string, message *discordgo.MessageS
 	return err
 }
 
-// DeleteMessage deletes a given message after 0 or an option delay
+// DeleteMessage deletes a given message immediately or an option delay
 func DeleteMessage(channelID, messageID string, delay ...time.Duration) error {
 	var duration time.Duration
 	if len(delay) > 0 {
