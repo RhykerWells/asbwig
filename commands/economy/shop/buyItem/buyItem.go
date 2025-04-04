@@ -21,6 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 	Description: "Buys an item from the shop",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},
+		{Name: "Position", Type: dcommand.String, Optional: true},
 		{Name: "Quantity", Type: dcommand.Int, Optional: true},
 	},
 	Run: func(data *dcommand.Data) {
@@ -39,28 +40,48 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).One(context.Background(), common.PQ)
+		var item models.EconomyShop
+		matchedItems, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "This item doesn't exist"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
+		item = *matchedItems[0]
+		if len(matchedItems) > 1 {
+			if len(data.Args) <= 1 {
+				embed.Description = "There are multiple items of this name. Please include it's item position after the name (use `iteminfo <Name>`)\nSyntax: `buyitem <Item> [ItemPosition] [Quantity]`\nUse `shop [Page]` to view all items"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			index := functions.ToInt64(data.Args[1]) - 1
+			if index < 0 || int(index) > len(matchedItems) {
+				embed.Description = "This position doesn't exists. You can see an items item position (use `iteminfo <Name>`)\nUse `shop [Page]` to view all items"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			item = *matchedItems[index]
+		}
 		var buyQuantity int64 = 1
-		if len(data.Args) > 1 {
-			if data.Args[1] == "max" || data.Args[1] == "all" {
+		argIndex := 1
+		if len(matchedItems) > 1 {
+			argIndex = 2
+		}
+		if len(data.Args) > argIndex {
+			if data.Args[argIndex] == "max" || data.Args[argIndex] == "all" {
 				quantity := map[string]int64{"max": (cash / item.Price), "all": item.Quantity}
-				buyQuantity=quantity[data.Args[1]]
+				buyQuantity=quantity[data.Args[argIndex]]
 				if buyQuantity == 0 {
 					buyQuantity=quantity["max"]
 				}
-			} else if functions.ToInt64(data.Args[1]) > 0 {
-				buyQuantity = functions.ToInt64(data.Args[1])
+			} else if functions.ToInt64(data.Args[argIndex]) > 0 {
+				buyQuantity = functions.ToInt64(data.Args[argIndex])
 			}
-		}
-		if item.Quantity > 0 && buyQuantity > item.Quantity {
-			embed.Description = "There's not enough of this in the shop to buy that much"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
+			if item.Quantity > 0 && buyQuantity > item.Quantity {
+				embed.Description = "There's not enough of this in the shop to buy that much"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
 		}
 		if (name == "Chicken" || name == "chicken") && buyQuantity > 1 {
 			embed.Description = "You can't buy more than one chicken at a time"

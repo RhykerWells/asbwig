@@ -48,7 +48,7 @@ var Command = &dcommand.AsbwigCommand{
 			resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 			return
 		}
-		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=? AND soldby=0", data.GuildID, data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Content: "Please start again and enter a name that doesn't already exist"})
 			return
@@ -99,7 +99,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, delay)
 			return
 		}
-		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", m.GuildID, name)).One(context.Background(), common.PQ)
+		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=? AND soldby=0", m.GuildID, name)).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, delay)

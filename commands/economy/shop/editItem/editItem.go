@@ -14,6 +14,7 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
+	"github.com/sirupsen/logrus"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -24,6 +25,7 @@ var Command = &dcommand.AsbwigCommand{
 	Description: "Edits the values of an item in the shop",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},
+		{Name: "Position", Type: dcommand.String, Optional: true},
 		{Name: "Option", Type: dcommand.String},
 		{Name: "Value", Type: dcommand.Any},
 	},
@@ -36,9 +38,22 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).One(context.Background(), common.PQ)
+		matchedItems, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "This item doesn't exist"
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
+		var item *models.EconomyShop
+		for _, matchedItem := range matchedItems {
+			if matchedItem.Soldby == "0" {
+				item = matchedItem
+				break
+			}
+		}
+		logrus.Infoln(item)
+		if item == nil {
+			embed.Description = "This item has been sold by a user. You can't edit it"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
