@@ -151,7 +151,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
 		quantityField := &discordgo.MessageEmbedField{Name: "Stock", Value: displayQuantity}
 		embed.Fields = append(embed.Fields, quantityField)
-		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID)\nType `skip` to skip this step", Embed: embed})
+		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step", Embed: embed})
 		return
 	}
 	if !createItem.Role.Valid {
@@ -160,7 +160,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		role, _ := functions.GetRole(m.GuildID, strings.Split(m.Content, " ")[0])
 		if strings.Split(m.Content, " ")[0] != "skip" && role == nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
-			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID)\nType `skip` to skip this step"}, 10)
+			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step"}, 10)
 			return
 		}
 		if role != nil {
