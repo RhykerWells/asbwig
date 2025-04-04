@@ -16,22 +16,28 @@ import (
 
 // SendBasicMessage sends a string as message content to the given channel
 // If a delay is included, then the message is deleted after X seconds.
-func SendBasicMessage(channelID string, message string, delay ...any) (msg *discordgo.Message, err error) {
+func SendBasicMessage(channelID string, message string, delay ...time.Duration) (msg *discordgo.Message, err error) {
 	msg, err = common.Session.ChannelMessageSend(channelID, message)
-	if delay != nil {
-		DeleteMessage(channelID, msg.ID, delay)
+	if err != nil {
+		return nil, err
 	}
-	return msg, err
+	if len(delay) > 0 {
+		DeleteMessage(channelID, msg.ID, delay[0])
+	}
+	return msg, nil
 }
 
 // SendMessage sends complex message objects to a given channel. Supporting, embed, components etc.
 // If a delay is included, then the message is deleted after X seconds
-func SendMessage(channelID string, message *discordgo.MessageSend, delay ...any) (msg *discordgo.Message, err error) {
+func SendMessage(channelID string, message *discordgo.MessageSend, delay ...time.Duration) (msg *discordgo.Message, err error) {
 	msg, err = common.Session.ChannelMessageSendComplex(channelID, message)
-	if delay != nil {
-		DeleteMessage(channelID, msg.ID, delay)
+	if err != nil {
+		return nil, err
 	}
-	return msg, err
+	if len(delay) > 0 {
+		DeleteMessage(channelID, msg.ID, delay[0])
+	}
+	return msg, nil
 }
 
 // SendDM sends complex message objects to a given users DM channel. Supporting, embed, components etc.
@@ -67,12 +73,12 @@ func EditMessage(channelID string, messageID string, message *discordgo.MessageS
 }
 
 // DeleteMessage deletes a given message after 0 or an option delay
-func DeleteMessage(channelID, messageID string, delay ...any) error {
-	var duration int
+func DeleteMessage(channelID, messageID string, delay ...time.Duration) error {
+	var duration time.Duration
 	if len(delay) > 0 {
-		duration = delay[0].([]any)[0].(int)
-    }
-	time.Sleep(time.Duration(duration * int(time.Second)))
+		duration = delay[0]
+	}
+	time.Sleep(duration)
 	err := common.Session.ChannelMessageDelete(channelID, messageID)
 
 	return err
