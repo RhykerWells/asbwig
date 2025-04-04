@@ -37,12 +37,12 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		price := humanize.Comma(item.Price)
 		quantity := "Infinite"
-		if item.Quantity.Int64 > 0 {
-			quantity = humanize.Comma(item.Quantity.Int64)
+		if item.Quantity > 0 {
+			quantity = humanize.Comma(item.Quantity)
 		}
 		role := "None"
-		if item.Role.String != "0" {
-			role = "<@&" + item.Role.String + ">"
+		if item.Role != "0" {
+			role = "<@&" + item.Role + ">"
 		}
 		fields := []*discordgo.MessageEmbedField{
 			{Name: "Name", Value: item.Name, Inline: true},

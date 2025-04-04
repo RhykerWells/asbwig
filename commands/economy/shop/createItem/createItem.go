@@ -193,8 +193,8 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Name: createItem.Name.String,
 		Description: createItem.Description.String,
 		Price: createItem.Price.Int64,
-		Quantity: createItem.Quantity,
-		Role: createItem.Role,
+		Quantity: createItem.Quantity.Int64,
+		Role: createItem.Role.String,
 		Reply: createItem.Reply.String,
 	}
 	item.Insert(context.Background(), common.PQ, boil.Infer())

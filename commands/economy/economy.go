@@ -21,6 +21,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/settings/removeResponse"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/set"
 	"github.com/RhykerWells/asbwig/commands/economy/settings/viewsettings"
+	"github.com/RhykerWells/asbwig/commands/economy/shop/buyItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/createItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/editItem"
 	"github.com/RhykerWells/asbwig/commands/economy/shop/itemInfo"
@@ -57,6 +58,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		set.Command,
 		viewsettings.Command,
 		//Shop
+		buyitem.Command,
 		createitem.Command,
 		edititem.Command,
 		iteminfo.Command,

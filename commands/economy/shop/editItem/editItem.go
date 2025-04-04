@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -95,7 +94,7 @@ var Command = &dcommand.AsbwigCommand{
 			if quantity == 0 {
 				displayValue = "Infinite"
 			}
-			item.Quantity = null.Int64From(quantity)
+			item.Quantity = quantity
 			item.Update(context.Background(), common.PQ, boil.Infer())
 		case "description", "reply":
 			value = strings.Join(data.ArgsNotLowered[1:], " ")
@@ -128,7 +127,7 @@ var Command = &dcommand.AsbwigCommand{
 				roleID = role.ID
 				displayValue = "<@&" + roleID + ">"
 			}
-			item.Role = null.StringFrom(roleID)
+			item.Role = roleID
 			item.Update(context.Background(), common.PQ, boil.Infer())
 		}
 		embed.Color = common.SuccessGreen

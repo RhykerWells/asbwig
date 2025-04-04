@@ -50,8 +50,8 @@ var Command = &dcommand.AsbwigCommand{
 			}
 			shopNumber ++
 			quantity := "Infinite"
-			if item.Quantity.Int64 > 0 {
-				quantity = humanize.Comma(item.Quantity.Int64)
+			if item.Quantity > 0 {
+				quantity = humanize.Comma(item.Quantity)
 			}
 			price := humanize.Comma(item.Price)
 			fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.Symbol, price, item.Name, quantity)
