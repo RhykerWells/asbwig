@@ -1286,7 +1286,7 @@ func (o *EconomyConfig) AddGuildEconomyShops(ctx context.Context, exec boil.Cont
 				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
 				strmangle.WhereClause("\"", "\"", 2, economyShopPrimaryKeyColumns),
 			)
-			values := []interface{}{o.GuildID, rel.GuildID, rel.Name}
+			values := []interface{}{o.GuildID, rel.GuildID, rel.Name, rel.Soldby}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)

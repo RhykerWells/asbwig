@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,14 +23,14 @@ import (
 
 // EconomyShop is an object representing the database table.
 type EconomyShop struct {
-	GuildID     string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Description string      `boil:"description" json:"description" toml:"description" yaml:"description"`
-	Price       int64       `boil:"price" json:"price" toml:"price" yaml:"price"`
-	Quantity    int64       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
-	Role        string      `boil:"role" json:"role" toml:"role" yaml:"role"`
-	Reply       string      `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
-	Soldby      null.String `boil:"soldby" json:"soldby,omitempty" toml:"soldby" yaml:"soldby,omitempty"`
+	GuildID     string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Description string `boil:"description" json:"description" toml:"description" yaml:"description"`
+	Price       int64  `boil:"price" json:"price" toml:"price" yaml:"price"`
+	Quantity    int64  `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
+	Role        string `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Reply       string `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
+	Soldby      string `boil:"soldby" json:"soldby" toml:"soldby" yaml:"soldby"`
 
 	R *economyShopR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyShopL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -87,7 +86,7 @@ var EconomyShopWhere = struct {
 	Quantity    whereHelperint64
 	Role        whereHelperstring
 	Reply       whereHelperstring
-	Soldby      whereHelpernull_String
+	Soldby      whereHelperstring
 }{
 	GuildID:     whereHelperstring{field: "\"economy_shop\".\"guild_id\""},
 	Name:        whereHelperstring{field: "\"economy_shop\".\"name\""},
@@ -96,7 +95,7 @@ var EconomyShopWhere = struct {
 	Quantity:    whereHelperint64{field: "\"economy_shop\".\"quantity\""},
 	Role:        whereHelperstring{field: "\"economy_shop\".\"role\""},
 	Reply:       whereHelperstring{field: "\"economy_shop\".\"reply\""},
-	Soldby:      whereHelpernull_String{field: "\"economy_shop\".\"soldby\""},
+	Soldby:      whereHelperstring{field: "\"economy_shop\".\"soldby\""},
 }
 
 // EconomyShopRels is where relationship names are stored.
@@ -128,9 +127,9 @@ type economyShopL struct{}
 
 var (
 	economyShopAllColumns            = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply", "soldby"}
-	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply"}
-	economyShopColumnsWithDefault    = []string{"soldby"}
-	economyShopPrimaryKeyColumns     = []string{"guild_id", "name"}
+	economyShopColumnsWithoutDefault = []string{"guild_id", "name", "description", "price", "quantity", "role", "reply", "soldby"}
+	economyShopColumnsWithDefault    = []string{}
+	economyShopPrimaryKeyColumns     = []string{"guild_id", "name", "soldby"}
 	economyShopGeneratedColumns      = []string{}
 )
 
@@ -392,7 +391,7 @@ func (o *EconomyShop) SetGuild(ctx context.Context, exec boil.ContextExecutor, i
 		strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
 		strmangle.WhereClause("\"", "\"", 2, economyShopPrimaryKeyColumns),
 	)
-	values := []interface{}{related.GuildID, o.GuildID, o.Name}
+	values := []interface{}{related.GuildID, o.GuildID, o.Name, o.Soldby}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -435,13 +434,13 @@ func EconomyShops(mods ...qm.QueryMod) economyShopQuery {
 }
 
 // FindEconomyShopG retrieves a single record by ID.
-func FindEconomyShopG(ctx context.Context, guildID string, name string, selectCols ...string) (*EconomyShop, error) {
-	return FindEconomyShop(ctx, boil.GetContextDB(), guildID, name, selectCols...)
+func FindEconomyShopG(ctx context.Context, guildID string, name string, soldby string, selectCols ...string) (*EconomyShop, error) {
+	return FindEconomyShop(ctx, boil.GetContextDB(), guildID, name, soldby, selectCols...)
 }
 
 // FindEconomyShop retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID string, name string, selectCols ...string) (*EconomyShop, error) {
+func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID string, name string, soldby string, selectCols ...string) (*EconomyShop, error) {
 	economyShopObj := &EconomyShop{}
 
 	sel := "*"
@@ -449,10 +448,10 @@ func FindEconomyShop(ctx context.Context, exec boil.ContextExecutor, guildID str
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2", sel,
+		"select %s from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2 AND \"soldby\"=$3", sel,
 	)
 
-	q := queries.Raw(query, guildID, name)
+	q := queries.Raw(query, guildID, name, soldby)
 
 	err := q.Bind(ctx, exec, economyShopObj)
 	if err != nil {
@@ -823,7 +822,7 @@ func (o *EconomyShop) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), economyShopPrimaryKeyMapping)
-	sql := "DELETE FROM \"economy_shop\" WHERE \"guild_id\"=$1 AND \"name\"=$2"
+	sql := "DELETE FROM \"economy_shop\" WHERE \"guild_id\"=$1 AND \"name\"=$2 AND \"soldby\"=$3"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -918,7 +917,7 @@ func (o *EconomyShop) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *EconomyShop) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEconomyShop(ctx, exec, o.GuildID, o.Name)
+	ret, err := FindEconomyShop(ctx, exec, o.GuildID, o.Name, o.Soldby)
 	if err != nil {
 		return err
 	}
@@ -967,21 +966,21 @@ func (o *EconomyShopSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 }
 
 // EconomyShopExistsG checks if the EconomyShop row exists.
-func EconomyShopExistsG(ctx context.Context, guildID string, name string) (bool, error) {
-	return EconomyShopExists(ctx, boil.GetContextDB(), guildID, name)
+func EconomyShopExistsG(ctx context.Context, guildID string, name string, soldby string) (bool, error) {
+	return EconomyShopExists(ctx, boil.GetContextDB(), guildID, name, soldby)
 }
 
 // EconomyShopExists checks if the EconomyShop row exists.
-func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID string, name string) (bool, error) {
+func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID string, name string, soldby string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2 limit 1)"
+	sql := "select exists(select 1 from \"economy_shop\" where \"guild_id\"=$1 AND \"name\"=$2 AND \"soldby\"=$3 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, guildID, name)
+		fmt.Fprintln(writer, guildID, name, soldby)
 	}
-	row := exec.QueryRowContext(ctx, sql, guildID, name)
+	row := exec.QueryRowContext(ctx, sql, guildID, name, soldby)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -993,5 +992,5 @@ func EconomyShopExists(ctx context.Context, exec boil.ContextExecutor, guildID s
 
 // Exists checks if the EconomyShop row exists.
 func (o *EconomyShop) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return EconomyShopExists(ctx, exec, o.GuildID, o.Name)
+	return EconomyShopExists(ctx, exec, o.GuildID, o.Name, o.Soldby)
 }
