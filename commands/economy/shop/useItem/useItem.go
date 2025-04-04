@@ -36,6 +36,9 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
+		if item.Role != "0" {
+			functions.AddRole(data.GuildID, data.Author.ID, item.Role)
+		}
 		quantity := item.Quantity
 		newQuantity := quantity - 1
 		if newQuantity == 0 {
