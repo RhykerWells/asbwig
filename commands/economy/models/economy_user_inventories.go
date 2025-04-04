@@ -23,65 +23,72 @@ import (
 
 // EconomyUserInventory is an object representing the database table.
 type EconomyUserInventory struct {
-	GuildID  string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	UserID   string `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Name     string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Quantity int64  `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
-	Role     string `boil:"role" json:"role" toml:"role" yaml:"role"`
-	Reply    string `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
+	GuildID     string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	UserID      string `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Description string `boil:"description" json:"description" toml:"description" yaml:"description"`
+	Quantity    int64  `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
+	Role        string `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Reply       string `boil:"reply" json:"reply" toml:"reply" yaml:"reply"`
 
 	R *economyUserInventoryR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyUserInventoryL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EconomyUserInventoryColumns = struct {
-	GuildID  string
-	UserID   string
-	Name     string
-	Quantity string
-	Role     string
-	Reply    string
+	GuildID     string
+	UserID      string
+	Name        string
+	Description string
+	Quantity    string
+	Role        string
+	Reply       string
 }{
-	GuildID:  "guild_id",
-	UserID:   "user_id",
-	Name:     "name",
-	Quantity: "quantity",
-	Role:     "role",
-	Reply:    "reply",
+	GuildID:     "guild_id",
+	UserID:      "user_id",
+	Name:        "name",
+	Description: "description",
+	Quantity:    "quantity",
+	Role:        "role",
+	Reply:       "reply",
 }
 
 var EconomyUserInventoryTableColumns = struct {
-	GuildID  string
-	UserID   string
-	Name     string
-	Quantity string
-	Role     string
-	Reply    string
+	GuildID     string
+	UserID      string
+	Name        string
+	Description string
+	Quantity    string
+	Role        string
+	Reply       string
 }{
-	GuildID:  "economy_user_inventories.guild_id",
-	UserID:   "economy_user_inventories.user_id",
-	Name:     "economy_user_inventories.name",
-	Quantity: "economy_user_inventories.quantity",
-	Role:     "economy_user_inventories.role",
-	Reply:    "economy_user_inventories.reply",
+	GuildID:     "economy_user_inventories.guild_id",
+	UserID:      "economy_user_inventories.user_id",
+	Name:        "economy_user_inventories.name",
+	Description: "economy_user_inventories.description",
+	Quantity:    "economy_user_inventories.quantity",
+	Role:        "economy_user_inventories.role",
+	Reply:       "economy_user_inventories.reply",
 }
 
 // Generated where
 
 var EconomyUserInventoryWhere = struct {
-	GuildID  whereHelperstring
-	UserID   whereHelperstring
-	Name     whereHelperstring
-	Quantity whereHelperint64
-	Role     whereHelperstring
-	Reply    whereHelperstring
+	GuildID     whereHelperstring
+	UserID      whereHelperstring
+	Name        whereHelperstring
+	Description whereHelperstring
+	Quantity    whereHelperint64
+	Role        whereHelperstring
+	Reply       whereHelperstring
 }{
-	GuildID:  whereHelperstring{field: "\"economy_user_inventories\".\"guild_id\""},
-	UserID:   whereHelperstring{field: "\"economy_user_inventories\".\"user_id\""},
-	Name:     whereHelperstring{field: "\"economy_user_inventories\".\"name\""},
-	Quantity: whereHelperint64{field: "\"economy_user_inventories\".\"quantity\""},
-	Role:     whereHelperstring{field: "\"economy_user_inventories\".\"role\""},
-	Reply:    whereHelperstring{field: "\"economy_user_inventories\".\"reply\""},
+	GuildID:     whereHelperstring{field: "\"economy_user_inventories\".\"guild_id\""},
+	UserID:      whereHelperstring{field: "\"economy_user_inventories\".\"user_id\""},
+	Name:        whereHelperstring{field: "\"economy_user_inventories\".\"name\""},
+	Description: whereHelperstring{field: "\"economy_user_inventories\".\"description\""},
+	Quantity:    whereHelperint64{field: "\"economy_user_inventories\".\"quantity\""},
+	Role:        whereHelperstring{field: "\"economy_user_inventories\".\"role\""},
+	Reply:       whereHelperstring{field: "\"economy_user_inventories\".\"reply\""},
 }
 
 // EconomyUserInventoryRels is where relationship names are stored.
@@ -112,8 +119,8 @@ func (r *economyUserInventoryR) GetGuild() *EconomyConfig {
 type economyUserInventoryL struct{}
 
 var (
-	economyUserInventoryAllColumns            = []string{"guild_id", "user_id", "name", "quantity", "role", "reply"}
-	economyUserInventoryColumnsWithoutDefault = []string{"guild_id", "user_id", "name", "quantity", "role", "reply"}
+	economyUserInventoryAllColumns            = []string{"guild_id", "user_id", "name", "description", "quantity", "role", "reply"}
+	economyUserInventoryColumnsWithoutDefault = []string{"guild_id", "user_id", "name", "description", "quantity", "role", "reply"}
 	economyUserInventoryColumnsWithDefault    = []string{}
 	economyUserInventoryPrimaryKeyColumns     = []string{"guild_id", "user_id", "name"}
 	economyUserInventoryGeneratedColumns      = []string{}

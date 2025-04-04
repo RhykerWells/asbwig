@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS economy_user_inventories (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
 	name TEXT NOT NULL,
+	description TEXT NOT NULL,
 	quantity BIGINT NOT NULL,
 	role TEXT NOT NULL,
 	reply TEXT NOT NULL,
