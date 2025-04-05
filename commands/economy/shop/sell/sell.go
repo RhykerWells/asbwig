@@ -39,6 +39,11 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
+		if inventoryItem.Name == "Chicken" || inventoryItem.Name == "chicken" {
+			embed.Description = "You can't sell this item\nUse `inventory [Page]` to view all your items"
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
 		if len(data.Args) <= 1 {
 			embed.Description = "No `Price` argument provided"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
