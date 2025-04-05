@@ -19,7 +19,7 @@ var (
 	SQLX *sqlx.DB
 
 	SuccessGreen = 0x00ff7b
-	ErrorRed = 0xFF0000
+	ErrorRed     = 0xFF0000
 
 	Session *discordgo.Session
 	Bot     *discordgo.User

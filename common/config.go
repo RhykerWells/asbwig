@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	ConfigBotName  = os.Getenv("ASBWIG_BOTNAME")
-	ConfigBotToken = os.Getenv("ASBWIG_TOKEN")
+	ConfigBotName     = os.Getenv("ASBWIG_BOTNAME")
+	ConfigBotToken    = os.Getenv("ASBWIG_TOKEN")
 	ConfigBotClientID = os.Getenv("ASBWIG_CLIENTID")
 
 	ConfigPGHost     = os.Getenv("ASBWIG_PGHOST")
 	ConfigPGDB       = os.Getenv("ASBWIG_PGDB")
 	ConfigPGUsername = os.Getenv("ASBWIG_PGUSER")
 	ConfigPGPassword = os.Getenv("ASBWIG_PGPASSWORD")
-	
+
 	ConfigBotOwner = os.Getenv("ASBWIG_OWNERID")
 )
 
