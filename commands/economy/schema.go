@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS economy_config (
 	customworkresponses BOOLEAN NOT NULL DEFAULT 'false',
 	customcrimeresponses BOOLEAN NOT NULL DEFAULT 'false'
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_custom_responses (
     guild_id TEXT PRIMARY KEY,
 	type TEXT NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS economy_custom_responses (
     CONSTRAINT fk_guild_work_responses FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_users (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
@@ -30,10 +30,10 @@ CREATE TABLE IF NOT EXISTS economy_users (
 	CONSTRAINT fk_guild_user FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE INDEX IF NOT EXISTS idx_guild_users
 	ON economy_users (guild_id, user_id);
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_user_inventories (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS economy_user_inventories (
 	CONSTRAINT fk_guild_user_inventory FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE INDEX IF NOT EXISTS idx_guild_users
 	ON economy_users (guild_id, user_id);
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_cooldowns (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS economy_cooldowns (
 	CONSTRAINT fk_guild_user_cooldown FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE INDEX IF NOT EXISTS idx_guild_user_cooldowns
 	ON economy_cooldowns (guild_id, user_id);
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_shop (
     guild_id TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -76,10 +76,10 @@ CREATE TABLE IF NOT EXISTS economy_shop (
 	CONSTRAINT fk_guild_shop FOREIGN KEY (guild_id)
 		REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE INDEX IF NOT EXISTS idx_item_name
     ON economy_shop (name)
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS economy_createitem (
 	guild_id TEXT NOT NULL,
 	user_id TEXT NOT NULL,
