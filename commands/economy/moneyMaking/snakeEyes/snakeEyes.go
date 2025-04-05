@@ -19,7 +19,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "snakeeyes",
-	Aliases:     []string{""},
+	Aliases:     []string{"dice"},
 	Description: "Rolls 2 6-sided dice, with a payout of `<Bet>*36` if they both land on 1",
 	Args: []*dcommand.Args{
 		{Name: "Bet", Type: dcommand.Int},

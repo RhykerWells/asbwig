@@ -19,6 +19,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "rob",
+	Aliases:     []string{"steal"},
 	Description: "Pew pew pew",
 	Args: []*dcommand.Args{
 		{Name: "Member", Type: dcommand.User},

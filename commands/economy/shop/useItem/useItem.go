@@ -16,6 +16,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "useitem",
+	Aliases:     []string{"use"},
 	Description: "Uses an item present in your inventory",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},
