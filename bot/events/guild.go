@@ -8,7 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Join guild event
+// guildJoin is called when the bot is added to a new guild
+// This adds the guild to the relevant database tables
 func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	prefix.GuildPrefix(g.ID)
 	economy.GuildEconomyAdd(g.ID)
@@ -19,10 +20,11 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}).Infoln("Joined guild: ", g.Name)
 }
 
-// Leave guild event
+// guildLeave is called when the bot is removed from a guild
+// This removes the guild from any tables that it is part of
 func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	if g.Unavailable {
-		return // Guild outage
+		return
 	}
 	removeGuildConfig(g.ID)
 	log.Infoln("Left guild: ", g.ID)
