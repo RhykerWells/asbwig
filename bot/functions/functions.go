@@ -60,13 +60,21 @@ func EditBasicMessage(channelID, messageID, message string) error {
 // EditMessage edits a 'complex' message and allows replacement of all message objects
 func EditMessage(channelID string, messageID string, message *discordgo.MessageSend) error {
 	edit := &discordgo.MessageEdit{
-		ID:	messageID,
+		ID:      messageID,
 		Channel: channelID,
 	}
-	if message.Content != "" {edit.Content = &message.Content}
-	if message.Embed != nil {edit.Embed = message.Embed}
-	if message.Embeds != nil {edit.Embeds = &message.Embeds}
-	if message.Components != nil {edit.Components = &message.Components}
+	if message.Content != "" {
+		edit.Content = &message.Content
+	}
+	if message.Embed != nil {
+		edit.Embed = message.Embed
+	}
+	if message.Embeds != nil {
+		edit.Embeds = &message.Embeds
+	}
+	if message.Components != nil {
+		edit.Components = &message.Components
+	}
 	_, err := common.Session.ChannelMessageEditComplex(edit)
 
 	return err
