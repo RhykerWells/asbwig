@@ -5,6 +5,7 @@ package economy
 import (
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
 	"github.com/RhykerWells/asbwig/commands/economy/informational/leaderboard"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/chickenFight"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/coinFlip"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/crime"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rob"
@@ -42,6 +43,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		balance.Command,
 		leaderboard.Command,
 		//Moneymaking
+		chickenfight.Command,
 		coinflip.Command,
 		crime.Command,
 		rob.Command,
