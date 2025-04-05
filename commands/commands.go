@@ -4,9 +4,9 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/RhykerWells/asbwig/commands/economy"
 	"github.com/RhykerWells/asbwig/commands/invite"
 	"github.com/RhykerWells/asbwig/commands/ping"
-	"github.com/RhykerWells/asbwig/commands/economy"
 
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
@@ -27,5 +27,4 @@ func InitCommands(session *discordgo.Session) {
 
 	economy.EconomySetup(cmdHandler)
 	session.AddHandler(cmdHandler.HandleMessageCreate)
-} 
-
+}
