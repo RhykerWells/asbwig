@@ -41,7 +41,7 @@ func addResponse(data *dcommand.Data) {
 	if len(data.Args) <= 1 {
 		embed.Description = "No `Response` argument provided. Please include the exact string `(amount)` as a placeholder for where the amount goes"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return 
+		return
 	}
 	response := strings.Join(data.ArgsNotLowered[1:], " ")
 	for _, char := range "\"" {
@@ -51,11 +51,11 @@ func addResponse(data *dcommand.Data) {
 	if !a.MatchString(response) {
 		embed.Description = "Invalid `Response` argument provided. Please include the exact string `(amount)` as a placeholder for where the amount goes"
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return 
+		return
 	}
-	responseEntry := models.EconomyCustomResponse {
-		GuildID: data.GuildID,
-		Type: responseType,
+	responseEntry := models.EconomyCustomResponse{
+		GuildID:  data.GuildID,
+		Type:     responseType,
 		Response: response,
 	}
 	responseEntry.Insert(context.Background(), common.PQ, boil.Infer())

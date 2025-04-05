@@ -60,7 +60,7 @@ func addResponse(data *dcommand.Data) {
 			responses.Delete(context.Background(), common.PQ)
 			continue
 		}
-		responseNumber ++
+		responseNumber++
 	}
 	embed.Description = fmt.Sprintf("Successfully removed `%s` from your list of responses", responseToDelete)
 	embed.Color = common.SuccessGreen

@@ -46,7 +46,7 @@ func addResponse(data *dcommand.Data) {
 			page = 1
 		}
 	}
-	offset :=  (page - 1) * 10
+	offset := (page - 1) * 10
 	display := ""
 	guildResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", data.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if len(guildResponses) <= 0 {
@@ -57,7 +57,7 @@ func addResponse(data *dcommand.Data) {
 		if i == 10 {
 			break
 		}
-		responseNumber ++
+		responseNumber++
 		display += fmt.Sprintf("%d) `%s`\n", responseNumber, responses.Response)
 	}
 	embed.Author = &discordgo.MessageEmbedAuthor{Name: embedAuthor, IconURL: guild.IconURL("256")}
@@ -68,14 +68,14 @@ func addResponse(data *dcommand.Data) {
 		btnPrev := row.Components[0].(discordgo.Button)
 		btnPrev.Disabled = false
 		row.Components[0] = btnPrev
-		components[0] = row	
+		components[0] = row
 	}
 	if len(guildResponses) > responseNumber {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false
 		row.Components[1] = btnNext
-		components[0] = row		
+		components[0] = row
 	}
 	msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
 	go disableButtons(msg.ChannelID, msg.ID)
@@ -92,9 +92,9 @@ func disableButtons(channelID, messageID string) {
 	btnNext.Disabled = true
 	row.Components[0] = btnPrev
 	row.Components[1] = btnNext
-	components[0] = row	
+	components[0] = row
 	message := &discordgo.MessageSend{
-		Embed: lbMessage.Embeds[0],
+		Embed:      lbMessage.Embeds[0],
 		Components: components,
 	}
 	functions.EditMessage(channelID, messageID, message)

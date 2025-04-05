@@ -32,7 +32,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	if strings.Contains(embed[0].Author.Name, "crime-responses") {
 		responseType = "crime"
 	}
-	offset :=  (page - 1) * 10
+	offset := (page - 1) * 10
 	display := ""
 	guildResponses, err := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", b.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if err != nil {
@@ -43,7 +43,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		if i == 10 {
 			break
 		}
-		responseNumber ++
+		responseNumber++
 		display += fmt.Sprintf("%d) `%s`\n", responseNumber, responses.Response)
 	}
 	embed[0].Description = display
@@ -53,26 +53,26 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		btnPrev := row.Components[0].(discordgo.Button)
 		btnPrev.Disabled = false
 		row.Components[0] = btnPrev
-		components[0] = row	
+		components[0] = row
 	}
 	if page != 1 {
 		row := components[0].(discordgo.ActionsRow)
 		btnPrev := row.Components[0].(discordgo.Button)
 		btnPrev.Disabled = false
 		row.Components[0] = btnPrev
-		components[0] = row	
+		components[0] = row
 	}
 	if len(guildResponses) > responseNumber {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false
 		row.Components[1] = btnNext
-		components[0] = row		
+		components[0] = row
 	}
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: embed,
+			Embeds:     embed,
 			Components: components,
 		},
 	}
