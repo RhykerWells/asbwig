@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS economy_users (
 	user_id TEXT NOT NULL,
 	cash BIGINT NOT NULL,
 	bank BIGINT NOT NULL,
+	cfwinchance BIGINT NOT NULL DEFAULT 50,
 	PRIMARY KEY (guild_id, user_id),
 	CONSTRAINT fk_guild_user FOREIGN KEY (guild_id)
         REFERENCES economy_config (guild_id) ON DELETE CASCADE
