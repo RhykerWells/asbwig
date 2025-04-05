@@ -30,7 +30,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	} else {
 		page = page - 1
 	}
-	offset :=  (page - 1) * 10
+	offset := (page - 1) * 10
 	economyUsers, err := models.EconomyUsers(qm.Where("guild_id=?", b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 	display := ""
 	if err != nil || len(economyUsers) == 0 {
@@ -44,7 +44,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 			break
 		}
 		cash := humanize.Comma(entry.Cash)
-		rank ++
+		rank++
 		drank := ""
 		user, _ := functions.GetUser(entry.UserID)
 		pos := map[int]string{1: "🥇", 2: "🥈", 3: "🥉"}
@@ -63,19 +63,19 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		btnPrev := row.Components[0].(discordgo.Button)
 		btnPrev.Disabled = false
 		row.Components[0] = btnPrev
-		components[0] = row	
+		components[0] = row
 	}
 	if len(economyUsers) > rank {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false
 		row.Components[1] = btnNext
-		components[0] = row		
+		components[0] = row
 	}
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: embed,
+			Embeds:     embed,
 			Components: components,
 		},
 	}
