@@ -28,7 +28,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	} else {
 		page = page - 1
 	}
-	offset :=  (page - 1)
+	offset := (page - 1)
 	display := ""
 	name := b.Message.Embeds[0].Fields[0].Value
 	matchedItems, err := models.EconomyShops(qm.Where("guild_id=? AND name=?", guild.ID, name), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
@@ -76,19 +76,19 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		btnPrev := row.Components[0].(discordgo.Button)
 		btnPrev.Disabled = false
 		row.Components[0] = btnPrev
-		components[0] = row	
+		components[0] = row
 	}
 	if len(matchedItems) > page {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false
 		row.Components[1] = btnNext
-		components[0] = row		
+		components[0] = row
 	}
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: embed,
+			Embeds:     embed,
 			Components: components,
 		},
 	}

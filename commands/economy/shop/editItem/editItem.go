@@ -18,7 +18,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-
 var Command = &dcommand.AsbwigCommand{
 	Command:     "edititem",
 	Description: "Edits the values of an item in the shop",
@@ -119,7 +118,7 @@ var Command = &dcommand.AsbwigCommand{
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 				return
 			}
-			switch option{
+			switch option {
 			case "description":
 				item.Description = value
 			case "reply":

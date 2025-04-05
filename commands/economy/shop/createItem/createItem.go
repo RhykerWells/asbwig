@@ -30,7 +30,7 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
-		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Title: "Item info" , Footer: &discordgo.MessageEmbedFooter{Text: "Type cancel to cancel the setup"}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x0088CC}
+		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Title: "Item info", Footer: &discordgo.MessageEmbedFooter{Text: "Type cancel to cancel the setup"}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x0088CC}
 		_, err := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
 		channel, activeSession := activeSessions[data.Author.ID]
 		if err == nil || activeSession {
@@ -52,7 +52,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Content: "Please start again and enter a name that doesn't already exist"})
 			return
 		}
-		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: data.ArgsNotLowered[0]}}
+		embed.Fields = []*discordgo.MessageEmbedField{{Name: "name", Value: data.ArgsNotLowered[0]}}
 		activeSessions[data.Author.ID] = data.ChannelID
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for the item", Embed: embed})
 		item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, Name: null.StringFrom(data.ArgsNotLowered[0]), MSGID: msg.ID}
@@ -67,7 +67,7 @@ func resetTimeout(guildID, channelID, userID string) {
 		timer.Stop()
 	}
 
-	activeTimers[userID] = time.AfterFunc(2 * time.Minute, func() {
+	activeTimers[userID] = time.AfterFunc(2*time.Minute, func() {
 		delete(activeSessions, userID)
 		models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", guildID, userID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(channelID, "The item creation session has timed out due to inactivity. Please try again")
@@ -106,7 +106,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		createItem.Name = null.StringFrom(name)
 		createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
-		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: name, Inline: true}}
+		embed.Fields = []*discordgo.MessageEmbedField{{Name: "name", Value: name, Inline: true}}
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a price for this item", Embed: embed})
 		return
 	}
@@ -188,15 +188,15 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	embed.Footer = nil
 	embed.Color = common.SuccessGreen
-	item := models.EconomyShop {
-		GuildID: createItem.GuildID,
-		Name: createItem.Name.String,
+	item := models.EconomyShop{
+		GuildID:     createItem.GuildID,
+		Name:        createItem.Name.String,
 		Description: createItem.Description.String,
-		Price: createItem.Price.Int64,
-		Quantity: createItem.Quantity.Int64,
-		Role: createItem.Role.String,
-		Reply: createItem.Reply.String,
-		Soldby: "0",
+		Price:       createItem.Price.Int64,
+		Quantity:    createItem.Quantity.Int64,
+		Role:        createItem.Role.String,
+		Reply:       createItem.Reply.String,
+		Soldby:      "0",
 	}
 	item.Insert(context.Background(), common.PQ, boil.Infer())
 	delete(activeSessions, m.Author.ID)

@@ -15,7 +15,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-
 var Command = &dcommand.AsbwigCommand{
 	Command:     "buyitem",
 	Aliases:     []string{"buy"},
@@ -71,9 +70,9 @@ var Command = &dcommand.AsbwigCommand{
 		if len(data.Args) > argIndex {
 			if data.Args[argIndex] == "max" || data.Args[argIndex] == "all" {
 				quantity := map[string]int64{"max": (cash / item.Price), "all": item.Quantity}
-				buyQuantity=quantity[data.Args[argIndex]]
+				buyQuantity = quantity[data.Args[argIndex]]
 				if buyQuantity == 0 {
-					buyQuantity=quantity["max"]
+					buyQuantity = quantity["max"]
 				}
 			} else if functions.ToInt64(data.Args[argIndex]) > 0 {
 				buyQuantity = functions.ToInt64(data.Args[argIndex])
@@ -101,7 +100,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if item.Soldby ==  data.Author.ID {
+		if item.Soldby == data.Author.ID {
 			embed.Description = "You can't buy an item that you have listed"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
@@ -126,7 +125,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		embed.Color = common.SuccessGreen
-		embed.Description = fmt.Sprintf("You bought %s of %s for %s%s", humanize.Comma(buyQuantity), name, guildConfig.Symbol, humanize.Comma(item.Price * buyQuantity))
+		embed.Description = fmt.Sprintf("You bought %s of %s for %s%s", humanize.Comma(buyQuantity), name, guildConfig.Symbol, humanize.Comma(item.Price*buyQuantity))
 		userInventory := models.EconomyUserInventory{GuildID: data.GuildID, UserID: data.Author.ID, Name: name, Description: item.Description, Quantity: newQuantity, Role: item.Role, Reply: item.Reply}
 		userInventory.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
 		cash = cash - (item.Price * buyQuantity)

@@ -15,7 +15,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-
 var Command = &dcommand.AsbwigCommand{
 	Command:     "iteminfo",
 	Description: "Views the saved information about an item",
@@ -39,7 +38,7 @@ var Command = &dcommand.AsbwigCommand{
 				page = 1
 			}
 		}
-		offset :=  (page - 1)
+		offset := (page - 1)
 		name := data.ArgsNotLowered[0]
 		display := ""
 		matchedItems, err := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
@@ -90,14 +89,14 @@ var Command = &dcommand.AsbwigCommand{
 			btnPrev := row.Components[0].(discordgo.Button)
 			btnPrev.Disabled = false
 			row.Components[0] = btnPrev
-			components[0] = row	
+			components[0] = row
 		}
 		if len(matchedItems) > page {
 			row := components[0].(discordgo.ActionsRow)
 			btnNext := row.Components[1].(discordgo.Button)
 			btnNext.Disabled = false
 			row.Components[1] = btnNext
-			components[0] = row		
+			components[0] = row
 		}
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
 		go disableButtons(msg.ChannelID, msg.ID)
@@ -115,9 +114,9 @@ func disableButtons(channelID, messageID string) {
 	btnNext.Disabled = true
 	row.Components[0] = btnPrev
 	row.Components[1] = btnNext
-	components[0] = row	
+	components[0] = row
 	message := &discordgo.MessageSend{
-		Embed: lbMessage.Embeds[0],
+		Embed:      lbMessage.Embeds[0],
 		Components: components,
 	}
 	functions.EditMessage(channelID, messageID, message)

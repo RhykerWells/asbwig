@@ -32,7 +32,7 @@ var Command = &dcommand.AsbwigCommand{
 				page = 1
 			}
 		}
-		offset :=  (page - 1) * 10
+		offset := (page - 1) * 10
 		display := ""
 		userInventory, err := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		if err != nil || len(userInventory) == 0 {
@@ -47,7 +47,7 @@ var Command = &dcommand.AsbwigCommand{
 			if i == 10 {
 				break
 			}
-			invNumber ++
+			invNumber++
 			role := "None"
 			if item.Role != "0" {
 				role = "<@&" + item.Role + ">"
@@ -63,14 +63,14 @@ var Command = &dcommand.AsbwigCommand{
 			btnPrev := row.Components[0].(discordgo.Button)
 			btnPrev.Disabled = false
 			row.Components[0] = btnPrev
-			components[0] = row	
+			components[0] = row
 		}
 		if len(userInventory) > invNumber {
 			row := components[0].(discordgo.ActionsRow)
 			btnNext := row.Components[1].(discordgo.Button)
 			btnNext.Disabled = false
 			row.Components[1] = btnNext
-			components[0] = row		
+			components[0] = row
 		}
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Embed: embed, Components: components})
 		go disableButtons(msg.ChannelID, msg.ID)
@@ -88,9 +88,9 @@ func disableButtons(channelID, messageID string) {
 	btnNext.Disabled = true
 	row.Components[0] = btnPrev
 	row.Components[1] = btnNext
-	components[0] = row	
+	components[0] = row
 	message := &discordgo.MessageSend{
-		Embed: lbMessage.Embeds[0],
+		Embed:      lbMessage.Embeds[0],
 		Components: components,
 	}
 	functions.EditMessage(channelID, messageID, message)

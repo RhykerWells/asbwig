@@ -13,7 +13,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-
 var Command = &dcommand.AsbwigCommand{
 	Command:     "useitem",
 	Aliases:     []string{"use"},
