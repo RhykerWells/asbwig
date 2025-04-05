@@ -23,51 +23,58 @@ import (
 
 // EconomyUser is an object representing the database table.
 type EconomyUser struct {
-	GuildID string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	UserID  string `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Cash    int64  `boil:"cash" json:"cash" toml:"cash" yaml:"cash"`
-	Bank    int64  `boil:"bank" json:"bank" toml:"bank" yaml:"bank"`
+	GuildID     string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	UserID      string `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Cash        int64  `boil:"cash" json:"cash" toml:"cash" yaml:"cash"`
+	Bank        int64  `boil:"bank" json:"bank" toml:"bank" yaml:"bank"`
+	Cfwinchance int64  `boil:"cfwinchance" json:"cfwinchance" toml:"cfwinchance" yaml:"cfwinchance"`
 
 	R *economyUserR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyUserL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EconomyUserColumns = struct {
-	GuildID string
-	UserID  string
-	Cash    string
-	Bank    string
+	GuildID     string
+	UserID      string
+	Cash        string
+	Bank        string
+	Cfwinchance string
 }{
-	GuildID: "guild_id",
-	UserID:  "user_id",
-	Cash:    "cash",
-	Bank:    "bank",
+	GuildID:     "guild_id",
+	UserID:      "user_id",
+	Cash:        "cash",
+	Bank:        "bank",
+	Cfwinchance: "cfwinchance",
 }
 
 var EconomyUserTableColumns = struct {
-	GuildID string
-	UserID  string
-	Cash    string
-	Bank    string
+	GuildID     string
+	UserID      string
+	Cash        string
+	Bank        string
+	Cfwinchance string
 }{
-	GuildID: "economy_users.guild_id",
-	UserID:  "economy_users.user_id",
-	Cash:    "economy_users.cash",
-	Bank:    "economy_users.bank",
+	GuildID:     "economy_users.guild_id",
+	UserID:      "economy_users.user_id",
+	Cash:        "economy_users.cash",
+	Bank:        "economy_users.bank",
+	Cfwinchance: "economy_users.cfwinchance",
 }
 
 // Generated where
 
 var EconomyUserWhere = struct {
-	GuildID whereHelperstring
-	UserID  whereHelperstring
-	Cash    whereHelperint64
-	Bank    whereHelperint64
+	GuildID     whereHelperstring
+	UserID      whereHelperstring
+	Cash        whereHelperint64
+	Bank        whereHelperint64
+	Cfwinchance whereHelperint64
 }{
-	GuildID: whereHelperstring{field: "\"economy_users\".\"guild_id\""},
-	UserID:  whereHelperstring{field: "\"economy_users\".\"user_id\""},
-	Cash:    whereHelperint64{field: "\"economy_users\".\"cash\""},
-	Bank:    whereHelperint64{field: "\"economy_users\".\"bank\""},
+	GuildID:     whereHelperstring{field: "\"economy_users\".\"guild_id\""},
+	UserID:      whereHelperstring{field: "\"economy_users\".\"user_id\""},
+	Cash:        whereHelperint64{field: "\"economy_users\".\"cash\""},
+	Bank:        whereHelperint64{field: "\"economy_users\".\"bank\""},
+	Cfwinchance: whereHelperint64{field: "\"economy_users\".\"cfwinchance\""},
 }
 
 // EconomyUserRels is where relationship names are stored.
@@ -98,9 +105,9 @@ func (r *economyUserR) GetGuild() *EconomyConfig {
 type economyUserL struct{}
 
 var (
-	economyUserAllColumns            = []string{"guild_id", "user_id", "cash", "bank"}
+	economyUserAllColumns            = []string{"guild_id", "user_id", "cash", "bank", "cfwinchance"}
 	economyUserColumnsWithoutDefault = []string{"guild_id", "user_id", "cash", "bank"}
-	economyUserColumnsWithDefault    = []string{}
+	economyUserColumnsWithDefault    = []string{"cfwinchance"}
 	economyUserPrimaryKeyColumns     = []string{"guild_id", "user_id"}
 	economyUserGeneratedColumns      = []string{}
 )
