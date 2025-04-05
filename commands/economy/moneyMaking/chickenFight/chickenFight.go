@@ -85,7 +85,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		win := false
 		winChance := economyUser.Cfwinchance
-		chance := rand.Int63n(100) + 1 
+		chance := rand.Int63n(100) + 1
 		if chance <= winChance {
 			win = true
 		}

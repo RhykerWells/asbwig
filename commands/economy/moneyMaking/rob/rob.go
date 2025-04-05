@@ -66,7 +66,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		payout := rand.Int63n(victimCash) +1
+		payout := rand.Int63n(victimCash) + 1
 		embed.Description = fmt.Sprintf("You stole %s%s from %s", guild.Symbol, humanize.Comma(payout), member.Mention())
 		cash = cash + payout
 		victimCash = victimCash - payout
