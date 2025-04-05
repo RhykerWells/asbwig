@@ -47,7 +47,7 @@ var Command = &dcommand.AsbwigCommand{
 		cash = cash + functions.ToInt64(payout)
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
 		userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
-		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "crime", ExpiresAt: null.Time{Time: time.Now().Add(3600 * time.Second), Valid: true}}
+		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "work", ExpiresAt: null.Time{Time: time.Now().Add(3600 * time.Second), Valid: true}}
 		cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
