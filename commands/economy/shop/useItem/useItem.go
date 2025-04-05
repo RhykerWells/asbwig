@@ -42,10 +42,10 @@ var Command = &dcommand.AsbwigCommand{
 		quantity := item.Quantity
 		newQuantity := quantity - 1
 		if newQuantity == 0 {
-			_, _ = item.Delete(context.Background(), common.PQ)
+			item.Delete(context.Background(), common.PQ)
 		} else if newQuantity > 0 {
 			item.Quantity = newQuantity
-			_ = item.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
+			item.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
 		}
 		functions.SendBasicMessage(data.ChannelID, item.Reply, 10)
 	},

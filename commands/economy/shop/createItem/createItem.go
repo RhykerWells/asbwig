@@ -13,7 +13,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/sirupsen/logrus"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -43,7 +42,7 @@ var Command = &dcommand.AsbwigCommand{
 			activeSessions[data.Author.ID] = data.ChannelID
 			msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)", Embed: embed})
 			item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, MSGID: msg.ID}
-			_ = item.Insert(context.Background(), common.PQ, boil.Infer())
+			item.Insert(context.Background(), common.PQ, boil.Infer())
 			common.Session.AddHandler(handleMessageCreate)
 			resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 			return
@@ -57,7 +56,7 @@ var Command = &dcommand.AsbwigCommand{
 		activeSessions[data.Author.ID] = data.ChannelID
 		msg, _ := common.Session.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{Content: "Please enter a price for the item", Embed: embed})
 		item := models.EconomyCreateitem{GuildID: data.GuildID, UserID: data.Author.ID, Name: null.StringFrom(data.ArgsNotLowered[0]), MSGID: msg.ID}
-		_ = item.Insert(context.Background(), common.PQ, boil.Infer())
+		item.Insert(context.Background(), common.PQ, boil.Infer())
 		resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 		common.Session.AddHandler(handleMessageCreate)
 	},
@@ -106,7 +105,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Name = null.StringFrom(name)
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
 		embed.Fields = []*discordgo.MessageEmbedField {{Name: "name", Value: name, Inline: true}}
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a price for this item", Embed: embed})
 		return
@@ -119,7 +118,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Price = null.Int64From(functions.ToInt64(price))
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("price"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("price"))
 		priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
 		embed.Fields = append(embed.Fields, priceField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)", Embed: embed})
@@ -132,7 +131,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Description = null.StringFrom(m.Content)
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("description"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("description"))
 		descriptionField := &discordgo.MessageEmbedField{Name: "Description", Value: m.Content}
 		embed.Fields = append(embed.Fields, descriptionField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step", Embed: embed})
@@ -150,7 +149,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			displayQuantity = "Infinite"
 		}
 		createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
 		quantityField := &discordgo.MessageEmbedField{Name: "Stock", Value: displayQuantity}
 		embed.Fields = append(embed.Fields, quantityField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step", Embed: embed})
@@ -170,7 +169,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			displayRole = fmt.Sprintf("<@&%s>", roleID)
 		}
 		createItem.Role = null.StringFrom(roleID)
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("role"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("role"))
 		roleField := &discordgo.MessageEmbedField{Name: "Role given", Value: displayRole}
 		embed.Fields = append(embed.Fields, roleField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What reply should be given when this item is used?", Embed: embed})
@@ -183,7 +182,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Reply = null.StringFrom(m.Content)
-		_, _ = createItem.Update(context.Background(), common.PQ, boil.Whitelist("reply"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist("reply"))
 		replyField := &discordgo.MessageEmbedField{Name: "Reply message", Value: m.Content}
 		embed.Fields = append(embed.Fields, replyField)
 	}
@@ -199,8 +198,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Reply: createItem.Reply.String,
 		Soldby: "0",
 	}
-	err := item.Insert(context.Background(), common.PQ, boil.Infer())
-	logrus.Warnln(err)
+	item.Insert(context.Background(), common.PQ, boil.Infer())
 	delete(activeSessions, m.Author.ID)
 	if timer, exists := activeTimers[m.Author.ID]; exists {
 		timer.Stop()

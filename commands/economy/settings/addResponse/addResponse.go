@@ -58,7 +58,7 @@ func addResponse(data *dcommand.Data) {
 		Type: responseType,
 		Response: response,
 	}
-	_ = responseEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	responseEntry.Insert(context.Background(), common.PQ, boil.Infer())
 	embed.Description = fmt.Sprintf("Successfully added `%s` to your list of responses", response)
 	embed.Color = common.SuccessGreen
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

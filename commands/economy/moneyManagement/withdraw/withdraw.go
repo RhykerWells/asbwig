@@ -60,7 +60,7 @@ var Command = &dcommand.AsbwigCommand{
 		cash = cash + amount
 		bank = bank - amount
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Bank: bank}
-		_ = userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash", "bank"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash", "bank"), boil.Infer())
 		embed.Description = fmt.Sprintf("You Withdrew %s%s from your bank\nThere is now %s%s in your bank", guild.Symbol, humanize.Comma(amount), guild.Symbol, humanize.Comma(bank))
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

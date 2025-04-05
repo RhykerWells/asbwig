@@ -67,10 +67,10 @@ var Command = &dcommand.AsbwigCommand{
 		quantity := inventoryItem.Quantity
 		newQuantity := quantity - 1
 		if newQuantity == 0 {
-			_, _ = inventoryItem.Delete(context.Background(), common.PQ)
+			inventoryItem.Delete(context.Background(), common.PQ)
 		} else if newQuantity > 0 {
 			inventoryItem.Quantity = newQuantity
-			_ = inventoryItem.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
+			inventoryItem.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
 		}
 		embed.Description = fmt.Sprintf("Added %s to the shop. Selling for %s%s!", name, guildConfig.Symbol, humanize.Comma(price))
 		embed.Color = common.SuccessGreen

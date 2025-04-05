@@ -13,8 +13,8 @@ import (
 func guildMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 	guildid := m.GuildID
 	userid := m.Member.User.ID
-	_, _ = models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
-	_, _ = models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
 }
 
 func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
@@ -27,5 +27,5 @@ func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		Cash: guild.Startbalance,
 		Bank: 0,
 	}
-	_ = userEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
 }
