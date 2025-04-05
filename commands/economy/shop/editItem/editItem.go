@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/sirupsen/logrus"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -38,9 +37,9 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		matchedItems, exists := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
-		if exists != nil {
-			embed.Description = "This item doesn't exist"
+		matchedItems, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
+		if len(matchedItems) == 0 {
+			embed.Description = "This item doesn't exist. Use `shop` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -51,7 +50,6 @@ var Command = &dcommand.AsbwigCommand{
 				break
 			}
 		}
-		logrus.Infoln(item)
 		if item == nil {
 			embed.Description = "This item has been sold by a user. You can't edit it"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
