@@ -58,14 +58,14 @@ outer:
 	}
 
 	data := &Data{
-		Session:   s,
-		GuildID:   event.GuildID,
-		ChannelID: event.ChannelID,
-		Author:    event.Author,
-		Args:      args,
-		ArgsNotLowered:	argsNotLowered,
-		Handler:   c,
-		Message:   event.Message,
+		Session:        s,
+		GuildID:        event.GuildID,
+		ChannelID:      event.ChannelID,
+		Author:         event.Author,
+		Args:           args,
+		ArgsNotLowered: argsNotLowered,
+		Handler:        c,
+		Message:        event.Message,
 	}
 
 	go runCommand(cmd, data)

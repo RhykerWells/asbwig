@@ -7,25 +7,25 @@ import (
 )
 
 type AsbwigCommand struct {
-	Command			string
-	Aliases			[]string
-	Description 	string
-	Args			[]*Args
-	ArgsRequired	int
-	Run				Run
-	Data			*Data
+	Command      string
+	Aliases      []string
+	Description  string
+	Args         []*Args
+	ArgsRequired int
+	Run          Run
+	Data         *Data
 }
 
 type CommandHandler struct {
-	cmdInstances 	[]AsbwigCommand
-	cmdMap       	map[string]AsbwigCommand
+	cmdInstances []AsbwigCommand
+	cmdMap       map[string]AsbwigCommand
 }
 
 type RegisteredCommand struct {
-	Trigger		string
-	Aliases		[]string
+	Trigger     string
+	Aliases     []string
 	Description string
-	Args		[]*Args
+	Args        []*Args
 }
 
 func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
@@ -42,14 +42,14 @@ func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
 	}
 }
 
-func (c *CommandHandler) RegisteredCommands() (map[string]RegisteredCommand) {
+func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	cmdMap := make(map[string]RegisteredCommand)
 	for _, cmd := range c.cmdMap {
 		rcmd := &RegisteredCommand{
-			Trigger: 		 cmd.Command,
-			Aliases:		 cmd.Aliases,
-			Description: 	 cmd.Description,
-			Args: 		 	 cmd.Args,
+			Trigger:     cmd.Command,
+			Aliases:     cmd.Aliases,
+			Description: cmd.Description,
+			Args:        cmd.Args,
 		}
 		cmdMap[cmd.Command] = *rcmd
 	}
