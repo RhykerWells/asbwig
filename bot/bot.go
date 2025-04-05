@@ -6,7 +6,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-
 var (
 	gatewayIntentsUsed = discordgo.MakeIntent(
 		discordgo.IntentGuilds |
@@ -22,6 +21,7 @@ var (
 		discordgo.IntentGuildScheduledEvents,
 	)
 )
+
 func Run(s *discordgo.Session) {
 	events.InitEvents()
 	commands.InitCommands(s)
