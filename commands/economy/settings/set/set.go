@@ -8,6 +8,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -25,7 +26,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Setting", Type: dcommand.String},
 		{Name: "Value", Type: dcommand.String},
 	},
-	Run: settings,
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {settings(data)}),
 }
 
 func settings(data *dcommand.Data) {

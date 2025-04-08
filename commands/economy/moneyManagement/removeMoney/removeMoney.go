@@ -7,6 +7,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -24,7 +25,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Place", Type: dcommand.String},
 		{Name: "Amount", Type: dcommand.Int},
 	},
-	Run: func(data *dcommand.Data) {
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
 		if len(data.Args) <= 0 {
@@ -76,5 +77,5 @@ var Command = &dcommand.AsbwigCommand{
 		embed.Description = fmt.Sprintf("You removed %s%s from %ss %s", guild.Symbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-	},
+	}),
 }
