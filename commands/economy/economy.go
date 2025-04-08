@@ -10,6 +10,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/crime"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rob"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/rollNumber"
+	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/russianRoulette"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/snakeEyes"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/work"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyManagement/addMoney"
@@ -48,6 +49,7 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 		crime.Command,
 		rob.Command,
 		rollnumber.Command,
+		russianroulette.Command,
 		snakeeyes.Command,
 		work.Command,
 		//Moneymanagement
