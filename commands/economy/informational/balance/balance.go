@@ -28,7 +28,7 @@ var Command = &dcommand.AsbwigCommand{
 			cash = economyUser.Cash
 			bank = economyUser.Bank
 		}
-		rankQuery := `SELECT position FROM (SELECT user_id, RANK() OVER (ORDER BY cash DESC) AS position FROM economy_cashs WHERE guild_id=$1) AS s WHERE user_id=$2`
+		rankQuery := `SELECT position FROM (SELECT user_id, RANK() OVER (ORDER BY cash DESC) AS position FROM economy_cash WHERE guild_id=$1) AS s WHERE user_id=$2`
 		var rank int64
 		drank := ""
 		row := common.PQ.QueryRow(rankQuery, data.GuildID, data.Author.ID).Scan(&rank)
