@@ -9,6 +9,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -23,7 +24,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Type", Type: dcommand.String},
 		{Name: "Response", Type: dcommand.String},
 	},
-	Run: addResponse,
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {addResponse(data)}),
 }
 
 func addResponse(data *dcommand.Data) {

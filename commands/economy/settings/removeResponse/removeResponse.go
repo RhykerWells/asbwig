@@ -7,6 +7,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -21,10 +22,10 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Type", Type: dcommand.String},
 		{Name: "Response", Type: dcommand.Int},
 	},
-	Run: addResponse,
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {removeResponse(data)}),
 }
 
-func addResponse(data *dcommand.Data) {
+func removeResponse(data *dcommand.Data) {
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 	if len(data.Args) <= 0 {
 		embed.Description = "No `Type` argument provided. Available arguments:\n`Work`, `Crime`"

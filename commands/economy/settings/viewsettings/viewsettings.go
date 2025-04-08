@@ -7,6 +7,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -18,10 +19,10 @@ var Command = &dcommand.AsbwigCommand{
 	Command:     "viewsettings",
 	Category: 	 dcommand.CategoryEconomy,
 	Description: "Changes the settings in the economy",
-	Run:         settings,
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {viewsettings(data)}),
 }
 
-func settings(data *dcommand.Data) {
+func viewsettings(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " settings", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
 	guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
