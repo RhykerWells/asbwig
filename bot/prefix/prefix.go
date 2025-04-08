@@ -1,6 +1,8 @@
 package prefix
 
-import "github.com/RhykerWells/asbwig/common"
+import (
+	"github.com/RhykerWells/asbwig/common"
+)
 
 func GuildPrefix(guild string) string {
 	var prefix string
@@ -17,7 +19,6 @@ func GuildPrefix(guild string) string {
 
 // Adds the default prefix to the database if the guild doesn't have one
 func addDefaultPrefix(guild string) {
-	const query = `INSERT INTO core_config (guild_id, guild_prefix) VALUES ($1, '~')
-	`
+	const query = `INSERT INTO core_config (guild_id, guild_prefix) VALUES ($1, '~')`
 	common.PQ.Exec(query, guild)
 }
