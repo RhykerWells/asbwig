@@ -20,6 +20,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "edititem",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Edits the values of an item in the shop",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},

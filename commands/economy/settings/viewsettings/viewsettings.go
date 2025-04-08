@@ -16,6 +16,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "viewsettings",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Changes the settings in the economy",
 	Run:         settings,
 }

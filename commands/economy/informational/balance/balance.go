@@ -18,6 +18,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "balance",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"bal"},
 	Description: "Views your balance in the economy",
 	Run: (func(data *dcommand.Data) {

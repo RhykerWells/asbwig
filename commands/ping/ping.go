@@ -9,6 +9,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "ping",
+	Category: 	 dcommand.CategoryGeneral,
 	Description: "Displays bot latency",
 	Run: (func(data *dcommand.Data) {
 		msg, err := functions.SendBasicMessage(data.ChannelID, "Ping...")

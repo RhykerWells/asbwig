@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "buyitem",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"buy"},
 	Description: "Buys an item from the shop",
 	Args: []*dcommand.Args{

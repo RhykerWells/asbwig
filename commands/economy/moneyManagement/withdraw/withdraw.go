@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "withdraw",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"with"},
 	Description: "Withdraws a given amount from your bank",
 	Args: []*dcommand.Args{

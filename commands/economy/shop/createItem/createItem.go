@@ -24,6 +24,7 @@ var (
 )
 var Command = &dcommand.AsbwigCommand{
 	Command:     "createitem",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Guided create item",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},

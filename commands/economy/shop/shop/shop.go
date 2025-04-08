@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "shop",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Views the shop for the server",
 	Args: []*dcommand.Args{
 		{Name: "Page", Type: dcommand.Int, Optional: true},

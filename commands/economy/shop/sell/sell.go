@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "sell",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Adds an item from your inventory to the shop for others to buy",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},

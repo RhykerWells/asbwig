@@ -19,6 +19,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "coinflip",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"cf", "flip"},
 	Description: "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
 	Args: []*dcommand.Args{

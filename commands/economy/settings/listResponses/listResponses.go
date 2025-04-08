@@ -16,6 +16,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "listresponses",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Lists all responses for  `work` or `crime`",
 	Args: []*dcommand.Args{
 		{Name: "Type", Type: dcommand.String},

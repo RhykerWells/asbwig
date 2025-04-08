@@ -15,6 +15,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "removeresponse",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Removes a response from being used in `work` or `crime`",
 	Args: []*dcommand.Args{
 		{Name: "Type", Type: dcommand.String},
