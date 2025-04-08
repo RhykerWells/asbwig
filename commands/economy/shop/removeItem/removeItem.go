@@ -6,6 +6,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
@@ -20,7 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "Item", Type: dcommand.String},
 		{Name: "Position", Type: dcommand.String, Optional: true},
 	},
-	Run: func(data *dcommand.Data) {
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		if len(data.Args) <= 0 {
@@ -55,5 +56,5 @@ var Command = &dcommand.AsbwigCommand{
 		embed.Description = "Removed " + name + " successfully!"
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-	},
+	}),
 }
