@@ -9,7 +9,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
-	"github.com/sirupsen/logrus"
 )
 
 var helpCmd = &dcommand.AsbwigCommand{
@@ -58,7 +57,6 @@ func genericCategoryHelp(channelID string) {
 		}
 		return categoryNames[i] < categoryNames[j]
 	})
-	logrus.Warnln(categories)
 
 	helpEmbed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
