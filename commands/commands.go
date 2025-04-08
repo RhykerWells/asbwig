@@ -18,6 +18,7 @@ func InitCommands(session *discordgo.Session) {
 
 	cmdHandler.RegisterCommands(
 		helpCmd,
+		prefixCmd,
 
 		ping.Command,
 		invite.Command,
