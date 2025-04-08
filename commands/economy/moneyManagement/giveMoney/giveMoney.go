@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "givemoney",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"loan"},
 	Description: "Gives money to a specified users cash balance from your cash",
 	Args: []*dcommand.Args{

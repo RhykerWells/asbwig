@@ -6,14 +6,35 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	CategoryGeneral = CommandCategory{
+		Name:        "General",
+		Description: "General bot commands",
+	}
+	CategoryOwner = CommandCategory {
+		Name: "Owner",
+		Description: "Mainanance and other bot-owner commands",
+	}
+	CategoryEconomy = CommandCategory {
+		Name: "Economy",
+		Description: "Gambling and other economy based commands",
+	}
+)
+
 type AsbwigCommand struct {
 	Command      string
+	Category	 CommandCategory
 	Aliases      []string
 	Description  string
 	Args         []*Args
 	ArgsRequired int
 	Run          Run
 	Data         *Data
+}
+
+type CommandCategory struct {
+	Name        string
+	Description string
 }
 
 type CommandHandler struct {
@@ -23,6 +44,7 @@ type CommandHandler struct {
 
 type RegisteredCommand struct {
 	Trigger     string
+	Category    CommandCategory
 	Aliases     []string
 	Description string
 	Args        []*Args
@@ -47,6 +69,7 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	for _, cmd := range c.cmdMap {
 		rcmd := &RegisteredCommand{
 			Trigger:     cmd.Command,
+			Category:    cmd.Category,
 			Aliases:     cmd.Aliases,
 			Description: cmd.Description,
 			Args:        cmd.Args,

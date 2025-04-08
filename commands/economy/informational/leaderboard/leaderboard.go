@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command: "leaderboard",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases: []string{"lb", "top"},
 	Args: []*dcommand.Args{
 		{Name: "Page", Type: dcommand.Int, Optional: true},

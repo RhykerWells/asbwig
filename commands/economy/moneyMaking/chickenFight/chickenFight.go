@@ -19,6 +19,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "chickenfight",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Chicken fight for a payout of <Bet> with a base payout of 50%. Increases each win up to 70%",
 	Args: []*dcommand.Args{
 		{Name: "Bet", Type: dcommand.Int},

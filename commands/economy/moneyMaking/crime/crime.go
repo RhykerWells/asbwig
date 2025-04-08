@@ -20,6 +20,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "crime",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Pew pew pew",
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}

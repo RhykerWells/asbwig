@@ -31,6 +31,7 @@ type RouletteGame struct {
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "russianroulette",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"rr"},
 	Description: "Russian roulette with up to 6 people\nAll players must join with the same bet\nPayout for winners is `(<Bet>*Players)/winners`",
 	Args: []*dcommand.Args{

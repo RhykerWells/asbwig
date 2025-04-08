@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "inventory",
+	Category: 	 dcommand.CategoryEconomy,
 	Aliases:     []string{"inv"},
 	Description: "Guided create item",
 	Args: []*dcommand.Args{

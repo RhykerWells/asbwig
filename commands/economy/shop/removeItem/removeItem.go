@@ -14,6 +14,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "removeitem",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Views the saved information about an item",
 	Args: []*dcommand.Args{
 		{Name: "Item", Type: dcommand.String},

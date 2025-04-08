@@ -17,6 +17,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "addmoney",
+	Category: 	 dcommand.CategoryEconomy,
 	Description: "Adds money to a specified users cash/bank balance",
 	Args: []*dcommand.Args{
 		{Name: "User", Type: dcommand.User},
