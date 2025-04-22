@@ -14,7 +14,7 @@
 			margin: 0;
 			background-color: #08060d;
 		}
-		.login-button {
+		.account-buttons>a {
 			padding: 2.5rem 5rem;
 			font-size: 2.25rem;
 			color: white;
@@ -23,12 +23,15 @@
 			border-radius: 1rem;
 			cursor: pointer;
 		}
-		.login-button:hover {
+		.account-buttons>a:hover {
 			opacity: 60%;
 		}
 	</style>
 </head>
 <body>
-	<a href="./login" class="login-button">Login</a>
+	<div class="account-buttons">
+		<a href="./login" class="login-button">Login</a>
+		<a href="./logout" class="logout-button">Logout</a>
+	</div>
 </body>
 </html>
