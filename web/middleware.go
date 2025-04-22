@@ -1,33 +1,69 @@
 package web
 
 import (
-	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 )
 
-func generateSessionToken() string {
-	b := make([]byte, 64)
-	_, err := rand.Read(b)
+// setCookie sets the cookie containing the users Oauth2 scope information
+func setCookie(w http.ResponseWriter, userData map[string]interface{}) error {
+	encodedValue, err := encodeCookie(userData)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	// Base64 encode the random bytes
-	return base64.URLEncoding.EncodeToString(b)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "asbwig_userinfo",
+		Value:   encodedValue,
+		Path:    "/",
+		Expires: time.Now().Add(24 * time.Hour),
+	})
+
+	return nil
 }
 
-func setLoginCookie(w http.ResponseWriter, sessionToken string) {
-	// Create a cookie with the session token
-	cookie := &http.Cookie{
-		Name:     "asbwig_session", // Name of the cookie
-		Value:    sessionToken,    // Session token value
-		Path:     "/",             // Make cookie available site-wide
-		HttpOnly: true,            // Make cookie HTTP-only (can't be accessed via JavaScript)
-		Expires:  time.Now().Add(24 * time.Hour), // Set expiration time for 24 hours
+func encodeCookie(data map[string]interface{}) (string, error) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(jsonData), nil
+}
+
+func decodeCookie(encoded string) (map[string]interface{}, error) {
+	decodedBytes, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, err
 	}
 
-	// Add cookie to response
-	http.SetCookie(w, cookie)
+	var data map[string]interface{}
+	if err := json.Unmarshal(decodedBytes, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// checkCookie checks the stored browser cookie and returns the users information or an error
+func checkCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}, error) {
+	cookie, err := r.Cookie("asbwig_userinfo")
+	if err == nil {
+		// Decode and verify cookie
+		userData, err := decodeCookie(cookie.Value)
+		if err == nil {
+			return userData, nil
+		}
+
+		// If decoding failed — clear the bad cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:    "asbwig_userinfo",
+			Value:   "",
+			Path:    "/",
+			Expires: time.Unix(0, 0),
+		})
+	}
+	return nil, errors.New("no cookie provided")
 }
