@@ -15,11 +15,12 @@ var (
 	String = &StringArg{}
 	Int    = &IntArg{}
 	User   = &UserArg{}
+	Channel = &ChannelArg{}
 )
 
 type AnyArg struct{}
 var _ ArgumentType = (*AnyArg)(nil)
-func (s *AnyArg) Help() string {
+func (a *AnyArg) Help() string {
 	return "Any"
 }
 
@@ -31,12 +32,18 @@ func (s *StringArg) Help() string {
 
 type IntArg struct{}
 var _ ArgumentType = (*IntArg)(nil)
-func (s *IntArg) Help() string {
+func (i *IntArg) Help() string {
 	return "Whole number"
 }
 
 type UserArg struct{}
 var _ ArgumentType = (*UserArg)(nil)
-func (s *UserArg) Help() string {
+func (u *UserArg) Help() string {
+	return "Mention/ID"
+}
+
+type ChannelArg struct{}
+var _ ArgumentType = (*ChannelArg)(nil)
+func (c *ChannelArg) Help() string {
 	return "Mention/ID"
 }
