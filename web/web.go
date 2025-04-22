@@ -3,6 +3,7 @@ package web
 import (
 	"io/fs"
 	"net/http"
+	"text/template"
 
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
@@ -21,15 +22,24 @@ func Run() {
 	runWebServer(RootMultiplexer)
 }
 
-func embedHTML(filename string) http.HandlerFunc {
+func embedHTML(filename string, data interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := frontend.HTMLTemplates.ReadFile("templates/" + filename)
+		fileData, err := frontend.HTMLTemplates.ReadFile("templates/" + filename)
 		if err != nil {
 			http.NotFound(w, r)
 			return
 		}
+
+		tmpl, err := template.New(filename).Parse(string(fileData))
+		if err != nil {
+			http.Error(w, "Failed to parse template", http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "text/html")
-		w.Write(data)
+		if err := tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -38,7 +48,7 @@ func runRootMultiplexer() {
 	RootMultiplexer = mux
 
 	// Serve the login page
-	mux.HandleFunc(pat.Get("/"), embedHTML("index.html"))
+	mux.HandleFunc(pat.Get("/"), handleHomePage)
 	mux.HandleFunc(pat.Get("/login"), handleLogin)
 	mux.HandleFunc(pat.Get("/logout"), handleLogout)
 	mux.HandleFunc(pat.Get("/confirm"), confirmLogin)
@@ -47,4 +57,9 @@ func runRootMultiplexer() {
 func runWebServer(multiplexer *goji.Mux) {
 	logrus.Info("Webserver started on :8085")
 	http.ListenAndServe(":8085", multiplexer)
+}
+
+func handleHomePage(w http.ResponseWriter, r *http.Request) {
+	userData, _ := checkCookie(w, r)
+	embedHTML("index.html", map[string]interface{}{"User": userData})(w, r)
 }
