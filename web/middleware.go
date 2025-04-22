@@ -1,12 +1,48 @@
 package web
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
 )
+
+func createCSRF() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+func setCSRF(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "asbwig_csrf",
+		Value:   token,
+		Path:    "/",
+		Expires: time.Now().Add(24 * time.Hour),
+		Secure: true,
+	})
+}
+
+func getCSRF(w http.ResponseWriter, r *http.Request) string {
+	cookie, err := r.Cookie("asbwig_csrf")
+	if err == nil {
+		return cookie.Value
+	}
+
+	// If decoding failed — clear the bad cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:    "asbwig_csrf",
+		Value:   "",
+		Path:    "/",
+		Expires: time.Unix(0, 0),
+		Secure: true,
+	})
+	return ""
+}
 
 // setCookie sets the cookie containing the users Oauth2 scope information
 func setCookie(w http.ResponseWriter, userData map[string]interface{}) error {
@@ -65,5 +101,5 @@ func checkCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}
 			Expires: time.Unix(0, 0),
 		})
 	}
-	return nil, errors.New("no cookie provided")
+	return nil, errors.New("no session ")
 }
