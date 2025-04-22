@@ -9,6 +9,8 @@ var (
 	ConfigBotName     = os.Getenv("ASBWIG_BOTNAME")
 	ConfigBotToken    = os.Getenv("ASBWIG_TOKEN")
 	ConfigBotClientID = os.Getenv("ASBWIG_CLIENTID")
+	ConfigBotSecret   = os.Getenv("ASBWIG_CLIENTSECRET")
+	ConfigASBWIGHost  = os.Getenv("ASBWIG_HOST")
 
 	ConfigPGHost     = os.Getenv("ASBWIG_PGHOST")
 	ConfigPGDB       = os.Getenv("ASBWIG_PGDB")
