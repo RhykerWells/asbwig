@@ -79,3 +79,17 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
+
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	userCookie, err := r.Cookie("asbwig_userinfo")
+	if err != nil {
+		return
+	}
+	deleteCookie(w, userCookie)
+	csrfCookie, err := r.Cookie("asbwig_csrf")
+	if err != nil {
+		return
+	}
+	deleteCookie(w, csrfCookie)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}

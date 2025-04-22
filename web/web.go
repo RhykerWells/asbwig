@@ -40,6 +40,7 @@ func runRootMultiplexer() {
 	// Serve the login page
 	mux.HandleFunc(pat.Get("/"), embedHTML("index.html"))
 	mux.HandleFunc(pat.Get("/login"), handleLogin)
+	mux.HandleFunc(pat.Get("/logout"), handleLogout)
 	mux.HandleFunc(pat.Get("/confirm"), confirmLogin)
 }
 
