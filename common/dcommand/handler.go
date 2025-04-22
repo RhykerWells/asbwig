@@ -1,10 +1,14 @@
 package dcommand
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
+	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	prfx "github.com/RhykerWells/asbwig/bot/prefix"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )
@@ -109,17 +113,91 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 }
 
 func runCommand(cmd AsbwigCommand, data *Data) {
-	argCount := len(data.Args)
-	if argCount < cmd.ArgsRequired {
-		functions.SendBasicMessage(data.ChannelID, "Not enough arguments passed")
-		return
-	}
-
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
 		"Command":         cmd.Command,
 		"Triggering user": data.Author.ID},
 	).Infoln("Executed command")
 
+	argCount := len(data.Args)
+	if argCount < cmd.ArgsRequired {
+		handleMissingArgs(cmd, data)
+		return
+	}
+	if embed, invalid := handleInvalidArgs(cmd, data); invalid {
+		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		return
+	}
+
 	cmd.Run(data)
+}
+
+func handleMissingArgs(cmd AsbwigCommand, data *Data) {
+	args := cmd.Args
+	var missingArgs []*Args
+	for _, arg := range args {
+		if arg.Optional {
+			continue
+		}
+		missingArgs = append(missingArgs, arg)
+	}
+	var argDisplay string
+	for _, arg := range missingArgs {
+		argDisplay += fmt.Sprintf("<%s:%s> ", arg.Name, arg.Type.Help())
+	}
+	embedDescription := fmt.Sprintf("Missing required args\n```%s %s```", cmd.Command, argDisplay)
+	embed := &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:	data.Author.Username + " - " + cmd.Command,
+			IconURL: data.Author.AvatarURL("256"),
+		},
+		Description: embedDescription,
+		Color: common.ErrorRed,
+	}
+	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+}
+
+func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, bool) {
+	for i, arg := range cmd.Args {
+		input := data.Args[i]
+		switch reflect.TypeOf(arg.Type).String() {
+		case "*dcommand.IntArg":
+			if functions.ToInt64(input) <= 0 {
+				return errorEmbed(data, "Invalid `Integer` argument provided.\nPlease provide a whole number above 0."), true
+			}
+		case "*dcommand.UserArg":
+			if _, err := functions.GetMember(data.GuildID, input); err != nil {
+				return errorEmbed(data, "Invalid `User` argument provided.\nPlease provide a user mention or ID."), true
+			}
+		case "*dcommand.ChannelArg":
+			if _, err := functions.GetChannel(data.GuildID, input); err != nil {
+				return errorEmbed(data, "Invalid `Channel` argument provided.\nPlease provide a channel mention or ID."), true
+			}
+		case "*dcommand.BetArg":
+			if functions.ToInt64(input) <= 0 && input != "all" && input != "max" {
+				return errorEmbed(data, "Invalid `Bet` argument provided.\nPlease provide a whole number, `all`, or `max`."), true
+			}
+		case "*dcommand.CoinSideArg":
+			if input != "heads" && input != "tails" {
+				return errorEmbed(data, "Invalid `coinSide` argument provided.\nPlease provide `heads` or `tails`."), true
+			}
+		case "*dcommand.BalanceArg":
+			if input != "cash" && input != "bank" {
+				return errorEmbed(data, "Invalid `userBalance` argument provided.\nPlease provide `cash` or `bank`."), true
+			}
+		default:
+			return errorEmbed(data, "Something went wrong handling the arguments."), true
+		}
+	}
+	// Return nil if no errors
+	return nil, false
+}
+
+func errorEmbed(data *Data, description string) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Author:      &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")},
+		Timestamp:   time.Now().Format(time.RFC3339),
+		Color:       common.ErrorRed,
+		Description: description,
+	}
 }
