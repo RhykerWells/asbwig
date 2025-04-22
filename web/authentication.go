@@ -36,16 +36,21 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	url := OauthConf.AuthCodeURL("a", oauth2.AccessTypeOnline)
+	csrfToken, err := createCSRF()
+	if err != nil {
+		return
+	}
+	setCSRF(w, csrfToken)
+	url := OauthConf.AuthCodeURL(csrfToken, oauth2.AccessTypeOnline)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 // confirmLogin handles the successful Discord Oauth login
 func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
+	csrf := getCSRF(w, r)
 	state := r.URL.Query().Get("state")
-	if state != "a" {
+	if state != csrf {
 		http.Redirect(w, r, "/?error=invalid_CSRF", http.StatusTemporaryRedirect)
 		return
 	}
