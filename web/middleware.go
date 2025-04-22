@@ -103,3 +103,10 @@ func checkCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}
 	}
 	return nil, errors.New("no session ")
 }
+
+// deleteCookie deletes the specified HTTP cookie from local storage
+func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
+	cookie.Value = "none"
+	cookie.Path = "/"
+	http.SetCookie(w, cookie)
+}
