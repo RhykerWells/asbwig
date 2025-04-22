@@ -92,6 +92,21 @@ func DeleteMessage(channelID, messageID string, delay ...time.Duration) error {
 	return err
 }
 
+// Channel functions
+
+// GetChannel returns the channel object if possible from a channel ID
+func GetChannel(guildID, channel string) (*discordgo.Channel, error) {
+	if strings.HasPrefix(channel, "<@") {
+		channel = channel[2 : len(channel)-1]
+	}
+	guildChannels, _ := common.Session.GuildChannels(guildID)
+	c, err := common.Session.Channel(channel)
+	if slices.Contains(guildChannels, c) {
+		return c, nil
+	}
+	return nil, err
+}
+
 // User functions
 
 // GetUser returns the user object if possible of a user ID
