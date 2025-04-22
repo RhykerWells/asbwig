@@ -42,17 +42,7 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		if len(data.Args) <= 0 {
-			embed.Description = "No `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		amount := data.Args[0]
-		if functions.ToInt64(amount) <= 0 && amount != "all" && amount != "max" {
-			embed.Description = "Invalid `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		bet := int64(0)
 		if amount == "all" {
 			bet = cash
