@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/RhykerWells/asbwig/common"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
@@ -27,14 +26,9 @@ func initDiscordOauth() {
 
 // handleLogin will check for the users signin cookie, if it exists, automatically log them in, if not they are redirected to the login portal
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-	userData, err := checkCookie(w, r)
+	_, err := checkCookie(w, r)
 	if err == nil {
-		userJson, err := json.MarshalIndent(userData, "", "  ")
-		if err == nil {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-			logrus.Info(string(userJson))
-			return
-		}
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 	csrfToken, err := createCSRF()
 	if err != nil {
@@ -72,8 +66,6 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 
 	var userData map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&userData)
-	userJson, _ := json.MarshalIndent(userData, "", "  ")
-	logrus.Info(string(userJson))
 
 	setCookie(w, userData)
 
