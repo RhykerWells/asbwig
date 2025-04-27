@@ -124,9 +124,11 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 		handleMissingArgs(cmd, data)
 		return
 	}
-	if embed, invalid := handleInvalidArgs(cmd, data); invalid {
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
+	if argCount > 0 {
+		if embed, invalid := handleInvalidArgs(cmd, data); invalid {
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+			return
+		}
 	}
 
 	cmd.Run(data)
