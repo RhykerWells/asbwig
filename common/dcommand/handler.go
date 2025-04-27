@@ -161,6 +161,8 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 	for i, arg := range cmd.Args {
 		input := data.Args[i]
 		switch reflect.TypeOf(arg.Type).String() {
+		case "*dcommand.StringArg":
+			return nil, false
 		case "*dcommand.IntArg":
 			if functions.ToInt64(input) <= 0 {
 				return errorEmbed(data, "Invalid `Integer` argument provided.\nPlease provide a whole number above 0."), true
