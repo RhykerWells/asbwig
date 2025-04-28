@@ -17,6 +17,7 @@ var (
 	User   = &UserArg{}
 	Channel = &ChannelArg{}
 	Bet = &BetArg{}
+	Money = &MoneyArg{}
 	CoinSide = &CoinSideArg{}
 	UserBalance = &BalanceArg{}
 )
