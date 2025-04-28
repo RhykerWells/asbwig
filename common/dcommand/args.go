@@ -17,7 +17,6 @@ var (
 	User   = &UserArg{}
 	Channel = &ChannelArg{}
 	Bet = &BetArg{}
-	Money = &MoneyArg{}
 	CoinSide = &CoinSideArg{}
 	UserBalance = &BalanceArg{}
 )
@@ -37,7 +36,7 @@ func (s *StringArg) Help() string {
 type IntArg struct{}
 var _ ArgumentType = (*IntArg)(nil)
 func (i *IntArg) Help() string {
-	return "Whole number"
+	return "Whole number above 0"
 }
 
 type UserArg struct{}
@@ -56,12 +55,6 @@ type BetArg struct{}
 var _ ArgumentType = (*BetArg)(nil)
 func (b *BetArg) Help() string {
 	return "Whole integer|max|all"
-}
-
-type MoneyArg struct{}
-var _ ArgumentType = (*MoneyArg)(nil)
-func (m *MoneyArg) Help() string {
-	return "Whole integer above 0"
 }
 
 type CoinSideArg struct{}
