@@ -182,6 +182,10 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 			if input != "cash" && input != "bank" {
 				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide `cash` or `bank`.", errorMessage)), true
 			}
+		case "*dcommand.ResponseType":
+			if input != "work" && input != "crime" {
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide `work` or `crime`", errorMessage)), true
+			}
 		default:
 			return errorEmbed(cmd.Command, data, "Something went wrong handling the arguments."), true
 		}

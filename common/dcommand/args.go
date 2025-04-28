@@ -19,6 +19,7 @@ var (
 	Bet = &BetArg{}
 	CoinSide = &CoinSideArg{}
 	UserBalance = &BalanceArg{}
+	ResponseType = &ResponseArg{}
 )
 
 type AnyArg struct{}
@@ -67,4 +68,10 @@ type BalanceArg struct{}
 var _ ArgumentType = (*BalanceArg)(nil)
 func (b *BalanceArg) Help() string {
 	return "Bank/Cash"
+}
+
+type ResponseArg struct{}
+var _ ArgumentType = (*ResponseArg)(nil)
+func (r *ResponseArg) Help() string {
+	return "Work/Crime"
 }
