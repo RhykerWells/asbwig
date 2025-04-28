@@ -20,8 +20,10 @@ var Command = &dcommand.AsbwigCommand{
 	Category: 	 dcommand.CategoryEconomy,
 	Description: "Lists all responses for  `work` or `crime`",
 	Args: []*dcommand.Args{
-		{Name: "Type", Type: dcommand.String},
+		{Name: "Type", Type: dcommand.ResponseType},
+		{Name: "Page", Type: dcommand.Int, Optional: true},
 	},
+	ArgsRequired: 1,
 	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {listResponses(data)}),
 }
 
@@ -29,17 +31,7 @@ func listResponses(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + "responses", IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "responses_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "responses_forward"}}}}
-	if len(data.Args) <= 0 {
-		embed.Description = "No `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	responseType := data.Args[0]
-	if responseType != "work" && responseType != "crime" {
-		embed.Description = "Invalid `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	embedAuthor := fmt.Sprintf("%s %s-responses", guild.Name, responseType)
 	page := 1
 	if len(data.Args) > 1 {
