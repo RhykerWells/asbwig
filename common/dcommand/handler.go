@@ -147,59 +147,55 @@ func handleMissingArgs(cmd AsbwigCommand, data *Data) {
 	for _, arg := range missingArgs {
 		argDisplay += fmt.Sprintf("<%s:%s> ", arg.Name, arg.Type.Help())
 	}
-	embedDescription := fmt.Sprintf("Missing required args\n```%s %s```", cmd.Command, argDisplay)
-	embed := &discordgo.MessageEmbed{
-		Author: &discordgo.MessageEmbedAuthor{
-			Name:	data.Author.Username + " - " + cmd.Command,
-			IconURL: data.Author.AvatarURL("256"),
-		},
-		Description: embedDescription,
-		Color: common.ErrorRed,
-	}
+	embed := errorEmbed(cmd.Command, data, fmt.Sprintf("Missing required args\n```%s %s```", cmd.Command, argDisplay))
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
 
 func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, bool) {
 	for i, arg := range cmd.Args {
 		input := data.Args[i]
+		errorMessage := fmt.Sprintf("Invalid `%s` arg provided.", arg.Name)
 		switch reflect.TypeOf(arg.Type).String() {
 		case "*dcommand.StringArg":
 			return nil, false
 		case "*dcommand.IntArg":
 			if functions.ToInt64(input) <= 0 {
-				return errorEmbed(data, "Invalid `Integer` argument provided.\nPlease provide a whole number above 0."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a whole number above 0.", errorMessage)), true
 			}
 		case "*dcommand.UserArg":
 			if _, err := functions.GetMember(data.GuildID, input); err != nil {
-				return errorEmbed(data, "Invalid `User` argument provided.\nPlease provide a user mention or ID."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a user mention or ID.", errorMessage)), true
 			}
 		case "*dcommand.ChannelArg":
 			if _, err := functions.GetChannel(data.GuildID, input); err != nil {
-				return errorEmbed(data, "Invalid `Channel` argument provided.\nPlease provide a channel mention or ID."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a channel mention or ID.", errorMessage)), true
 			}
 		case "*dcommand.BetArg":
 			if functions.ToInt64(input) <= 0 && input != "all" && input != "max" {
-				return errorEmbed(data, "Invalid `Bet` argument provided.\nPlease provide a whole number, `all`, or `max`."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a whole number, `all`, or `max`.", errorMessage)), true
 			}
 		case "*dcommand.CoinSideArg":
 			if input != "heads" && input != "tails" {
-				return errorEmbed(data, "Invalid `coinSide` argument provided.\nPlease provide `heads` or `tails`."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide `heads` or `tails`.", errorMessage)), true
 			}
 		case "*dcommand.BalanceArg":
 			if input != "cash" && input != "bank" {
-				return errorEmbed(data, "Invalid `userBalance` argument provided.\nPlease provide `cash` or `bank`."), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide `cash` or `bank`.", errorMessage)), true
 			}
 		default:
-			return errorEmbed(data, "Something went wrong handling the arguments."), true
+			return errorEmbed(cmd.Command, data, "Something went wrong handling the arguments."), true
 		}
 	}
 	// Return nil if no errors
 	return nil, false
 }
 
-func errorEmbed(data *Data, description string) *discordgo.MessageEmbed {
+func errorEmbed(cmd string, data *Data, description string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Author:      &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")},
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:	data.Author.Username + " - " + cmd,
+			IconURL: data.Author.AvatarURL("256"),
+		},
 		Timestamp:   time.Now().Format(time.RFC3339),
 		Color:       common.ErrorRed,
 		Description: description,
