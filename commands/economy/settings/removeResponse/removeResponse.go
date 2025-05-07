@@ -19,30 +19,16 @@ var Command = &dcommand.AsbwigCommand{
 	Category: 	 dcommand.CategoryEconomy,
 	Description: "Removes a response from being used in `work` or `crime`",
 	Args: []*dcommand.Args{
-		{Name: "Type", Type: dcommand.String},
+		{Name: "Type", Type: dcommand.ResponseType},
 		{Name: "Response", Type: dcommand.Int},
 	},
+	ArgsRequired: 2,
 	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {removeResponse(data)}),
 }
 
 func removeResponse(data *dcommand.Data) {
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-	if len(data.Args) <= 0 {
-		embed.Description = "No `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	responseType := data.Args[0]
-	if responseType != "work" && responseType != "crime" {
-		embed.Description = "Invalid `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
-	if len(data.Args) <= 1 {
-		embed.Description = "No `Response` argument provided. To view your responses. Use the `listresponses` command"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	responseToDelete := data.Args[1]
 	if functions.ToInt64(responseToDelete) <= 0 {
 		embed.Description = "Invalid `Response` argument provided. To view your responses. Use the `listresponses` command"

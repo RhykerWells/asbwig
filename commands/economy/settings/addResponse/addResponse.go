@@ -21,30 +21,16 @@ var Command = &dcommand.AsbwigCommand{
 	Category: 	 dcommand.CategoryEconomy,
 	Description: "Adds a new response to use in `work` or `crime`",
 	Args: []*dcommand.Args{
-		{Name: "Type", Type: dcommand.String},
+		{Name: "Type", Type: dcommand.ResponseType},
 		{Name: "Response", Type: dcommand.String},
 	},
+	ArgsRequired: 2,
 	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {addResponse(data)}),
 }
 
 func addResponse(data *dcommand.Data) {
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-	if len(data.Args) <= 0 {
-		embed.Description = "No `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	responseType := data.Args[0]
-	if responseType != "work" && responseType != "crime" {
-		embed.Description = "Invalid `Type` argument provided. Available arguments:\n`Work`, `Crime`"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
-	if len(data.Args) <= 1 {
-		embed.Description = "No `Response` argument provided. Please include the exact string `(amount)` as a placeholder for where the amount goes"
-		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-		return
-	}
 	response := strings.Join(data.ArgsNotLowered[1:], " ")
 	for _, char := range "\"" {
 		response = strings.ReplaceAll(response, string(char), "")

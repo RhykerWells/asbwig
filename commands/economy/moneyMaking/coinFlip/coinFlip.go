@@ -23,9 +23,10 @@ var Command = &dcommand.AsbwigCommand{
 	Aliases:     []string{"cf", "flip"},
 	Description: "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
 	Args: []*dcommand.Args{
-		{Name: "Bet", Type: dcommand.Int},
-		{Name: "betSide", Type: dcommand.String},
+		{Name: "Bet", Type: dcommand.Bet},
+		{Name: "betSide", Type: dcommand.CoinSide},
 	},
+	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type='coinflip'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
@@ -42,17 +43,7 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		if len(data.Args) <= 0 {
-			embed.Description = "No `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		amount := data.Args[0]
-		if functions.ToInt64(amount) <= 0 && amount != "all" && amount != "max" {
-			embed.Description = "Invalid `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		bet := int64(0)
 		if amount == "all" {
 			bet = cash
@@ -75,17 +66,7 @@ var Command = &dcommand.AsbwigCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if len(data.Args) <= 1 {
-			embed.Description = "No `betSide` argument provided\nSides available: `heads` or `tails`."
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		betSide := data.Args[1]
-		if betSide != "heads" && betSide != "tails" {
-			embed.Description = "Invalid `betSide` argument provided\nSides available: `heads` or `tails`."
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		if rand.Int63n(2) == 1 {
 			cash = cash + bet
 			embed.Description = fmt.Sprintf("You flipped %s and won %s%s", betSide, guild.Symbol, humanize.Comma(bet))

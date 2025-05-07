@@ -24,6 +24,7 @@ var Command = &dcommand.AsbwigCommand{
 		{Name: "User", Type: dcommand.User},
 		{Name: "Amount", Type: dcommand.Int},
 	},
+	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
@@ -32,28 +33,8 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		if len(data.Args) <= 0 {
-			embed.Description = "No `User` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
-		receiving, err := functions.GetMember(data.GuildID, data.Args[0])
-		if err != nil {
-			embed.Description = "Invalid `User` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
-		if len(data.Args) <= 1 {
-			embed.Description = "No `Amount` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
+		receiving, _ := functions.GetMember(data.GuildID, data.Args[0])
 		amount := data.Args[1]
-		if functions.ToInt64(amount) <= 0 {
-			embed.Description = "Invalid `Amount` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		conversionAmount := functions.ToInt64(amount)
 		if conversionAmount > cash {
 			embed.Description = fmt.Sprintf("You don't have enough cash to give. You have %s%s", guild.Symbol, humanize.Comma(cash))

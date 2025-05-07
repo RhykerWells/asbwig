@@ -23,8 +23,9 @@ var Command = &dcommand.AsbwigCommand{
 	Aliases:     []string{"roll", "rollnum"},
 	Description: "Rolls a number\n**100** = payout of `<bet>*5`\n**90-99** = payout of `<Bet>*3`\n**65-89** = payout of `<Bet>`\n**64 and under** = Loss of `<Bet>`",
 	Args: []*dcommand.Args{
-		{Name: "Bet", Type: dcommand.Int},
+		{Name: "Bet", Type: dcommand.Bet},
 	},
+	ArgsRequired: 1,
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type='rollnumber'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
@@ -41,17 +42,7 @@ var Command = &dcommand.AsbwigCommand{
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		if len(data.Args) <= 0 {
-			embed.Description = "No `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		amount := data.Args[0]
-		if functions.ToInt64(amount) <= 0 && amount != "all" && amount != "max" {
-			embed.Description = "Invalid `Bet` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		bet := int64(0)
 		if amount == "all" {
 			bet = cash
