@@ -1,0 +1,22 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/go:1.23.3 #
+    steps:
+      - checkout  # Checkout the code
+      - run:
+          name: Set up Go modules
+          command: |
+            go mod tidy  # Ensure all modules are correctly fetched
+      - run:
+          name: Build the application
+          command: |
+            go build -o asbwig ./cmd/asbwig  # Build the binary from cmd/asbwig/main.go
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
