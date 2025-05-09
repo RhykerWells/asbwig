@@ -23,6 +23,7 @@ var Command = &dcommand.AsbwigCommand{
 	Args: []*dcommand.Args{
 		{Name: "Amount", Type: dcommand.Int},
 	},
+	ArgsRequired: 1,
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
@@ -32,17 +33,7 @@ var Command = &dcommand.AsbwigCommand{
 			cash = economyUser.Cash
 			bank = economyUser.Bank
 		}
-		if len(data.Args) <= 0 {
-			embed.Description = "No `Amount` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		value := data.Args[0]
-		if functions.ToInt64(value) <= 0 && value != "all" {
-			embed.Description = "Invalid `Amount` argument provided"
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 		var amount int64
 		if value == "all" {
 			amount = bank

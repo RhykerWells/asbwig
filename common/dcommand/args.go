@@ -15,11 +15,16 @@ var (
 	String = &StringArg{}
 	Int    = &IntArg{}
 	User   = &UserArg{}
+	Channel = &ChannelArg{}
+	Bet = &BetArg{}
+	CoinSide = &CoinSideArg{}
+	UserBalance = &BalanceArg{}
+	ResponseType = &ResponseArg{}
 )
 
 type AnyArg struct{}
 var _ ArgumentType = (*AnyArg)(nil)
-func (s *AnyArg) Help() string {
+func (a *AnyArg) Help() string {
 	return "Any"
 }
 
@@ -31,12 +36,42 @@ func (s *StringArg) Help() string {
 
 type IntArg struct{}
 var _ ArgumentType = (*IntArg)(nil)
-func (s *IntArg) Help() string {
-	return "Whole number"
+func (i *IntArg) Help() string {
+	return "Whole number above 0"
 }
 
 type UserArg struct{}
 var _ ArgumentType = (*UserArg)(nil)
-func (s *UserArg) Help() string {
+func (u *UserArg) Help() string {
 	return "Mention/ID"
+}
+
+type ChannelArg struct{}
+var _ ArgumentType = (*ChannelArg)(nil)
+func (c *ChannelArg) Help() string {
+	return "Mention/ID"
+}
+
+type BetArg struct{}
+var _ ArgumentType = (*BetArg)(nil)
+func (b *BetArg) Help() string {
+	return "Whole integer|max|all"
+}
+
+type CoinSideArg struct{}
+var _ ArgumentType = (*CoinSideArg)(nil)
+func (c *CoinSideArg) Help() string {
+	return "Heads/Tails"
+}
+
+type BalanceArg struct{}
+var _ ArgumentType = (*BalanceArg)(nil)
+func (b *BalanceArg) Help() string {
+	return "Bank/Cash"
+}
+
+type ResponseArg struct{}
+var _ ArgumentType = (*ResponseArg)(nil)
+func (r *ResponseArg) Help() string {
+	return "Work/Crime"
 }

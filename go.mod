@@ -1,11 +1,12 @@
 module github.com/RhykerWells/asbwig
 
-go 1.21.0
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/friendsofgo/errors v0.9.2
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/volatiletech/null/v8 v8.1.2
@@ -30,8 +31,8 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 )
