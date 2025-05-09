@@ -7,7 +7,6 @@ toolchain go1.24.1
 require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/friendsofgo/errors v0.9.2
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/volatiletech/null/v8 v8.1.2

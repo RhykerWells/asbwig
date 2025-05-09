@@ -8,7 +8,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -16,7 +15,6 @@ import (
 
 var (
 	PQ   *sql.DB
-	SQLX *sqlx.DB
 
 	SuccessGreen = 0x00ff7b
 	ErrorRed     = 0xFF0000
@@ -77,7 +75,6 @@ func postgresConnect(database string, host string, username string, password str
 	// Initialise database
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable%s", host, username, database, password))
 	PQ = db
-	SQLX = sqlx.NewDb(PQ, "postgres")
 	boil.SetDB(PQ)
 	return err
 }
