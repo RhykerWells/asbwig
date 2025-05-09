@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
@@ -58,5 +59,5 @@ func runWebServer(multiplexer *goji.Mux) {
 
 func handleHomePage(w http.ResponseWriter, r *http.Request) {
 	userData, _ := checkCookie(w, r)
-	embedHTML("index.html", map[string]interface{}{"User": userData})(w, r)
+	embedHTML("index.html", map[string]interface{}{"User": userData, "Year": time.Now().UTC().Year()})(w, r)
 }
