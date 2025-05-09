@@ -14,6 +14,7 @@ import (
 var (
 	RootMultiplexer *goji.Mux
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
+	StaticFiles fs.FS = frontend.StaticFiles
 )
 
 func Run() {
@@ -46,6 +47,8 @@ func embedHTML(filename string, data interface{}) http.HandlerFunc {
 func runRootMultiplexer() {
 	mux := goji.NewMux()
 	RootMultiplexer = mux
+
+	mux.Handle(pat.Get("/static/*"), http.FileServer(http.FS(StaticFiles)))
 
 	// Serve the login page
 	mux.HandleFunc(pat.Get("/"), handleHomePage)
