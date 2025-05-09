@@ -25,20 +25,14 @@ func Run() {
 
 func embedHTML(filename string, data interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fileData, err := frontend.HTMLTemplates.ReadFile("templates/" + filename)
+		tmpl, err := template.ParseFS(frontend.HTMLTemplates, "templates/*.html")
 		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		tmpl, err := template.New(filename).Parse(string(fileData))
-		if err != nil {
-			http.Error(w, "Failed to parse template", http.StatusInternalServerError)
+			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		if err := tmpl.Execute(w, data); err != nil {
+		if err := tmpl.ExecuteTemplate(w, filename, data); err != nil {
 			http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		}
 	}
