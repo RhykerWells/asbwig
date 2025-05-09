@@ -1,39 +1,36 @@
 body {
     font-family: Arial, sans-serif;
-    height: 100vh;
-    margin: 0;
     background-color: #08060d;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-.main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.navbar, footer {
+    background-color: #1e1535!important;
+    border-bottom: 1px solid #404c5e;
 }
-
-.profile {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+.navbar .navbar-login-section {
+    margin-right: 1rem;
 }
-.profile a {
-    padding: 2.5rem 5rem;
-    font-size: 2.25rem;
-    color: white;
+.btn-outline-purple {
+    color: #0c0623;
+    background-color: transparent;
+    background-image: none;
+    border-color: #0c0623;
+}
+.btn-outline-purple:hover {
+    color: #fff;
     background-color: #0c0623;
-    border: none;
-    border-radius: 1rem;
-    cursor: pointer;
-    text-decoration: none;
+    background-image: none;
+    border-color: #0c0623;
 }
-.profile a:hover {
-    opacity: 60%;
+.btn-outline-grey {
+    color: #404c5e;
+    background-color: transparent;
+    background-image: none;
+    border-color: #404c5e;
 }
-.username p {
-    font-size: 1.5rem;
-    color: white;
-    margin: 0;
+.btn-outline-grey:hover {
+    color: #fff;
+    background-color: #404c5e;
+    background-image: none;
+    border-color: #404c5e;
 }
