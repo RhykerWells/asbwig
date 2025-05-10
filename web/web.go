@@ -1,11 +1,13 @@
 package web
 
 import (
+	"encoding/json"
 	"io/fs"
 	"net/http"
 	"text/template"
 	"time"
 
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
 	"goji.io/v3"
@@ -57,6 +59,8 @@ func runRootMultiplexer() {
 }
 
 func runWebServer(multiplexer *goji.Mux) {
+	dashboard(multiplexer)
+
 	logrus.Info("Webserver started on :8085")
 	http.ListenAndServe(":8085", multiplexer)
 }
@@ -72,4 +76,18 @@ func handleTerms(w http.ResponseWriter, r *http.Request) {
 
 func handlePrivacy(w http.ResponseWriter, r *http.Request) {
 	embedHTML("privacy.html", map[string]interface{}{})(w,r)
+}
+
+
+func dashboard(mux *goji.Mux) {
+	// handler pages
+	mux.HandleFunc(pat.Get("/user-guilds"), handleUserGuilds)
+}
+
+func handleUserGuilds(w http.ResponseWriter, r *http.Request) {
+    userData, _ := checkCookie(w, r)
+    guilds := getUserManagedGuilds(common.Session, userData["id"].(string))
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(guilds)
 }
