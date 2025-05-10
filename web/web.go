@@ -53,6 +53,7 @@ func runRootMultiplexer() {
 
 	// Data and service related pages
 	mux.HandleFunc(pat.Get("/terms"), handleTerms)
+	mux.HandleFunc(pat.Get("/privacy-policy"), handlePrivacy)
 }
 
 func runWebServer(multiplexer *goji.Mux) {
@@ -67,4 +68,8 @@ func handleHomePage(w http.ResponseWriter, r *http.Request) {
 
 func handleTerms(w http.ResponseWriter, r *http.Request) {
 	embedHTML("terms.html", map[string]interface{}{})(w,r)
+}
+
+func handlePrivacy(w http.ResponseWriter, r *http.Request) {
+	embedHTML("privacy.html", map[string]interface{}{})(w,r)
 }
