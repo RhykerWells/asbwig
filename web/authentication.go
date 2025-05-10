@@ -40,6 +40,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // confirmLogin handles the successful Discord Oauth login
+// and redirects users to the dashboard
 func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	csrf := getCSRF(w, r)
