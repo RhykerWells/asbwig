@@ -50,6 +50,9 @@ func runRootMultiplexer() {
 	mux.HandleFunc(pat.Get("/login"), handleLogin)
 	mux.HandleFunc(pat.Get("/logout"), handleLogout)
 	mux.HandleFunc(pat.Get("/confirm"), confirmLogin)
+
+	// Data and service related pages
+	mux.HandleFunc(pat.Get("/terms"), handleTerms)
 }
 
 func runWebServer(multiplexer *goji.Mux) {
@@ -60,4 +63,8 @@ func runWebServer(multiplexer *goji.Mux) {
 func handleHomePage(w http.ResponseWriter, r *http.Request) {
 	userData, _ := checkCookie(w, r)
 	embedHTML("index.html", map[string]interface{}{"User": userData, "Year": time.Now().UTC().Year()})(w, r)
+}
+
+func handleTerms(w http.ResponseWriter, r *http.Request) {
+	embedHTML("terms.html", map[string]interface{}{})(w,r)
 }
