@@ -86,12 +86,7 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 	userData, _ := checkCookie(w, r)
     
     // Check that userData["id"] exists and is a string
-    userID, ok := userData["id"].(string)
-    if !ok {
-        // Redirect to the home page if userID is missing
-        http.Redirect(w, r, "/", http.StatusFound)
-        return
-    }
+    userID, _ := userData["id"].(string)
 	// Retrieve the guilds managed by the user
 	guilds := getUserManagedGuilds(common.Session, userID)
 	// Create a map to store guild data (ID and Name)
