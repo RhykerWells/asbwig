@@ -1,0 +1,36 @@
+:root {
+    --basePurple: #08060d;
+    --baseGrey: #121212;
+    --secondaryPurple: #1e1535;
+    --accentPurple: #0c0623;
+    --accentGrey: #1e1e1e;
+
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: var(--basePurple)!important;
+    
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+nav.navbar {
+    background-color: var(--baseGrey)!important;
+}
+
+
+
+.dropdown-menu.logoutarea, .dropdown-menu.selectserverarea {
+    background-color: var(--baseGrey)!important;
+}
+
+.dropdown-item.logoutbtn:hover, .dropdown-item.serverbtn:hover {
+    background-color: var(--accentGrey);
+}
+
+.dropdown-item.serverbtn.noserver {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
