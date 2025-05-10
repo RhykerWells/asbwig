@@ -11,7 +11,7 @@
 
 /* Terms, Privacy etc */
 body {
-    background-color: var(--baseGrey)!important;
+    background-color: var(--baseGrey);
 }
 .policyBody .container {
     max-width: 1200px
