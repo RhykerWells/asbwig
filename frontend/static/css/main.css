@@ -1,8 +1,9 @@
 :root {
     --basePurple: #08060d;
+    --baseGrey: #121212;
     --secondaryPurple: #1e1535;
     --accentPurple: #0c0623;
-    --accentGrey: #121212;
+    --accentGrey: #1e1e1e;
 
     color: white;
     font-family: Arial, Helvetica, sans-serif;
@@ -10,7 +11,7 @@
 
 /* Terms, Privacy etc */
 body {
-    background-color: var(--accentGrey)!important;
+    background-color: var(--baseGrey)!important;
 }
 .policyBody .container {
     max-width: 1200px
@@ -34,7 +35,7 @@ body {
 /* Navbar */
 .navbar-main {
     background-color: var(--secondaryPurple);
-    border-bottom: 1px solid --accentGrey;
+    border-bottom: 1px solid var(--accentGrey);
 }
 .navbar-main .navbar-login-section {
     margin-right: 1rem;
@@ -43,7 +44,7 @@ body {
 /* Footer */
 .footer-main {
     background-color: var(--secondaryPurple);
-    border-top: 1px solid --accentGrey;
+    border-top: 1px solid var(--accentGrey);
 }
 
 .btn-outline-grey {
