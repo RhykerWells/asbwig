@@ -70,7 +70,7 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 
 	setCookie(w, userData)
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 }
 
 func handleLogout(w http.ResponseWriter, r *http.Request) {
