@@ -97,8 +97,15 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
 	// Create a map to store guild data (ID and Name)
 	guildList := make([]map[string]interface{}, 0)
 	for guildID, guildName := range guilds {
+		avatarURL := "./static/img/icons/cross.png"
+		if guild, err := common.Session.Guild(guildID); err == nil {
+			if url := guild.IconURL("1024"); url != "" {
+				avatarURL = url
+			}
+		}
 		guildList = append(guildList, map[string]interface{}{
 			"ID":   guildID,
+			"Avatar": avatarURL,
 			"Name": guildName,
 		})
 	}
