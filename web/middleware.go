@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 func createCSRF() (string, error) {
@@ -109,4 +111,40 @@ func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 	cookie.Value = "none"
 	cookie.Path = "/"
 	http.SetCookie(w, cookie)
+}
+
+// getUserManagedGuilds returns the guild IDs of the guilds that the bot is in
+// where the user has Manage Server or Administrator privileges
+func getUserManagedGuilds(session *discordgo.Session, userID string) map[string]string {
+	managedGuilds := make(map[string]string)
+	for _, guild := range session.State.Guilds {
+        member, err := session.GuildMember(guild.ID, userID)
+        if err != nil {
+            continue
+        }
+        managed := isUserManaged(session, guild.ID, member)
+        if managed {
+			// Store the guild ID and name in the map
+            managedGuilds[guild.ID] = guild.Name
+        }
+    }
+	
+    return managedGuilds
+}
+
+func isUserManaged(session *discordgo.Session, guildID string, member *discordgo.Member) bool {
+	guild, err := session.State.Guild(guildID)
+    if err == nil && guild.OwnerID == member.User.ID {
+        return true
+    }
+	for _, roleID := range member.Roles {
+		role, err := session.State.Role(guildID, roleID)
+		if err == nil {
+			continue
+		}
+		if (role.Permissions&discordgo.PermissionAdministrator != 0) || (role.Permissions&discordgo.PermissionManageServer != 0) {
+            return true
+        }
+	}
+	return false
 }
