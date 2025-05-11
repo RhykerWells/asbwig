@@ -15,14 +15,15 @@ import (
 
 var (
 	RootMultiplexer *goji.Mux
+
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
 	StaticFiles fs.FS = frontend.StaticFiles
 )
 
 func Run() {
 	initDiscordOauth()
-	runRootMultiplexer()
-	runWebServer(RootMultiplexer)
+	multiplexer := setupWebRoutes()
+	runWebServer(multiplexer)
 }
 
 func embedHTML(filename string, data interface{}) http.HandlerFunc {
@@ -38,6 +39,15 @@ func embedHTML(filename string, data interface{}) http.HandlerFunc {
 			http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		}
 	}
+}
+
+func setupWebRoutes() *goji.Mux {
+	// start the base routes, such as logins, static files and such
+	runRootMultiplexer()
+
+	RootMultiplexer.HandleFunc(pat.Get("/dashboard"), handleDashboard)
+
+	return RootMultiplexer
 }
 
 func runRootMultiplexer() {
@@ -58,8 +68,6 @@ func runRootMultiplexer() {
 }
 
 func runWebServer(multiplexer *goji.Mux) {
-	dashboard(multiplexer)
-
 	logrus.Info("Webserver started on :8085")
 	http.ListenAndServe(":8085", multiplexer)
 }
