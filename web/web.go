@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
 	"goji.io/v3"
@@ -17,6 +18,8 @@ var (
 
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
 	StaticFiles fs.FS = frontend.StaticFiles
+
+	URL string = "https://" + common.ConfigASBWIGHost
 )
 
 func Run() {

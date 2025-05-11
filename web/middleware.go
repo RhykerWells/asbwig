@@ -178,6 +178,7 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 		"User": userData,
 		"Guilds": guildList,
 		"Year": time.Now().UTC().Year(),
+		"URL": URL,
 	}
 	return responseData
 }
