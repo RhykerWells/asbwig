@@ -64,6 +64,12 @@ func setupWebRoutes() *goji.Mux {
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage"), embedHTML("manage.html"))
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage/"), embedHTML("manage.html"))
 
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage/core"), embedHTML("core.html"))
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage/core/"), embedHTML("core.html"))
+
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix"), handleUpdatePrefix)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix/"), handleUpdatePrefix)
+
 	return RootMultiplexer
 }
 
