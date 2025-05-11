@@ -143,3 +143,20 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
+
+#prefixInput {
+    background-color: var(--basePurple);
+    --bs-card-inner-border-radius: 0 !important;
+    border: 0.1rem solid var(--accentGrey);
+    border-radius: 10px 0px 0px 10px;
+}
+#prefixInput:focus {
+    outline: none;
+    box-shadow: none;
+}
+#saveButton {
+	background-color: var(--basePurple);
+    --bs-card-inner-border-radius: 0 !important;
+    border: 0.1rem solid var(--accentGrey);
+    border-radius: 0px 10px 10px 0px;
+}
