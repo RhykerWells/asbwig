@@ -1,5 +1,10 @@
 # Your Discord bot token
 ASBWIG_TOKEN=tokenXXXX
+ASBWIG_CLIENTID=clientID
+ASBWIG_CLIENTSECRET=secretXXXX
+
+# Webserver
+ASBWIG_HOST=domain
 
 # Your user ID
 ASBWIG_OWNERID=userID

@@ -1,0 +1,91 @@
+{{define "navbar"}}
+<nav class="navbar navbar-expand-sm navbar-main fixed-top">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="#">
+			<img src="{{.URL}}/static/img/avatar.svg" alt="logo" width="64" height="64">
+		</a>
+		<form class="navbar-login-section d-flex">
+			{{if not .User}}
+			<a class="btn me-2 btn-outline-light" href="{{.URL}}/login">Login</a>
+			{{else}}
+			<a class="btn me-2 btn-outline-light" href="{{.URL}}/logout">Logout</a>
+			{{end}}
+			<a class="btn btn-outline-light" href="{{.URL}}/dashboard">Dashboard</a>
+		</form>
+	</div>
+</nav>
+{{end}}
+{{define "footer"}}
+<footer class="footer-main py-3">
+	<ul class="nav justify-content-center pb-3 mb-3 border-bottom">
+		<li class="nav-item"><a href="{{.URL}}/" class="nav-link px-2 text-light">Home</a></li>
+		<div class="vr"></div>
+		<li class="nav-item"><a href="{{.URL}}/terms" class="nav-link px-2 text-light">Terms of Use</a></li>
+		<li class="nav-item"><a href="{{.URL}}/privacy-policy" class="nav-link px-2 text-light">Privacy policy</a></li>
+	</ul>
+	<p class="text-center text-light">© {{.Year}} Rhyker Wells | All rights reserved</p>
+</footer>
+{{end}}
+{{define "dashboard_nav"}}
+<nav class="navbar navbar-expand-lg sticky-top">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="{{.URL}}/">
+			<img src="{{.URL}}/static/img/avatar.svg" alt="logo" width="35" height="35">
+		</a>
+		<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="navbar-collapse collapse justify-content-end" id="navbarNavDropdown">
+			<ul class="navbar-nav">
+				<!-- Hide this vertical divider on mobile -->
+				<div class="vr d-none d-sm-block me-2"></div>
+				{{if .User}}
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<figure class="profile-picture me-2 mb-0">
+								<img src="{{if not .CurrentGuild}}{{.URL}}/static/img/icons/search.png{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+							</figure>
+							<span class="d-flex flex-column">
+								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
+								<span style="font-size: 0.8rem;">Switch server</span>
+							</span>
+						</a>
+						<ul class="dropdown-menu selectserverarea w-100" aria-labelledby="serverDropdown" style="min-width: auto;">
+							{{if .ManagedGuilds}}
+								{{range .ManagedGuilds}}
+									<li class="d-flex align-items-center gap-2 px-2 py-1">
+										<a class="dropdown-item d-flex align-items-center m-0 p-0 gap-2 text-light serverbtn" href="{{$.URL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word;">
+											<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px;">
+											{{.Name}}
+										</a>
+									</li>
+								{{end}}
+							{{else}}
+								<li><p class="dropdown-item serverbtn">You don't manage any servers</p></li>
+							{{end}}
+						</ul>
+					</li>					
+					<div class="vr d-none d-sm-block me-2 "></div>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<figure class="profile-picture me-2 mb-0">
+								<img src="https://cdn.discordapp.com/avatars/{{.User.id}}/{{.User.avatar}}?size=64" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+							</figure>
+							<span class="d-flex flex-column">
+								<span>{{.User.global_name}}</span>
+							</span>
+						</a>
+						<ul class="dropdown-menu logoutarea" aria-labelledby="navbarDropdown">
+							<li><a class="dropdown-item logoutbtn text-light" href="{{.URL}}/logout">Logout</a></li>
+						</ul>
+					</li>
+				{{else}}
+					<li class="nav-item">
+						<a class="nav-link text-light" href="{{.URL}}/login">Login with Discord</a>
+					</li>
+				{{end}}
+			</ul>
+		</div>
+	</div>
+</nav>
+{{end}}

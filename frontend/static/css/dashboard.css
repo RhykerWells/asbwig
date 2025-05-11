@@ -1,0 +1,162 @@
+:root {
+    --basePurple: #08060d;
+    --baseGrey: #121212;
+    --secondaryPurple: #1e1535;
+    --accentPurple: #0c0623;
+    --accentGrey: #1e1e1e;
+
+    --primaryTetiaryPurple: #0C0815;
+    --secondaryTetiaryPurple: #120D20;
+
+    --logWarn: #fca253;
+    --logMute: #5772be;
+    --logUnmute: #00ff7b;
+    --logKick: #f2a013;
+    --logBan: #d64848;
+    --logUnban: #00ff7b;
+
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+body {
+    background-color: var(--basePurple)!important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+main {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+main::-webkit-scrollbar {
+    width: 10px;
+}
+main::-webkit-scrollbar-track {
+    background: transparent;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+}
+main::-webkit-scrollbar-thumb {
+    background-color: var(--accentGrey);
+    border-radius: 5px;
+    border: 2px solid var(--baseGrey);
+}
+main::-webkit-scrollbar-thumb:hover {
+    background-color: var(--basePurple);
+}
+
+nav.navbar {
+    background-color: var(--baseGrey)!important;
+}
+
+nav.navbar .dropdown-menu.logoutarea, .dropdown-menu.selectserverarea {
+    background-color: var(--baseGrey)!important;
+}
+
+nav.navbar .dropdown-item.logoutbtn:hover, .dropdown-item.serverbtn:hover {
+    background-color: var(--accentGrey);
+}
+
+nav.navbar .dropdown-item.serverbtn.noserver {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
+	position: absolute;
+	right: 1rem; /* keeps it on the right edge */
+}
+
+.card {
+    --bs-card-inner-border-radius: 0 !important;
+    border: 0.2rem solid var(--accentGrey);
+    border-radius: 10px;
+}
+.card-header {
+    background-color: var(--primaryTetiaryPurple);
+    border-bottom-color: var(--accentGrey);
+    border-radius: 5px 5px 0 0 !important;
+}
+.card-body {
+    background-color: var(--secondaryTetiaryPurple);
+    border-radius: 0 0 5px 5px !important;
+}
+.card .btn {
+    background-color: var(--basePurple);
+}
+
+.card.warn .card-header {
+    border-bottom-color: var(--logWarn);
+}
+.card.warn .btn {
+    background-color: var(--logWarn);
+}
+
+.card.mute .card-header {
+    border-bottom-color: var(--logMute);
+}
+.card.mute .btn {
+    background-color: var(--logMute);
+}
+
+.card.unmute .card-header {
+    border-bottom-color: var(--logUnmute);
+}
+.card.unmute .btn {
+    background-color: var(--logUnmute);
+}
+
+.card.kick .card-header {
+    border-bottom-color: var(--logKick);
+}
+.card.kick .btn {
+    background-color: var(--logKick);
+}
+
+.card.ban .card-header {
+    border-bottom-color: var(--logBan);
+}
+.card.ban .btn {
+    background-color: var(--logBan);
+}
+
+.card.unban .card-header {
+    border-bottom-color: var(--logUnban);
+}
+.card.unban .btn {
+    background-color: var(--logUnban);
+}
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#prefixInput {
+    background-color: var(--basePurple);
+    --bs-card-inner-border-radius: 0 !important;
+    border: 0.1rem solid var(--accentGrey);
+    border-radius: 10px 0px 0px 10px;
+}
+#prefixInput:focus {
+    outline: none;
+    box-shadow: none;
+}
+#saveButton {
+	background-color: var(--basePurple);
+    --bs-card-inner-border-radius: 0 !important;
+    border: 0.1rem solid var(--accentGrey);
+    border-radius: 0px 10px 10px 0px;
+}

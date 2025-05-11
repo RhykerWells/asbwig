@@ -9,6 +9,7 @@ import (
 	"github.com/RhykerWells/asbwig/bot"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/asbwig/web"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,6 +17,7 @@ func Init() {
 	err := common.Init()
 	bot.Run(common.Session)
 	common.Run(common.Session)
+	web.Run()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
 	}
