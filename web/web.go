@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	RootMultiplexer *goji.Mux
+	RootMultiplexer      *goji.Mux
 	DashboardMultiplexer *goji.Mux
 
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
-	StaticFiles fs.FS = frontend.StaticFiles
+	StaticFiles   fs.FS = frontend.StaticFiles
 
 	URL string = "https://" + common.ConfigASBWIGHost
 )
@@ -31,7 +31,7 @@ func Run() {
 func embedHTML(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data := dashboardContextData(w, r)
-		
+
 		tmpl, err := template.ParseFS(frontend.HTMLTemplates, "templates/*.html")
 		if err != nil {
 			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
@@ -49,7 +49,20 @@ func setupWebRoutes() *goji.Mux {
 	// start the base routes, such as logins, static files and such
 	runRootMultiplexer()
 
+	// Handle dashboard page
 	RootMultiplexer.HandleFunc(pat.Get("/dashboard"), embedHTML("dashboard.html"))
+	RootMultiplexer.HandleFunc(pat.Get("/dashboard/"), embedHTML("dashboard.html"))
+
+	// Create a sub-mux for dashboard-related routes
+	DashboardMultiplexer = goji.SubMux()
+	DashboardMultiplexer.Use(validateGuild)
+
+	// Server manage pages
+	RootMultiplexer.Handle(pat.New("/dashboard/:server"), DashboardMultiplexer)
+	RootMultiplexer.Handle(pat.New("/dashboard/:server/*"), DashboardMultiplexer)
+
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage"), embedHTML("manage.html"))
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage/"), embedHTML("manage.html"))
 
 	return RootMultiplexer
 }

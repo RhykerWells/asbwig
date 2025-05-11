@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	"goji.io/v3/pat"
@@ -212,4 +214,38 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
 	}
 	return guildData
+}
+
+// validateGuild ensures users can't access the manage page for guilds without the correct permissions
+func validateGuild(inner http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        guildIDStr := pat.Param(r, "server")
+        _, err := strconv.ParseInt(guildIDStr, 10, 64)
+        if err != nil {
+            http.Redirect(w, r, "?error=invalid_guild", http.StatusFound)
+            return
+        }
+
+        userData, err := checkCookie(w, r)
+        if err != nil {
+            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            return
+        }
+
+        userID, _ := userData["id"].(string)
+        user, err := functions.GetMember(guildIDStr, userID)
+        if err != nil {
+            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            return
+        }
+
+        managed := isUserManaged(guildIDStr, user)
+        if !managed {
+            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            return
+        }
+
+        // Call the next handler with the updated context
+        inner.ServeHTTP(w, r)
+    })
 }
