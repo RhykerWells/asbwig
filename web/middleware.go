@@ -160,7 +160,7 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	guilds := getUserManagedGuilds(userID)
 	guildList := make([]map[string]interface{}, 0)
 	for guildID, guildName := range guilds {
-		avatarURL := "./static/img/icons/cross.png"
+		avatarURL := URL + "/static/img/icons/cross.png"
 		if guild, err := common.Session.Guild(guildID); err == nil {
 			if url := guild.IconURL("1024"); url != "" {
 				avatarURL = url
