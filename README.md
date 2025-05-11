@@ -1,7 +1,7 @@
 <p align="center">
   <a href="https://github.com/RhykerWells/asbwig">
     <picture>
-      <img src="./frontend/img/avatar.png" height="128">
+      <img src="./frontend/static/img/avatar.png" height="128">
     </picture>
     <h1 align="center">ASBWIG</h1>
     <h1 align="center">
