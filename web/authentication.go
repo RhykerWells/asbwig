@@ -53,7 +53,7 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	token, err := OauthConf.Exchange(ctx, code)
 	if err != nil {
-		http.Redirect(w, r, "/?error=oauth2failure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/?error=oauth2_failure", http.StatusTemporaryRedirect)
 		return
 	}
 
