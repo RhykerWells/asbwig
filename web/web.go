@@ -88,7 +88,7 @@ func handleDashboard(w http.ResponseWriter, r *http.Request) {
     // Check that userData["id"] exists and is a string
     userID, _ := userData["id"].(string)
 	// Retrieve the guilds managed by the user
-	guilds := getUserManagedGuilds(common.Session, userID)
+	guilds := getUserManagedGuilds(userID)
 	// Create a map to store guild data (ID and Name)
 	guildList := make([]map[string]interface{}, 0)
 	for guildID, guildName := range guilds {

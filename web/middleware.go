@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -114,15 +115,15 @@ func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 }
 
 // getUserManagedGuilds returns the guild IDs of the guilds that the bot is in
-// where the user has Manage Server or Administrator privileges
-func getUserManagedGuilds(session *discordgo.Session, userID string) map[string]string {
+// where the user has Owner, Manage Server or Administrator permissions
+func getUserManagedGuilds(userID string) map[string]string {
 	managedGuilds := make(map[string]string)
-	for _, guild := range session.State.Guilds {
-        member, err := session.GuildMember(guild.ID, userID)
+	for _, guild := range common.Session.State.Guilds {
+        member, err := common.Session.GuildMember(guild.ID, userID)
         if err != nil {
             continue
         }
-        managed := isUserManaged(session, guild.ID, member)
+        managed := isUserManaged(guild.ID, member)
         if managed {
 			// Store the guild ID and name in the map
             managedGuilds[guild.ID] = guild.Name
@@ -132,13 +133,15 @@ func getUserManagedGuilds(session *discordgo.Session, userID string) map[string]
     return managedGuilds
 }
 
-func isUserManaged(session *discordgo.Session, guildID string, member *discordgo.Member) bool {
-	guild, err := session.State.Guild(guildID)
+// isUserManaged returns a boolean of whether or not the user has the permissions to manage the guild
+// Permissions required are: Owner, Manage Server or Administrator 
+func isUserManaged(guildID string, member *discordgo.Member) bool {
+	guild, err := common.Session.State.Guild(guildID)
     if err == nil && guild.OwnerID == member.User.ID {
         return true
     }
 	for _, roleID := range member.Roles {
-		role, err := session.State.Role(guildID, roleID)
+		role, err := common.Session.State.Role(guildID, roleID)
 		if err == nil {
 			continue
 		}
