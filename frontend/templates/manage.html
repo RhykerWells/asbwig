@@ -12,7 +12,25 @@
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{.URL}}/static/css/dashboard.css">
 </head>
-<body class="d-flex flex-column min-vh-100 text-light">
+<body class="text-light">
 	{{template "dashboard_nav" .}}
+	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
+		<div class="m-4 w-100">
+			<h2 style="margin-top: 2px">Primary config</h2>
+			<div class="container-fluid my-4 px-0">
+				<div class="row row-cols-1 row-cols-md-3 g-4">
+					<div class="col">
+						<div class="card">
+							<h5 class="card-header">Core</h5>
+							<div class="card-body">
+								<p class="card-text">Core server settings</p>
+								<a href="{{.URL}}/dashboard/{{.CurrentGuild.ID}}/manage/core" class="btn text-light">Edit core config</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
 </body>
 </html>
