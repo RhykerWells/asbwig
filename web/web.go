@@ -4,7 +4,6 @@ import (
 	"io/fs"
 	"net/http"
 	"text/template"
-	"time"
 
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
@@ -26,8 +25,10 @@ func Run() {
 	runWebServer(multiplexer)
 }
 
-func embedHTML(filename string, data interface{}) http.HandlerFunc {
+func embedHTML(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		data := dashboardContextData(w, r)
+		
 		tmpl, err := template.ParseFS(frontend.HTMLTemplates, "templates/*.html")
 		if err != nil {
 			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
@@ -45,7 +46,7 @@ func setupWebRoutes() *goji.Mux {
 	// start the base routes, such as logins, static files and such
 	runRootMultiplexer()
 
-	RootMultiplexer.HandleFunc(pat.Get("/dashboard"), handleDashboard)
+	RootMultiplexer.HandleFunc(pat.Get("/dashboard"), embedHTML("dashboard.html"))
 
 	return RootMultiplexer
 }
@@ -57,36 +58,17 @@ func runRootMultiplexer() {
 	mux.Handle(pat.Get("/static/*"), http.FileServer(http.FS(StaticFiles)))
 
 	// Serve the login page
-	mux.HandleFunc(pat.Get("/"), handleHomePage)
+	mux.HandleFunc(pat.Get("/"), embedHTML("index.html"))
 	mux.HandleFunc(pat.Get("/login"), handleLogin)
 	mux.HandleFunc(pat.Get("/logout"), handleLogout)
 	mux.HandleFunc(pat.Get("/confirm"), confirmLogin)
 
 	// Data and service related pages
-	mux.HandleFunc(pat.Get("/terms"), handleTerms)
-	mux.HandleFunc(pat.Get("/privacy-policy"), handlePrivacy)
+	mux.HandleFunc(pat.Get("/terms"), embedHTML("terms.html"))
+	mux.HandleFunc(pat.Get("/privacy-policy"), embedHTML("privacy.html"))
 }
 
 func runWebServer(multiplexer *goji.Mux) {
 	logrus.Info("Webserver started on :8085")
 	http.ListenAndServe(":8085", multiplexer)
-}
-
-func handleHomePage(w http.ResponseWriter, r *http.Request) {
-	userData, _ := checkCookie(w, r)
-	embedHTML("index.html", map[string]interface{}{"User": userData, "Year": time.Now().UTC().Year()})(w, r)
-}
-
-func handleTerms(w http.ResponseWriter, r *http.Request) {
-	embedHTML("terms.html", map[string]interface{}{})(w,r)
-}
-
-func handlePrivacy(w http.ResponseWriter, r *http.Request) {
-	embedHTML("privacy.html", map[string]interface{}{})(w,r)
-}
-
-
-func handleDashboard(w http.ResponseWriter, r *http.Request) {
-	dashboardData := dashboardContextData(w, r)
-	embedHTML("dashboard.html", dashboardData)(w,r)
 }
