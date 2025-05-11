@@ -151,3 +151,33 @@ func isUserManaged(guildID string, member *discordgo.Member) bool {
 	}
 	return false
 }
+
+// dashboardContextData returns all the necessary context data that we use within the site into one data map
+func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]interface{} {
+	userData, _ := checkCookie(w, r)
+    userID, _ := userData["id"].(string)
+
+	guilds := getUserManagedGuilds(userID)
+	guildList := make([]map[string]interface{}, 0)
+	for guildID, guildName := range guilds {
+		avatarURL := "./static/img/icons/cross.png"
+		if guild, err := common.Session.Guild(guildID); err == nil {
+			if url := guild.IconURL("1024"); url != "" {
+				avatarURL = url
+			}
+		}
+		guildList = append(guildList, map[string]interface{}{
+			"ID":   guildID,
+			"Avatar": avatarURL,
+			"Name": guildName,
+		})
+	}
+
+	// Marshal the guild data into JSON and write to the response
+	responseData := map[string]interface{}{
+		"User": userData,
+		"Guilds": guildList,
+		"Year": time.Now().UTC().Year(),
+	}
+	return responseData
+}

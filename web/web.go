@@ -6,7 +6,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/frontend"
 	"github.com/sirupsen/logrus"
 	"goji.io/v3"
@@ -15,6 +14,7 @@ import (
 
 var (
 	RootMultiplexer *goji.Mux
+	DashboardMultiplexer *goji.Mux
 
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
 	StaticFiles fs.FS = frontend.StaticFiles
@@ -86,38 +86,7 @@ func handlePrivacy(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func dashboard(mux *goji.Mux) {
-	mux.HandleFunc(pat.Get("/dashboard"), handleDashboard)
-}
-
 func handleDashboard(w http.ResponseWriter, r *http.Request) {
-	userData, _ := checkCookie(w, r)
-    
-    // Check that userData["id"] exists and is a string
-    userID, _ := userData["id"].(string)
-	// Retrieve the guilds managed by the user
-	guilds := getUserManagedGuilds(userID)
-	// Create a map to store guild data (ID and Name)
-	guildList := make([]map[string]interface{}, 0)
-	for guildID, guildName := range guilds {
-		avatarURL := "./static/img/icons/cross.png"
-		if guild, err := common.Session.Guild(guildID); err == nil {
-			if url := guild.IconURL("1024"); url != "" {
-				avatarURL = url
-			}
-		}
-		guildList = append(guildList, map[string]interface{}{
-			"ID":   guildID,
-			"Avatar": avatarURL,
-			"Name": guildName,
-		})
-	}
-
-	// Marshal the guild data into JSON and write to the response
-	responseData := map[string]interface{}{
-		"User": userData,
-		"Guilds": guildList,
-	}
-
-	embedHTML("dashboard.html", responseData)(w,r)
+	dashboardData := dashboardContextData(w, r)
+	embedHTML("dashboard.html", dashboardData)(w,r)
 }
