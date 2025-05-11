@@ -133,3 +133,13 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 .card.unban .btn {
     background-color: var(--logUnban);
 }
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
