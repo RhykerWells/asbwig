@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/bot/prefix"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	"goji.io/v3/pat"
@@ -181,7 +182,7 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	// If a guild is selected, populate a map of data
 	// TODO: host goji internally and modify pat.Param to return blank string instead of panic when param is not found.
 	var guildID string
-	if strings.HasSuffix(r.URL.Path, "/manage") || strings.HasSuffix(r.URL.Path, "/manage/") {
+	if strings.Contains(r.URL.Path, "/manage") {
 		guildID = pat.Param(r, "server")
 	}
 	guildData := getGuildData(guildID)
@@ -222,30 +223,45 @@ func validateGuild(inner http.Handler) http.Handler {
         guildIDStr := pat.Param(r, "server")
         _, err := strconv.ParseInt(guildIDStr, 10, 64)
         if err != nil {
-            http.Redirect(w, r, "?error=invalid_guild", http.StatusFound)
+            http.Redirect(w, r, "/?error=invalid_guild", http.StatusFound)
             return
         }
 
         userData, err := checkCookie(w, r)
         if err != nil {
-            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
             return
         }
 
         userID, _ := userData["id"].(string)
         user, err := functions.GetMember(guildIDStr, userID)
         if err != nil {
-            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
             return
         }
 
         managed := isUserManaged(guildIDStr, user)
         if !managed {
-            http.Redirect(w, r, "?error=no_access", http.StatusFound)
+            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
             return
         }
 
         // Call the next handler with the updated context
         inner.ServeHTTP(w, r)
     })
+}
+
+// handleUpdatePrefix changes the guilds prefix in the database with the one provided from the dashboard
+func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Prefix string `json:"prefix"`
+	}
+	
+	json.NewDecoder(r.Body).Decode(&data)
+
+	server := pat.Param(r, "server") // Extract the server (guild) ID from the URL
+
+	prefix.ChangeGuildPrefix(server, data.Prefix)
+
+	http.Redirect(w, r, "/dashboard/"+server+"/manage/core", http.StatusSeeOther)
 }
