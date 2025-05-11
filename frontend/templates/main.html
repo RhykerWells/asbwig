@@ -41,14 +41,20 @@
 				<div class="vr me-2 d-none d-sm-block"></div>
 				{{if .User}}
 					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle me-2 d-flex align-items-center text-light" href="#" role="button" id="serverDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-							Select server
+						<a class="nav-link dropdown-toggle me-2 d-flex align-items-center text-light position-relative pe-5" href="#" role="button" id="serverDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+							<figure class="profile-picture me-2 mb-0">
+								<img src="{{if not .CurrentGuild}}{{.URL}}/static/img/icons/search.png{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+							</figure>
+							<span class="d-flex flex-column">
+								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
+								<span style="font-size: 0.8rem;">Switch server</span>
+							</span>
 						</a>
 						<ul class="dropdown-menu selectserverarea w-100" aria-labelledby="serverDropdown" style="min-width: auto;">
-							{{if .Guilds}}
-								{{range .Guilds}}
+							{{if .ManagedGuilds}}
+								{{range .ManagedGuilds}}
 									<li class="d-flex align-items-center gap-2 px-2 py-1">
-										<a class="dropdown-item serverbtn m-0 p-0 d-flex align-items-center gap-2 text-light" href="#" style="white-space: normal; word-break: break-word;">
+										<a class="dropdown-item serverbtn m-0 p-0 d-flex align-items-center gap-2 text-light" href="{{$.URL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word;">
 											<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px;">
 											{{.Name}}
 										</a>

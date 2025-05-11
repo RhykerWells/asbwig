@@ -34,3 +34,8 @@ nav.navbar {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
 }
+
+#serverDropdown::after {
+	position: absolute;
+	right: 1rem; /* keeps it on the right edge */
+}
