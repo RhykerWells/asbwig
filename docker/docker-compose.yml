@@ -17,6 +17,8 @@ services:
       - app.env
     depends_on:
       - db
+    ports:
+      - 8085:8085
   db:
     container_name: asbwig-postgres-db
     image: postgres:16
