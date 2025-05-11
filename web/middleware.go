@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
+	"goji.io/v3/pat"
 )
 
 func createCSRF() (string, error) {
@@ -157,6 +159,7 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	userData, _ := checkCookie(w, r)
     userID, _ := userData["id"].(string)
 
+	// Set the list of guilds that the user manages
 	guilds := getUserManagedGuilds(userID)
 	guildList := make([]map[string]interface{}, 0)
 	for guildID, guildName := range guilds {
@@ -173,12 +176,40 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 		})
 	}
 
+	// If a guild is selected, populate a map of data
+	// TODO: host goji internally and modify pat.Param to return blank string instead of panic when param is not found.
+	var guildID string
+	if strings.HasSuffix(r.URL.Path, "/manage") || strings.HasSuffix(r.URL.Path, "/manage/") {
+		guildID = pat.Param(r, "server")
+	}
+	guildData := getGuildData(guildID)
+
 	// Marshal the guild data into JSON and write to the response
 	responseData := map[string]interface{}{
 		"User": userData,
-		"Guilds": guildList,
+		"ManagedGuilds": guildList,
 		"Year": time.Now().UTC().Year(),
 		"URL": URL,
+		"CurrentGuild": guildData,
 	}
 	return responseData
+}
+
+// getGuildData retrieves select data about the guild to use within the manage page of the dashboard
+func getGuildData(guildID string) (guildData map[string]interface{}) {
+	if guildID == "" {
+		return guildData
+	}
+	retrievedGuild, _ := common.Session.Guild(guildID)
+	guildData = map[string]interface{}{
+		"ID": retrievedGuild.ID,
+		"Name": retrievedGuild.Name,
+		"Avatar": retrievedGuild.IconURL("1024"),
+		"Channels": retrievedGuild.Channels,
+		"Roles": retrievedGuild.Roles,
+	}
+	if guildData["Avatar"] == "" {
+		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
+	}
+	return guildData
 }
