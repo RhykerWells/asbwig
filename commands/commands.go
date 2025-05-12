@@ -9,6 +9,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/ping"
 
 	"github.com/RhykerWells/asbwig/commands/botOwner/createInvite"
+	"github.com/RhykerWells/asbwig/commands/botOwner/leaveServer"
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
 
@@ -25,6 +26,7 @@ func InitCommands(session *discordgo.Session) {
 		invite.Command,
 
 		createinvite.Command,
+		leaveserver.Command,
 		setstatus.Command,
 	)
 
