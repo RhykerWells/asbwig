@@ -8,9 +8,11 @@ import (
 	"github.com/RhykerWells/asbwig/commands/invite"
 	"github.com/RhykerWells/asbwig/commands/ping"
 
+	"github.com/RhykerWells/asbwig/commands/botOwner/banServer"
 	"github.com/RhykerWells/asbwig/commands/botOwner/createInvite"
 	"github.com/RhykerWells/asbwig/commands/botOwner/leaveServer"
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
+	"github.com/RhykerWells/asbwig/commands/botOwner/unbanServer"
 )
 
 var cmdHandler *dcommand.CommandHandler
@@ -25,6 +27,8 @@ func InitCommands(session *discordgo.Session) {
 		ping.Command,
 		invite.Command,
 
+		banserver.Command,
+		unbanserver.Command,
 		createinvite.Command,
 		leaveserver.Command,
 		setstatus.Command,
