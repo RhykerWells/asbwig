@@ -4,7 +4,9 @@
 package models
 
 var TableNames = struct {
-	CoreConfig string
+	BannedGuilds string
+	CoreConfig   string
 }{
-	CoreConfig: "core_config",
+	BannedGuilds: "banned_guilds",
+	CoreConfig:   "core_config",
 }

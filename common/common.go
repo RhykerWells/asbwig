@@ -23,12 +23,17 @@ var (
 	Bot     *discordgo.User
 )
 
-const GuildConfigSchema = `
+var CoreSchema = []string{`
 CREATE TABLE IF NOT EXISTS core_config (
 	guild_id BIGINT PRIMARY KEY,
 	guild_prefix TEXT
-)
-`
+);
+`,`
+CREATE TABLE IF NOT EXISTS banned_guilds (
+	guild_id TEXT PRIMARY KEY
+);
+`,
+}
 
 func Init() error {
 	s, err := discordgo.New(ConfigDgoBotToken())
@@ -51,7 +56,7 @@ func Init() error {
 	}
 
 	log.Infof("Initializing DB schema")
-	InitSchema("Core", GuildConfigSchema)
+	InitSchema("Core", CoreSchema...)
 
 	Session = s
 	return err
