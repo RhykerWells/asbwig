@@ -12,6 +12,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Guild functions
+
+// GetGuild returns the full guild object for a guild
+func GetGuild(guildID string) *discordgo.Guild {
+	guild, _ := common.Session.Guild(guildID)
+	return guild
+}
+
 // Message functions
 
 // SendBasicMessage sends a string as message content to the given channel
