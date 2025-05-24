@@ -163,8 +163,12 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a whole number above 0.", errorMessage)), true
 			}
 		case "*dcommand.UserArg":
+			if _, err := functions.GetUser(input); err != nil {
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a valid user mention or ID.", errorMessage)), true
+			}
+		case "*dcommand.MemberArg":
 			if _, err := functions.GetMember(data.GuildID, input); err != nil {
-				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a user mention or ID.", errorMessage)), true
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide a valid user mention or ID.", errorMessage)), true
 			}
 		case "*dcommand.ChannelArg":
 			if _, err := functions.GetChannel(data.GuildID, input); err != nil {
