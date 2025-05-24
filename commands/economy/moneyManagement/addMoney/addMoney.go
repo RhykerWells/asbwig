@@ -21,7 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 	Category: 	 dcommand.CategoryEconomy,
 	Description: "Adds money to a specified users cash/bank balance",
 	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Place", Type: dcommand.UserBalance},
 		{Name: "Amount", Type: dcommand.Int},
 	},

@@ -21,7 +21,7 @@ var Command = &dcommand.AsbwigCommand{
 	Aliases:     []string{"loan"},
 	Description: "Gives money to a specified users cash balance from your cash",
 	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Amount", Type: dcommand.Int},
 	},
 	ArgsRequired: 2,

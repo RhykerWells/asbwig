@@ -23,7 +23,7 @@ var Command = &dcommand.AsbwigCommand{
 	Aliases:     []string{"steal"},
 	Description: "Pew pew pew",
 	Args: []*dcommand.Args{
-		{Name: "Member", Type: dcommand.User},
+		{Name: "Member", Type: dcommand.Member},
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
