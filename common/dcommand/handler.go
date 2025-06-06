@@ -35,7 +35,7 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 		return
 	}
 
-	prefixRemoved := strings.Split(event.Content[len(prefix):], " ")
+	prefixRemoved := strings.Fields(event.Content[len(prefix):])
 	if len(prefixRemoved) < 1 {
 		return
 	}
