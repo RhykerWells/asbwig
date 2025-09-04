@@ -223,14 +223,14 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 func getUrlData() (urlData map[string]interface{}) {
 	u, err := url.Parse(TermsURL)
 	termsURL := URL + "/terms"
-	if err != nil {
-		termsURL = u.RawPath
+	if err == nil {
+		termsURL = u.String()
 	}
 
 	u, err = url.Parse(PrivacyURL)
 	privacyURL := URL + "/privacy"
-	if err != nil {
-		privacyURL = u.RawPath
+	if err == nil {
+		privacyURL = u.String()
 	}
 	urlData = map[string]interface{}{
 		"Home": URL,
