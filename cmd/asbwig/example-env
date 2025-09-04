@@ -7,3 +7,5 @@ export ASBWIG_PGUSER="asbwig"
 export ASBWIG_CLIENTID="clientID"
 export ASBWIG_CLIENTSECRET="secretXXXX"
 export ASBWIG_HOST="your domain here"
+export ASBWIG_ASBWIG_TERMSURLOVERRIDE="your URL here" # optional
+export ASBWIG_PRIVACYURLOVERRIDE="your URL here" # optional
