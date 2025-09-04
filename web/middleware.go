@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -187,12 +188,14 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	}
 	guildData := getGuildData(guildID)
 
+	urls := getUrlData()
+
 	// Marshal the guild data into JSON and write to the response
 	responseData := map[string]interface{}{
 		"User": userData,
 		"ManagedGuilds": guildList,
 		"Year": time.Now().UTC().Year(),
-		"URL": URL,
+		"URLs": urls,
 		"CurrentGuild": guildData,
 	}
 	return responseData
@@ -215,6 +218,27 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
 	}
 	return guildData
+}
+
+func getUrlData() (urlData map[string]interface{}) {
+	u, err := url.Parse(TermsURL)
+	termsURL := "/terms"
+	if err != nil {
+		termsURL = u.RawPath
+	}
+
+	u, err = url.Parse(PrivacyURL)
+	privacyURL := "/privacy"
+	if err != nil {
+		privacyURL = u.RawPath
+	}
+	urlData = map[string]interface{}{
+		"Home": URL,
+		"Terms": termsURL,
+		"Privacy": privacyURL,
+	}
+
+	return urlData
 }
 
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions

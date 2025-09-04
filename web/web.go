@@ -20,6 +20,8 @@ var (
 	StaticFiles   fs.FS = frontend.StaticFiles
 
 	URL string = "https://" + common.ConfigASBWIGHost
+	TermsURL string = common.ConfigTermsURLOverride
+	PrivacyURL string = common.ConfigPrivacyURLOverride
 )
 
 func Run() {
