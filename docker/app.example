@@ -5,8 +5,8 @@ ASBWIG_CLIENTSECRET=secretXXXX
 
 # Webserver
 ASBWIG_HOST=domain
-export ASBWIG_ASBWIG_TERMSURLOVERRIDE= URL here" # Optional
-export ASBWIG_PRIVACYURLOVERRIDE="your URL here" # Optional
+export ASBWIG_TERMSURLOVERRIDE= URL here" # optional
+export ASBWIG_PRIVACYURLOVERRIDE="your URL here" # optional
 
 # Your user ID
 ASBWIG_OWNERID=userID
