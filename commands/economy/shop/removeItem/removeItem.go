@@ -9,13 +9,13 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "removeitem",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Views the saved information about an item",
 	Args: []*dcommand.Args{
 		{Name: "Item", Type: dcommand.String},

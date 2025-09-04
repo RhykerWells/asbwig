@@ -7,9 +7,9 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/models"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 // guildJoin is called when the bot is added to a new guild

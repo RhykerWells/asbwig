@@ -7,8 +7,8 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/RhykerWells/asbwig/common/models"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func OwnerCommand(inner dcommand.Run) dcommand.Run {

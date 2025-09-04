@@ -11,20 +11,20 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "listresponses",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Lists all responses for  `work` or `crime`",
 	Args: []*dcommand.Args{
 		{Name: "Type", Type: dcommand.ResponseType},
 		{Name: "Page", Type: dcommand.Int, Optional: true},
 	},
 	ArgsRequired: 1,
-	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {listResponses(data)}),
+	Run:          util.AdminOrManageServerCommand(func(data *dcommand.Data) { listResponses(data) }),
 }
 
 func listResponses(data *dcommand.Data) {

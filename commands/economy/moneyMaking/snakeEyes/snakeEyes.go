@@ -10,16 +10,16 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "snakeeyes",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Aliases:     []string{"dice"},
 	Description: "Rolls 2 6-sided dice, with a payout of `<Bet>*36` if they both land on 1",
 	Args: []*dcommand.Args{

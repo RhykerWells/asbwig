@@ -8,12 +8,12 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/RhykerWells/asbwig/common/models"
-	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:      "ban",
-	Category:	  dcommand.CategoryOwner,
+	Category:     dcommand.CategoryOwner,
 	Description:  "Bans a server from inviting the bot",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

@@ -10,14 +10,14 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "shop",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Views the shop for the server",
 	Args: []*dcommand.Args{
 		{Name: "Page", Type: dcommand.Int, Optional: true},

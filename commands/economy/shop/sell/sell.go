@@ -9,15 +9,15 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "sell",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Adds an item from your inventory to the shop for others to buy",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},

@@ -8,13 +8,13 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/aarondl/sqlboiler/v4/boil"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var (
-	PQ   *sql.DB
+	PQ *sql.DB
 
 	SuccessGreen = 0x00ff7b
 	ErrorRed     = 0xFF0000
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS core_config (
 	guild_id BIGINT PRIMARY KEY,
 	guild_prefix TEXT
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS banned_guilds (
 	guild_id TEXT PRIMARY KEY
 );

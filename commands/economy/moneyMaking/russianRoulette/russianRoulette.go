@@ -6,16 +6,17 @@ import (
 	"math/rand"
 	"time"
 
+	"slices"
+
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"slices"
 )
 
 var (
@@ -31,7 +32,7 @@ type RouletteGame struct {
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "russianroulette",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Aliases:     []string{"rr"},
 	Description: "Russian roulette with up to 6 people\nAll players must join with the same bet\nPayout for winners is `(<Bet>*Players)/winners`",
 	Args: []*dcommand.Args{
@@ -115,7 +116,7 @@ var Command = &dcommand.AsbwigCommand{
 			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "russianroulette", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
 			cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			time.AfterFunc(2*time.Minute, func() {startGame(data.GuildID, data.ChannelID, data.Author.ID)})
+			time.AfterFunc(2*time.Minute, func() { startGame(data.GuildID, data.ChannelID, data.Author.ID) })
 			return
 		}
 		if bet != game.Bet {
