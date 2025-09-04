@@ -10,9 +10,9 @@ import (
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/common"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {

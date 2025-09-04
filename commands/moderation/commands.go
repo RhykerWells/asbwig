@@ -15,7 +15,7 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/RhykerWells/durationutil"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 // returns a boolean value on the status of the guild moderation

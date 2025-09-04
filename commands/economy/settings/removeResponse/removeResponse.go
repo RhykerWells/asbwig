@@ -10,20 +10,20 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "removeresponse",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Removes a response from being used in `work` or `crime`",
 	Args: []*dcommand.Args{
 		{Name: "Type", Type: dcommand.ResponseType},
 		{Name: "Response", Type: dcommand.Int},
 	},
 	ArgsRequired: 2,
-	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {removeResponse(data)}),
+	Run:          util.AdminOrManageServerCommand(func(data *dcommand.Data) { removeResponse(data) }),
 }
 
 func removeResponse(data *dcommand.Data) {

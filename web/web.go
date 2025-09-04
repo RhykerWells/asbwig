@@ -20,6 +20,8 @@ var (
 	StaticFiles   fs.FS = frontend.StaticFiles
 
 	URL string = "https://" + common.ConfigASBWIGHost
+	TermsURL string = common.ConfigTermsURLOverride
+	PrivacyURL string = common.ConfigPrivacyURLOverride
 )
 
 func Run() {
@@ -100,7 +102,7 @@ func runRootMultiplexer() {
 
 	// Data and service related pages
 	mux.HandleFunc(pat.Get("/terms"), embedHTML("terms.html"))
-	mux.HandleFunc(pat.Get("/privacy-policy"), embedHTML("privacy.html"))
+	mux.HandleFunc(pat.Get("/privacy"), embedHTML("privacy.html"))
 }
 
 func runWebServer(multiplexer *goji.Mux) {

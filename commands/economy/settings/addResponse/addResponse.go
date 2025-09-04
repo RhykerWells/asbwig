@@ -12,20 +12,20 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "addresponse",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Adds a new response to use in `work` or `crime`",
 	Args: []*dcommand.Args{
 		{Name: "Type", Type: dcommand.ResponseType},
 		{Name: "Response", Type: dcommand.String},
 	},
 	ArgsRequired: 2,
-	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {addResponse(data)}),
+	Run:          util.AdminOrManageServerCommand(func(data *dcommand.Data) { addResponse(data) }),
 }
 
 func addResponse(data *dcommand.Data) {

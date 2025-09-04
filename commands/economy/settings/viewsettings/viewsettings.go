@@ -10,16 +10,16 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:     "viewsettings",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Changes the settings in the economy",
-	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {viewsettings(data)}),
+	Run:         util.AdminOrManageServerCommand(func(data *dcommand.Data) { viewsettings(data) }),
 }
 
 func viewsettings(data *dcommand.Data) {

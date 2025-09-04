@@ -8,12 +8,12 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/RhykerWells/asbwig/common/models"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
 	Command:      "unbanserver",
-	Category:	  dcommand.CategoryOwner,
+	Category:     dcommand.CategoryOwner,
 	Description:  "Removes the server ban from inviting the bot",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

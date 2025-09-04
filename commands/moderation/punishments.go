@@ -10,8 +10,8 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 func RefreshMuteSettings(guildID string) {

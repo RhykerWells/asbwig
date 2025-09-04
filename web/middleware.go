@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"sort"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -18,9 +19,9 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"goji.io/v3/pat"
 )
 
@@ -194,15 +195,38 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	}
 	guildData := getGuildData(guildID)
 
+	urls := getUrlData()
+
 	// Marshal the guild data into JSON and write to the response
 	responseData := map[string]interface{}{
 		"User": userData,
 		"ManagedGuilds": guildList,
 		"Year": time.Now().UTC().Year(),
-		"URL": URL,
+		"URLs": urls,
 		"CurrentGuild": guildData,
 	}
 	return responseData
+}
+
+func getUrlData() (urlData map[string]interface{}) {
+	u, err := url.Parse(TermsURL)
+	termsURL := URL + "/terms"
+	if err == nil {
+		termsURL = u.String()
+	}
+
+	u, err = url.Parse(PrivacyURL)
+	privacyURL := URL + "/privacy"
+	if err == nil {
+		privacyURL = u.String()
+	}
+	urlData = map[string]interface{}{
+		"Home": URL,
+		"Terms": termsURL,
+		"Privacy": privacyURL,
+	}
+
+	return urlData
 }
 
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions
@@ -237,7 +261,7 @@ func validateGuild(inner http.Handler) http.Handler {
 		inner.ServeHTTP(w, r)
 	})
 }
-
+// CURRENT
 // getGuildData retrieves select data about the guild to use within the manage page of the dashboard
 func getGuildData(guildID string) (guildData map[string]interface{}) {
 	if guildID == "" {

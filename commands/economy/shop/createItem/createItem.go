@@ -12,11 +12,11 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var (
@@ -25,12 +25,12 @@ var (
 )
 var Command = &dcommand.AsbwigCommand{
 	Command:     "createitem",
-	Category: 	 dcommand.CategoryEconomy,
+	Category:    dcommand.CategoryEconomy,
 	Description: "Guided create item",
 	Args: []*dcommand.Args{
 		{Name: "Name", Type: dcommand.String},
 	},
-	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {itemCreation(data)}),
+	Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) { itemCreation(data) }),
 }
 
 func itemCreation(data *dcommand.Data) {
