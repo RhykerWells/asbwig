@@ -89,7 +89,7 @@ func runRootMultiplexer() {
 
 	// Data and service related pages
 	mux.HandleFunc(pat.Get("/terms"), embedHTML("terms.html"))
-	mux.HandleFunc(pat.Get("/privacy-policy"), embedHTML("privacy.html"))
+	mux.HandleFunc(pat.Get("/privacy"), embedHTML("privacy.html"))
 }
 
 func runWebServer(multiplexer *goji.Mux) {
