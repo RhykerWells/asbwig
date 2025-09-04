@@ -2,15 +2,15 @@
 <nav class="navbar navbar-expand-sm navbar-main fixed-top">
 	<div class="container-fluid">
 		<a class="navbar-brand" href="#">
-			<img src="{{.URL}}/static/img/avatar.svg" alt="logo" width="64" height="64">
+			<img src="{{.URLs.Home}}/static/img/avatar.svg" alt="logo" width="64" height="64">
 		</a>
 		<form class="navbar-login-section d-flex">
 			{{if not .User}}
-			<a class="btn me-2 btn-outline-light" href="{{.URL}}/login">Login</a>
+			<a class="btn me-2 btn-outline-light" href="{{.URLs.Home}}/login">Login</a>
 			{{else}}
-			<a class="btn me-2 btn-outline-light" href="{{.URL}}/logout">Logout</a>
+			<a class="btn me-2 btn-outline-light" href="{{.URLs.Home}}/logout">Logout</a>
 			{{end}}
-			<a class="btn btn-outline-light" href="{{.URL}}/dashboard">Dashboard</a>
+			<a class="btn btn-outline-light" href="{{.URLs.Home}}/dashboard">Dashboard</a>
 		</form>
 	</div>
 </nav>
@@ -18,10 +18,10 @@
 {{define "footer"}}
 <footer class="footer-main py-3">
 	<ul class="nav justify-content-center pb-3 mb-3 border-bottom">
-		<li class="nav-item"><a href="{{.URL}}/" class="nav-link px-2 text-light">Home</a></li>
+		<li class="nav-item"><a href="{{.URLs.Home}}/" class="nav-link px-2 text-light">Home</a></li>
 		<div class="vr"></div>
-		<li class="nav-item"><a href="{{.URL}}/terms" class="nav-link px-2 text-light">Terms of Use</a></li>
-		<li class="nav-item"><a href="{{.URL}}/privacy-policy" class="nav-link px-2 text-light">Privacy policy</a></li>
+		<li class="nav-item"><a href="{{.URLs.Home}}/terms" class="nav-link px-2 text-light">Terms of Use</a></li>
+		<li class="nav-item"><a href="{{.URLs.Home}}/privacy-policy" class="nav-link px-2 text-light">Privacy policy</a></li>
 	</ul>
 	<p class="text-center text-light">© {{.Year}} Rhyker Wells | All rights reserved</p>
 </footer>
@@ -29,8 +29,8 @@
 {{define "dashboard_nav"}}
 <nav class="navbar navbar-expand-lg sticky-top">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="{{.URL}}/">
-			<img src="{{.URL}}/static/img/avatar.svg" alt="logo" width="35" height="35">
+		<a class="navbar-brand" href="{{.URLs.Home}}/">
+			<img src="{{.URLs.Home}}/static/img/avatar.svg" alt="logo" width="35" height="35">
 		</a>
 		<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
@@ -43,7 +43,7 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<figure class="profile-picture me-2 mb-0">
-								<img src="{{if not .CurrentGuild}}{{.URL}}/static/img/icons/search.png{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+								<img src="{{if not .CurrentGuild}}{{.URLs.Home}}/static/img/icons/search.png{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
 							</figure>
 							<span class="d-flex flex-column">
 								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
@@ -76,12 +76,12 @@
 							</span>
 						</a>
 						<ul class="dropdown-menu logoutarea" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item logoutbtn text-light" href="{{.URL}}/logout">Logout</a></li>
+							<li><a class="dropdown-item logoutbtn text-light" href="{{.URLs.Home}}/logout">Logout</a></li>
 						</ul>
 					</li>
 				{{else}}
 					<li class="nav-item">
-						<a class="nav-link text-light" href="{{.URL}}/login">Login with Discord</a>
+						<a class="nav-link text-light" href="{{.URLs.Home}}/login">Login with Discord</a>
 					</li>
 				{{end}}
 			</ul>
