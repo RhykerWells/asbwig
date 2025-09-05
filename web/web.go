@@ -39,6 +39,7 @@ func embedHTML(filename string) http.HandlerFunc {
 			"dict": dict,
 			"inSlice": inSlice,
 			"toJson": toJson,
+			"lower": lower,
 		}
 
 		tmpl, err := template.New("template").Funcs(funcMap).ParseFS(frontend.HTMLTemplates, "templates/*.html")
@@ -75,13 +76,11 @@ func setupWebRoutes() *goji.Mux {
 
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage/core"), embedHTML("core.html"))
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage/core/"), embedHTML("core.html"))
-
-	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation"), embedHTML("moderation.html"))
-	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation/"), embedHTML("moderation.html"))
-
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix"), handleUpdatePrefix)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix/"), handleUpdatePrefix)
 
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation"), embedHTML("moderation.html"))
+	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation/"), embedHTML("moderation.html"))
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration"), handleUpdateModeration)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration/"), handleUpdateModeration)
 
