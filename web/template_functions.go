@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"html/template"
+	"strings"
 )
 
 func dict(pairs ...interface{}) map[int]interface{} {
@@ -44,4 +45,8 @@ func inSlice(val string, slice interface{}) bool {
 func toJson(v interface{}) template.JS {
 	b, _ := json.Marshal(v)
 	return template.JS(b)
+}
+
+func lower(str string) string {
+	return strings.ToLower(str)
 }
