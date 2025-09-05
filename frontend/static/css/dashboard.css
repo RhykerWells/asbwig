@@ -88,11 +88,11 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 .card-header {
 	background-color: var(--primaryTetiaryPurple);
 	border-bottom-color: var(--accentGrey);
-	border-radius: 5px 5px 0 0 !important;
+	border-radius: 7px 7px 0 0 !important;
 }
 .card-body {
 	background-color: var(--secondaryTetiaryPurple);
-	border-radius: 0 0 5px 5px !important;
+	border-radius: 0 0 7px 7px !important;
 }
 .card .btn {
 	background-color: var(--basePurple);
