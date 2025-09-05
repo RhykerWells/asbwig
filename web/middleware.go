@@ -261,7 +261,7 @@ func validateGuild(inner http.Handler) http.Handler {
 		inner.ServeHTTP(w, r)
 	})
 }
-// CURRENT
+
 // getGuildData retrieves select data about the guild to use within the manage page of the dashboard
 func getGuildData(guildID string) (guildData map[string]interface{}) {
 	if guildID == "" {
@@ -462,4 +462,8 @@ func updateRoles(guildID string, roleType string, rolesMap []string) {
 	}
 
 	tx.Commit()
+}
+
+func handleModerationAction(w http.Response, r *http.Request) {
+	
 }
