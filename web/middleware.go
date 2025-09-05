@@ -158,7 +158,7 @@ func isUserManaged(guildID string, member *discordgo.Member) bool {
 		if err == nil {
 			continue
 		}
-		if (role.Permissions&discordgo.PermissionAdministrator != 0) || (role.Permissions&discordgo.PermissionManageServer != 0) {
+		if (role.Permissions&discordgo.PermissionAdministrator != 0) || (role.Permissions&discordgo.PermissionManageGuild != 0) {
 			return true
 		}
 	}
