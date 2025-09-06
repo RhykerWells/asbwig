@@ -47,6 +47,24 @@
 							</div>
 						</div>
 					</div>
+					{{$moderationAction := dict 1 "Warn" 2 "Mute" 3 "Blank" 4 "Kick" 5 "Ban"}}
+					{{range (seq 1 5)}}
+					{{if eq . 3}}
+						<div class="col d-none d-md-flex"></div>
+					{{else}}
+						<div class="col">
+							<div class="card {{index $moderationAction .}}">
+								<div class="card-header">
+									<h5>{{- index $moderationAction . -}}s</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Core {{lower (index $moderationAction .)}} settings</p>
+									<a href="{{$.URLs.Home}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation" class="btn text-light">Edit {{lower (index $moderationAction .)}} config</a>
+								</div>
+							</div>
+						</div>
+					{{end}}
+					{{end}}
 				</div>
 			</div>
 		</div>
