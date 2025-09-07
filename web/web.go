@@ -34,14 +34,7 @@ func Run() {
 func embedHTML(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		contextData := dashboardContextData(w, r)
-		funcMap := template.FuncMap{
-			"seq": seq,
-			"dict": dict,
-			"inSlice": inSlice,
-			"toJson": toJson,
-			"lower": lower,
-		}
-		tmpl := template.New("").Funcs(funcMap)
+		tmpl := template.New("").Funcs(templateFunctions)
 
 		// Parse templates
 		_, err := tmpl.ParseFS(frontend.HTMLTemplates, "templates/*.html")

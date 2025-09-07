@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+var (
+	templateFunctions = map[string]interface{}{
+		"dict": dict,
+		"seq": seq,
+		"inSlice": inSlice,
+		"toJson": toJson,
+		"lower": lower,
+	}
+)
+
 func dict(pairs ...interface{}) map[int]interface{} {
 	result := make(map[int]interface{})
 	for i := 0; i < len(pairs); i += 2 {
