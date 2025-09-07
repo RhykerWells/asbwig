@@ -67,6 +67,7 @@ nav.navbar .dropdown-menu.logoutarea, .dropdown-menu.selectserverarea {
 
 nav.navbar .dropdown-item.logoutbtn:hover, .dropdown-item.serverbtn:hover {
 	background-color: var(--accentGrey);
+	border-radius: 0.25rem;
 }
 
 nav.navbar .dropdown-item.serverbtn.noserver {
@@ -80,8 +81,6 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 }
 
 .card {
-	--bs-card-bg: transparent !important;
-	--bs-card-inner-border-radius: 0 !important;
 	border: 0.2rem solid var(--accentGrey);
 	border-radius: 10px;
 }
@@ -92,7 +91,7 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 }
 .card-body {
 	background-color: var(--secondaryTetiaryPurple);
-	border-radius: 0 0 5px 5px !important;
+	border-radius: 0 0 7px 7px !important;
 }
 .card .btn {
 	background-color: var(--basePurple);
@@ -140,6 +139,27 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 .card.Unban .btn {
 	background-color: var(--logUnban);
 }
+
+.modal-content {
+	border: 0.2rem solid var(--accentGrey);
+	border-radius: 12px;
+}
+.modal-header {
+	background-color: var(--primaryTetiaryPurple);
+	border-bottom: 1px solid var(--accentGrey);
+}
+.modal-body, .modal-footer {
+	background-color: var(--secondaryTetiaryPurple);
+	border: none;
+}
+
+.modal.modal-static .modal-dialog,
+.modal.show.modal-static .modal-dialog,
+.modal.fade.modal-static .modal-dialog {
+	transform: none !important;
+	animation: none !important;
+}
+
 
 .alert {
 	position: fixed;
@@ -241,6 +261,8 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 .slider:before {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+
 
 .knob {
 	position: absolute;
