@@ -17,6 +17,7 @@ var (
 	DashboardMultiplexer *goji.Mux
 
 	HTMLTemplates fs.FS = frontend.HTMLTemplates
+	HTMLPages fs.FS = frontend.HTMLPages
 	StaticFiles   fs.FS = frontend.StaticFiles
 
 	URL string = "https://" + common.ConfigASBWIGHost
@@ -32,8 +33,7 @@ func Run() {
 
 func embedHTML(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data := dashboardContextData(w, r)
-
+		contextData := dashboardContextData(w, r)
 		funcMap := template.FuncMap{
 			"seq": seq,
 			"dict": dict,
@@ -41,16 +41,26 @@ func embedHTML(filename string) http.HandlerFunc {
 			"toJson": toJson,
 			"lower": lower,
 		}
+		tmpl := template.New("").Funcs(funcMap)
 
-		tmpl, err := template.New("template").Funcs(funcMap).ParseFS(frontend.HTMLTemplates, "templates/*.html")
+		// Parse templates
+		_, err := tmpl.ParseFS(frontend.HTMLTemplates, "templates/*.html")
 		if err != nil {
 			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
 			return
 		}
 
+		// Parse pages
+		_, err = tmpl.ParseFS(frontend.HTMLPages, "pages/*.html")
+		if err != nil {
+			http.Error(w, "Failed to parse pages", http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "text/html")
-		if err := tmpl.ExecuteTemplate(w, filename, data); err != nil {
+		if err := tmpl.ExecuteTemplate(w, filename, contextData); err != nil {
 			http.Error(w, "Failed to render template", http.StatusInternalServerError)
+			return
 		}
 	}
 }

@@ -59,7 +59,42 @@
 								</div>
 								<div class="card-body">
 									<p class="card-text">Core {{lower (index $moderationAction .)}} settings</p>
-									<a href="{{$.URLs.Home}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation" class="btn text-light">Edit {{lower (index $moderationAction .)}} config</a>
+									<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{lower (index $moderationAction .)}}Modal">Edit {{lower (index $moderationAction .)}} config</button>
+								</div>
+								<div class="modal fade" id="{{lower (index $moderationAction .)}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+									<div class="modal-dialog modal-dialog-centered modal-lg">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5>{{index $moderationAction .}} settings</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+											</div>
+											<div class="modal-body">
+												<p class="card-text">Required moderator roles</p>
+												<div class="input-group mb-3">
+													<button class="btn dropdown-toggle text-start flex-grow-1 text-white requiredRolesDropdown" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
+														<span id="requiredRolesLabel">Select roles</span>
+													</button>
+													<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;" aria-labelledby="requiredRolesDropdown">
+														{{range $.CurrentGuild.Roles}}
+														{{if or (eq .ID $.CurrentGuild.ID) .Managed}}
+														{{continue}}
+														{{end}}
+														<li>
+															<label class="dropdown-item">
+																<input type="checkbox" class="roleCheckbox me-2" value="{{.ID}}">{{.Name}}
+															</label>
+														</li>
+														{{end}}
+													</ul>
+													<input type="hidden" id="requiredRoles{{index $moderationAction .}}Input">
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close without saving</button>
+												<button type="button" class="btn btn-primary">Save changes</button>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
