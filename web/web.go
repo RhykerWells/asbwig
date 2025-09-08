@@ -84,6 +84,8 @@ func setupWebRoutes() *goji.Mux {
 
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation"), embedHTML("moderation.html"))
 	DashboardMultiplexer.HandleFunc(pat.Get("/manage/moderation/"), embedHTML("moderation.html"))
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/moderation/update"), handleModActionUpdate)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/moderation/update/"), handleModActionUpdate)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration"), handleUpdateModeration)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration/"), handleUpdateModeration)
 

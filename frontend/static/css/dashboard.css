@@ -160,6 +160,14 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 	animation: none !important;
 }
 
+.toast {
+	color: white;
+	border: 0.1rem solid var(--accentGrey);
+}
+.toast-header {
+	border-bottom: 1px solid var(--accentGrey);
+	color: white;
+}
 
 .alert {
 	position: fixed;

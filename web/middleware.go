@@ -16,10 +16,10 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation"
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
-	"github.com/bwmarrin/discordgo"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"github.com/bwmarrin/discordgo"
 	"goji.io/v3/pat"
 )
 
@@ -312,13 +312,51 @@ func updateAllRoles(guildID string, rolesMap map[string][]string) {
 	tx.Commit()
 }
 
-func updateRoles(guildID string, roleType string, rolesMap []string) {
+func handleModActionUpdate(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var data struct {
+		ModAction string `json:"ModAction"`
+		Roles []string `json:"Roles"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]any{
+            "success": false,
+            "error":   "malformed data",
+        })
+		return
+	}
+
+	guildID := pat.Param(r, "server")
+
+	err = updateRoles(guildID, data.ModAction, data.Roles)
+	if err != nil {
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]any{
+            "success": false,
+            "error":   err.Error(),
+        })
+		return
+	}
+
+    w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]any{
+        "success": true,
+        "message": "Saved role config",
+    })
+}
+
+func updateRoles(guildID string, roleType string, rolesMap []string) error {
 	tx, _ := common.PQ.BeginTx(context.Background(), nil)
 	_, err := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", roleType)).DeleteAll(context.Background(), tx)
 
 	if err != nil {
 		tx.Rollback()
-		return
+		return err
 	}
 
 	for _, roleID := range rolesMap {
@@ -330,9 +368,9 @@ func updateRoles(guildID string, roleType string, rolesMap []string) {
 		role.Insert(context.Background(), tx, boil.Infer())
 	}
 
-	tx.Commit()
-}
-
-func handleModerationAction(w http.Response, r *http.Request) {
-	
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }
