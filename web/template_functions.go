@@ -72,7 +72,8 @@ func lower(str string) string {
 // roles: slice of Discord role objects
 // selectedRoleIDs: slice of string IDs of currently selected roles
 // uniqueID: string for the hidden input ID (used to retrieve and store changed data)
-func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniqueID string) template.HTML {
+// highestBotRolePosition: the position of the bots highest role
+func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniqueID string, highestBotRolePosition int) template.HTML {
 	selectedMap := make(map[string]bool)
 	if selectedRoleIDs != nil {
 		if roleIDs, ok := selectedRoleIDs.([]string); ok {
@@ -125,12 +126,19 @@ func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniq
 		if selectedMap[role.ID] {
 			checked = " checked"
 		}
+		disabled := ""
+		disabledMsg := ""
+		if highestBotRolePosition <= role.Position {
+			disabled = " disabled"
+			disabledMsg = " (bot higher than role)"
+		} 
 
-		menu.WriteString(`<li><label class="dropdown-item">`)
-		menu.WriteString(`<input type="checkbox" class="dropDownRoleCheckbox me-2" value="` + role.ID + `"` + checked + `>` + template.HTMLEscapeString(role.Name) + `</label></li>`)
+		menu.WriteString(`<li>`)
+		menu.WriteString(`<label class="dropdown-item` + disabled + `">`)
+		menu.WriteString(`<input type="checkbox" class="dropDownRoleCheckbox me-2" value="` + role.ID + `"` + checked + disabled + `>`)
+		menu.WriteString(template.HTMLEscapeString(role.Name) + disabledMsg)
 		menu.WriteString(`</label></li>`)
 	}
-
 	menu.WriteString(`</ul>`)
 	jsonVal, _ := json.Marshal(selectedRoleIDs)
 	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)

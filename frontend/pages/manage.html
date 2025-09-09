@@ -70,7 +70,7 @@
 											<form id="{{$moderationAction}}Form" method="POST" action="{{$.URLs.Home}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation/update">
 												<div class="modal-body">
 													<p class="card-text">Required moderator roles</p>
-													{{roleOptionsMulti $.CurrentGuild.Roles (index $.CurrentGuild.ModerationConfig.Restrictions $moderationAction) (printf "%sRoles"  $moderationAction)}}
+													{{roleOptionsMulti $.CurrentGuild.Roles (index $.CurrentGuild.ModerationConfig.Restrictions $moderationAction) (printf "%sRoles"  $moderationAction) $.CurrentGuild.BotHighestRolePosition}}
 												</div>
 												<div class="modal-footer">
 													<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close without saving</button>
