@@ -20,6 +20,7 @@ var (
 
 	// Forms content
 		"roleOptionsMulti": roleOptionsMulti,
+		"roleOptionsSingle": roleOptionsSingle,
 	}
 )
 
@@ -66,6 +67,72 @@ func toJson(v interface{}) template.JS {
 
 func lower(str string) string {
 	return strings.ToLower(str)
+}
+
+// roleOptionsSingle generates HTML options for singular role selection
+// roles: slice of Discord role objects
+// selectedRoleID: string ID of currently selected role
+// uniqueID: string for the hidden input ID (used to retrieve and store changed data)
+// highestBotRolePosition: the position of the bots highest role
+func roleOptionsSingle(roles []*discordgo.Role, selectedRoleID string, uniqueID string, highestBotRolePosition int) template.HTML {
+	filteredRoles := make([]*discordgo.Role, 0, len(roles))
+	for _, role := range roles {
+		if role.Managed || role.Name == "@everyone" {
+			continue
+		}
+		filteredRoles = append(filteredRoles, role)
+	}
+	sort.Slice(filteredRoles, func(i, j int) bool {
+		return filteredRoles[i].Position > filteredRoles[j].Position
+	})
+
+	// Button label
+	displayText := "Select role"
+	if len(selectedRoleID) > 0 {
+		label := ""
+		for _, role := range filteredRoles {
+			if selectedRoleID != role.ID {
+				continue
+			}
+			label = role.Name
+			break
+		}
+		if len(label) > 30 {
+			displayText = "1 Selected"
+		} else {
+			displayText = label
+		}
+	}
+
+	var menu strings.Builder
+	menu.WriteString(`<div class="input-group mb-3">`)
+	menu.WriteString(`
+		<button class="btn dropdown-toggle text-start flex-grow-1 text-white" type="button" data-bs-toggle="dropdown" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey); border-top-right-radius: var(--bs-btn-border-radius); border-bottom-right-radius: var(--bs-btn-border-radius);">
+			<span id="` + uniqueID + `Label">` + template.HTMLEscapeString(displayText) + `</span>
+		</button>
+		<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;" aria-labelledby="` + uniqueID + `Dropdown">
+		<li><a class="dropdown-item dropDownRoleSingleItem" data-value="">None</a></li>
+	`)
+
+	for _, role := range filteredRoles {
+		disabled := ""
+		disabledMsg := ""
+		if highestBotRolePosition <= role.Position {
+			disabled = " disabled"
+			disabledMsg = " (bot higher than role)"
+		} 
+
+		menu.WriteString(`<li>`)
+		menu.WriteString(`<a class="dropdown-item dropDownRoleSingleItem` + disabled + `" data-value="` + role.ID + `">`)
+		menu.WriteString(template.HTMLEscapeString(role.Name) + disabledMsg)
+		menu.WriteString(`</a></li>`)
+	}
+
+	menu.WriteString(`</ul>`)
+	jsonVal, _ := json.Marshal(selectedRoleID)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
+	menu.WriteString(`</div>`)
+	return template.HTML(menu.String())
 }
 
 // roleOptionsMulti generates HTML options for multiple role selection
