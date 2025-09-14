@@ -238,7 +238,7 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["User"] = userData
-		tmplData["ManageGuilds"] = guildList
+		tmplData["ManagedGuilds"] = guildList
 
 		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
