@@ -39,7 +39,7 @@ function sendFailureToast(message) {
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
     <div class="toast-body">
-        ${message}
+        ${message} (ask support if you need help)
     </div>
     `;
     container.appendChild(toast)
