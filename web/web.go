@@ -28,7 +28,7 @@ var (
 	dashboardRoutes []func(*goji.Mux)
 )
 
-type CtxKey = int
+type CtxKey int
 
 const (
 	CtxKeyTmplData CtxKey = iota
