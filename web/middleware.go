@@ -7,18 +7,13 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
+	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/bot/prefix"
-	"github.com/RhykerWells/asbwig/commands/moderation"
-	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
-	"github.com/aarondl/null/v8"
-	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"goji.io/v3/pat"
 )
@@ -196,181 +191,145 @@ func validateGuild(inner http.Handler) http.Handler {
 	})
 }
 
-// handleUpdatePrefix changes the guilds prefix in the database with the one provided from the dashboard
-func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	var data struct {
-		Prefix string `json:"prefix"`
+type TmplContextData map[string]interface{}
+
+// baseTemplateDataMW provides the initial template data to be parsed within each page
+func baseTemplateDataMW(inner http.Handler) http.Handler {
+	middleware := func(w http.ResponseWriter, r *http.Request) {
+		baseData := TmplContextData{
+			"HomeURL": URL,
+			"Year": time.Now().UTC().Year(),
+		}
+		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
+
+		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
-	
-	json.NewDecoder(r.Body).Decode(&data)
 
-	server := pat.Param(r, "server")
-
-	prefix.ChangeGuildPrefix(server, data.Prefix)
-
-	http.Redirect(w, r, "/dashboard/"+server+"/manage/core", http.StatusSeeOther)
+	return http.HandlerFunc(middleware)
 }
 
-func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	var data struct {
-		Update string `json:"update"`
-		Enabled bool `json:"enabled"`
-		Modlog string `json:"modlog"`
-		TriggerStatus bool `json:"triggerStatus"`
-		TriggerInput int `json:"triggerInput"`
-		ResponseStatus bool `json:"responseStatus"`
-		ResponseInput int `json:"responseInput"`
-		Roles map[string][]string `json:"roles"`
-		MuteRole string `json:"muteRole"`
-		ManagedMuteRole bool `json:"managedMuteRole"`
-		UpdateRoles []string `json:"updateRoles"`
-	}
-	json.NewDecoder(r.Body).Decode(&data)
-	server := pat.Param(r, "server")
+// userAndManagedGuildsInfoMW provides middleware to parse the current user data and the list of manageable guilds to the template data
+func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
+	middleware := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
-	switch data.Update {
-	case "all":
-		config.ModLog = null.StringFrom(data.Modlog)
-		config.UpdateRoles = data.UpdateRoles
-		config.MuteRole = null.NewString(data.MuteRole, true)
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log", "update_roles", "mute_role"), boil.Infer())
-		updateAllRoles(server, data.Roles)
-	case "modlog":
-		config.ModLog = null.StringFrom(data.Modlog)
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
-	case "Warn", "Mute", "Unmute", "Kick", "Ban", "Unban":
-		whitelist := "required_" + strings.ToLower(data.Update) +"_roles"
-		actionRoles := data.Roles[data.Update]
-		updateRoles(server, data.Update, actionRoles)
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-	case "status":
-		config.Enabled = data.Enabled
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("enabled"), boil.Infer())
-	case "triggerStatus", "responseStatus":
-		whitelist := ""
-		switch data.Update {
-		case "triggerStatus":
-			whitelist = "enabled_trigger_deletion"
-			config.EnabledTriggerDeletion = data.TriggerStatus
-		case "responseStatus":
-			whitelist = "enabled_response_deletion"
-			config.EnabledResponseDeletion = data.ResponseStatus
-		}
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-	case "triggerInput", "responseInput", "manageMuteRole":
-		whitelist := ""
-		switch data.Update {
-		case "triggerInput":
-			whitelist = "seconds_to_delete_trigger"
-			config.SecondsToDeleteTrigger = data.TriggerInput
-		case "responseInput":
-			whitelist = "seconds_to_delete_response"
-			config.SecondsToDeleteResponse = data.ResponseInput
-		case "manageMuteRole":
-			whitelist = "manage_mute_role"
-			config.ManageMuteRole = data.ManagedMuteRole
-		}
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-	case "updateRoles":
-		config.UpdateRoles = data.UpdateRoles
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("update_roles"), boil.Infer())
-	case "muteRole":
-		config.MuteRole = null.NewString(data.MuteRole, true)
-		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mute_role"), boil.Infer())
-	}
-
-	moderation.RefreshMuteSettings(server)
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
-}
-
-
-func updateAllRoles(guildID string, rolesMap map[string][]string) {
-	tx, _ := common.PQ.BeginTx(context.Background(), nil)
-	for actionType, roleIDs := range rolesMap {
-		_, err := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", actionType)).DeleteAll(context.Background(), tx)
-
+		userData, err := checkCookie(w, r)
 		if err != nil {
-			tx.Rollback()
-			break
+			http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+			return
 		}
+		userID, _ := userData["id"].(string)
 
-		for _, roleID := range roleIDs {
-			role := models.ModerationConfigRole{
-				GuildID:   guildID,
-				ActionType: actionType,
-				RoleID:    roleID,
+		guilds := getUserManagedGuilds(userID)
+		guildList := make([]map[string]interface{}, 0)
+		for guildID, guildName := range guilds {
+			avatarURL := URL + "/static/img/icons/cross.png"
+			if guild, err := common.Session.Guild(guildID); err == nil {
+				if url := guild.IconURL("1024"); url != "" {
+					avatarURL = url
+				}
 			}
-			role.Insert(context.Background(), tx, boil.Infer())
+			guildList = append(guildList, TmplContextData{
+				"ID":   guildID,
+				"Avatar": avatarURL,
+				"Name": guildName,
+			})
 		}
+
+		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
+		tmplData["User"] = userData
+		tmplData["ManageGuilds"] = guildList
+
+		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
+		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
 
-	tx.Commit()
+	return http.HandlerFunc(middleware)
 }
 
-func handleModActionUpdate(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	var data struct {
-		ModAction string `json:"ModAction"`
-		Roles []string `json:"Roles"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(map[string]any{
-            "success": false,
-            "error":   "malformed data",
-        })
-		return
-	}
+// currentGuildDataMW provides middleware to parse the current guilds data to the template data
+func currentGuildDataMW(inner http.Handler) http.Handler {
+	middleware := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		guildID := pat.Param(r, "server")
 
-	guildID := pat.Param(r, "server")
+		retrievedGuild, _ := common.Session.Guild(guildID)
 
-	err = updateRoles(guildID, data.ModAction, data.Roles)
-	if err != nil {
-        w.Header().Set("Content-Type", "application/json")
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(map[string]any{
-            "success": false,
-            "error":   err.Error(),
-        })
-		return
-	}
+		channels, _ := common.Session.GuildChannels(guildID)
+		sort.SliceStable(channels, func(i, j int) bool {
+			return channels[i].Position < channels[j].Position
+		})
 
-    w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(map[string]any{
-        "success": true,
-        "message": "Saved role config",
-    })
-}
+		roles := retrievedGuild.Roles
+		sort.SliceStable(roles, func(i, j int) bool {
+			return roles[i].Position > roles[j].Position
+		})
 
-func updateRoles(guildID string, roleType string, rolesMap []string) error {
-	tx, _ := common.PQ.BeginTx(context.Background(), nil)
-	_, err := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", roleType)).DeleteAll(context.Background(), tx)
+		member, _ := functions.GetMember(retrievedGuild.ID, common.Bot.ID)
+		role := functions.HighestRole(retrievedGuild.ID, member)
 
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	for _, roleID := range rolesMap {
-		role := models.ModerationConfigRole{
-			GuildID:   guildID,
-			ActionType: roleType,
-			RoleID:    roleID,
+		guildData := map[string]interface{}{
+			"ID": retrievedGuild.ID,
+			"Name": retrievedGuild.Name,
+			"Avatar": retrievedGuild.IconURL("1024"),
+			"Channels": channels,
+			"Roles": roles,
+			"BotHighestRolePosition": role.Position,
 		}
-		role.Insert(context.Background(), tx, boil.Infer())
+		if guildData["Avatar"] == "" {
+			guildData["Avatar"] = URL + "/static/img/icons/cross.png"
+		}
+
+		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
+		tmplData["CurrentGuild"] = guildData
+
+		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
+		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-	return nil
+	return http.HandlerFunc(middleware)
 }
+
+// urlDataMW provides middleware to parse the URL data to the template data
+func urlDataMW(inner http.Handler) http.Handler {
+	middleware := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		u, err := url.Parse(TermsURL)
+		termsURL := URL + "/terms"
+		if err == nil {
+			termsURL = u.String()
+		}
+
+		u, err = url.Parse(PrivacyURL)
+		privacyURL := URL + "/privacy"
+		if err == nil {
+			privacyURL = u.String()
+		}
+
+		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
+		tmplData["TermsURL"] = termsURL
+		tmplData["PrivacyURL"] = privacyURL
+
+		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
+		inner.ServeHTTP(w, r.WithContext(ctx))
+	}
+
+	return http.HandlerFunc(middleware)
+}
+
+/* generic middleware setup
+// genericMiddlewareNameMW provides middleware to parse XXXX data (and YYYY) to the template data
+func genericMiddlewareNameMW(inner http.Handler) http.Handler {
+	middleware := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
+
+		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
+		inner.ServeHTTP(w, r.WithContext(ctx))
+	}
+
+	return http.HandlerFunc(middleware)
+}
+*/
