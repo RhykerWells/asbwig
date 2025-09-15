@@ -152,6 +152,12 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 	background-color: var(--secondaryTetiaryPurple);
 	border: none;
 }
+.modal .btn.btn-danger {
+	background-color: var(--bs-btn-bg);
+}
+.modal .btn.btn-success {
+	background-color: var(--bs-btn-bg);
+}
 
 .modal.modal-static .modal-dialog,
 .modal.show.modal-static .modal-dialog,
