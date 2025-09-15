@@ -8,4 +8,4 @@ dbname = "asbwig"
 user="asbwig"
 pass="icantsee"
 sslmode = "disable"
-whitelist = ["moderation_config", "moderation_config_roles", "moderation_mutes", "moderation_bans", "moderation_cases"]
+whitelist = ["moderation_config", "moderation_mutes", "moderation_bans", "moderation_cases"]

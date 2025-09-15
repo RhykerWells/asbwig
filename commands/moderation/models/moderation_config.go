@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -25,72 +24,92 @@ import (
 
 // ModerationConfig is an object representing the database table.
 type ModerationConfig struct {
-	GuildID                 string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	Enabled                 bool              `boil:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
-	EnabledTriggerDeletion  bool              `boil:"enabled_trigger_deletion" json:"enabled_trigger_deletion" toml:"enabled_trigger_deletion" yaml:"enabled_trigger_deletion"`
-	SecondsToDeleteTrigger  int               `boil:"seconds_to_delete_trigger" json:"seconds_to_delete_trigger" toml:"seconds_to_delete_trigger" yaml:"seconds_to_delete_trigger"`
-	EnabledResponseDeletion bool              `boil:"enabled_response_deletion" json:"enabled_response_deletion" toml:"enabled_response_deletion" yaml:"enabled_response_deletion"`
-	SecondsToDeleteResponse int               `boil:"seconds_to_delete_response" json:"seconds_to_delete_response" toml:"seconds_to_delete_response" yaml:"seconds_to_delete_response"`
-	ModLog                  null.String       `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
-	ManageMuteRole          bool              `boil:"manage_mute_role" json:"manage_mute_role" toml:"manage_mute_role" yaml:"manage_mute_role"`
-	MuteRole                null.String       `boil:"mute_role" json:"mute_role,omitempty" toml:"mute_role" yaml:"mute_role,omitempty"`
-	UpdateRoles             types.StringArray `boil:"update_roles" json:"update_roles,omitempty" toml:"update_roles" yaml:"update_roles,omitempty"`
-	LastCaseID              int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
+	GuildID                           string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	ModerationEnabled                 bool              `boil:"moderation_enabled" json:"moderation_enabled" toml:"moderation_enabled" yaml:"moderation_enabled"`
+	ModerationTriggerDeletionEnabled  bool              `boil:"moderation_trigger_deletion_enabled" json:"moderation_trigger_deletion_enabled" toml:"moderation_trigger_deletion_enabled" yaml:"moderation_trigger_deletion_enabled"`
+	ModerationTriggerDeletionSeconds  int               `boil:"moderation_trigger_deletion_seconds" json:"moderation_trigger_deletion_seconds" toml:"moderation_trigger_deletion_seconds" yaml:"moderation_trigger_deletion_seconds"`
+	ModerationResponseDeletionEnabled bool              `boil:"moderation_response_deletion_enabled" json:"moderation_response_deletion_enabled" toml:"moderation_response_deletion_enabled" yaml:"moderation_response_deletion_enabled"`
+	ModerationResponseDeletionSeconds int               `boil:"moderation_response_deletion_seconds" json:"moderation_response_deletion_seconds" toml:"moderation_response_deletion_seconds" yaml:"moderation_response_deletion_seconds"`
+	ModerationLogChannel              string            `boil:"moderation_log_channel" json:"moderation_log_channel" toml:"moderation_log_channel" yaml:"moderation_log_channel"`
+	WarnRequiredRoles                 types.StringArray `boil:"warn_required_roles" json:"warn_required_roles,omitempty" toml:"warn_required_roles" yaml:"warn_required_roles,omitempty"`
+	MuteRequiredRoles                 types.StringArray `boil:"mute_required_roles" json:"mute_required_roles,omitempty" toml:"mute_required_roles" yaml:"mute_required_roles,omitempty"`
+	MuteRole                          string            `boil:"mute_role" json:"mute_role" toml:"mute_role" yaml:"mute_role"`
+	MuteManageRole                    bool              `boil:"mute_manage_role" json:"mute_manage_role" toml:"mute_manage_role" yaml:"mute_manage_role"`
+	MuteUpdateRoles                   types.StringArray `boil:"mute_update_roles" json:"mute_update_roles,omitempty" toml:"mute_update_roles" yaml:"mute_update_roles,omitempty"`
+	KickRequiredRoles                 types.StringArray `boil:"kick_required_roles" json:"kick_required_roles,omitempty" toml:"kick_required_roles" yaml:"kick_required_roles,omitempty"`
+	BanRequiredRoles                  types.StringArray `boil:"ban_required_roles" json:"ban_required_roles,omitempty" toml:"ban_required_roles" yaml:"ban_required_roles,omitempty"`
+	LastCaseID                        int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationConfigColumns = struct {
-	GuildID                 string
-	Enabled                 string
-	EnabledTriggerDeletion  string
-	SecondsToDeleteTrigger  string
-	EnabledResponseDeletion string
-	SecondsToDeleteResponse string
-	ModLog                  string
-	ManageMuteRole          string
-	MuteRole                string
-	UpdateRoles             string
-	LastCaseID              string
+	GuildID                           string
+	ModerationEnabled                 string
+	ModerationTriggerDeletionEnabled  string
+	ModerationTriggerDeletionSeconds  string
+	ModerationResponseDeletionEnabled string
+	ModerationResponseDeletionSeconds string
+	ModerationLogChannel              string
+	WarnRequiredRoles                 string
+	MuteRequiredRoles                 string
+	MuteRole                          string
+	MuteManageRole                    string
+	MuteUpdateRoles                   string
+	KickRequiredRoles                 string
+	BanRequiredRoles                  string
+	LastCaseID                        string
 }{
-	GuildID:                 "guild_id",
-	Enabled:                 "enabled",
-	EnabledTriggerDeletion:  "enabled_trigger_deletion",
-	SecondsToDeleteTrigger:  "seconds_to_delete_trigger",
-	EnabledResponseDeletion: "enabled_response_deletion",
-	SecondsToDeleteResponse: "seconds_to_delete_response",
-	ModLog:                  "mod_log",
-	ManageMuteRole:          "manage_mute_role",
-	MuteRole:                "mute_role",
-	UpdateRoles:             "update_roles",
-	LastCaseID:              "last_case_id",
+	GuildID:                           "guild_id",
+	ModerationEnabled:                 "moderation_enabled",
+	ModerationTriggerDeletionEnabled:  "moderation_trigger_deletion_enabled",
+	ModerationTriggerDeletionSeconds:  "moderation_trigger_deletion_seconds",
+	ModerationResponseDeletionEnabled: "moderation_response_deletion_enabled",
+	ModerationResponseDeletionSeconds: "moderation_response_deletion_seconds",
+	ModerationLogChannel:              "moderation_log_channel",
+	WarnRequiredRoles:                 "warn_required_roles",
+	MuteRequiredRoles:                 "mute_required_roles",
+	MuteRole:                          "mute_role",
+	MuteManageRole:                    "mute_manage_role",
+	MuteUpdateRoles:                   "mute_update_roles",
+	KickRequiredRoles:                 "kick_required_roles",
+	BanRequiredRoles:                  "ban_required_roles",
+	LastCaseID:                        "last_case_id",
 }
 
 var ModerationConfigTableColumns = struct {
-	GuildID                 string
-	Enabled                 string
-	EnabledTriggerDeletion  string
-	SecondsToDeleteTrigger  string
-	EnabledResponseDeletion string
-	SecondsToDeleteResponse string
-	ModLog                  string
-	ManageMuteRole          string
-	MuteRole                string
-	UpdateRoles             string
-	LastCaseID              string
+	GuildID                           string
+	ModerationEnabled                 string
+	ModerationTriggerDeletionEnabled  string
+	ModerationTriggerDeletionSeconds  string
+	ModerationResponseDeletionEnabled string
+	ModerationResponseDeletionSeconds string
+	ModerationLogChannel              string
+	WarnRequiredRoles                 string
+	MuteRequiredRoles                 string
+	MuteRole                          string
+	MuteManageRole                    string
+	MuteUpdateRoles                   string
+	KickRequiredRoles                 string
+	BanRequiredRoles                  string
+	LastCaseID                        string
 }{
-	GuildID:                 "moderation_config.guild_id",
-	Enabled:                 "moderation_config.enabled",
-	EnabledTriggerDeletion:  "moderation_config.enabled_trigger_deletion",
-	SecondsToDeleteTrigger:  "moderation_config.seconds_to_delete_trigger",
-	EnabledResponseDeletion: "moderation_config.enabled_response_deletion",
-	SecondsToDeleteResponse: "moderation_config.seconds_to_delete_response",
-	ModLog:                  "moderation_config.mod_log",
-	ManageMuteRole:          "moderation_config.manage_mute_role",
-	MuteRole:                "moderation_config.mute_role",
-	UpdateRoles:             "moderation_config.update_roles",
-	LastCaseID:              "moderation_config.last_case_id",
+	GuildID:                           "moderation_config.guild_id",
+	ModerationEnabled:                 "moderation_config.moderation_enabled",
+	ModerationTriggerDeletionEnabled:  "moderation_config.moderation_trigger_deletion_enabled",
+	ModerationTriggerDeletionSeconds:  "moderation_config.moderation_trigger_deletion_seconds",
+	ModerationResponseDeletionEnabled: "moderation_config.moderation_response_deletion_enabled",
+	ModerationResponseDeletionSeconds: "moderation_config.moderation_response_deletion_seconds",
+	ModerationLogChannel:              "moderation_config.moderation_log_channel",
+	WarnRequiredRoles:                 "moderation_config.warn_required_roles",
+	MuteRequiredRoles:                 "moderation_config.mute_required_roles",
+	MuteRole:                          "moderation_config.mute_role",
+	MuteManageRole:                    "moderation_config.mute_manage_role",
+	MuteUpdateRoles:                   "moderation_config.mute_update_roles",
+	KickRequiredRoles:                 "moderation_config.kick_required_roles",
+	BanRequiredRoles:                  "moderation_config.ban_required_roles",
+	LastCaseID:                        "moderation_config.last_case_id",
 }
 
 // Generated where
@@ -154,50 +173,55 @@ func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
 }
 
 var ModerationConfigWhere = struct {
-	GuildID                 whereHelperstring
-	Enabled                 whereHelperbool
-	EnabledTriggerDeletion  whereHelperbool
-	SecondsToDeleteTrigger  whereHelperint
-	EnabledResponseDeletion whereHelperbool
-	SecondsToDeleteResponse whereHelperint
-	ModLog                  whereHelpernull_String
-	ManageMuteRole          whereHelperbool
-	MuteRole                whereHelpernull_String
-	UpdateRoles             whereHelpertypes_StringArray
-	LastCaseID              whereHelperint64
+	GuildID                           whereHelperstring
+	ModerationEnabled                 whereHelperbool
+	ModerationTriggerDeletionEnabled  whereHelperbool
+	ModerationTriggerDeletionSeconds  whereHelperint
+	ModerationResponseDeletionEnabled whereHelperbool
+	ModerationResponseDeletionSeconds whereHelperint
+	ModerationLogChannel              whereHelperstring
+	WarnRequiredRoles                 whereHelpertypes_StringArray
+	MuteRequiredRoles                 whereHelpertypes_StringArray
+	MuteRole                          whereHelperstring
+	MuteManageRole                    whereHelperbool
+	MuteUpdateRoles                   whereHelpertypes_StringArray
+	KickRequiredRoles                 whereHelpertypes_StringArray
+	BanRequiredRoles                  whereHelpertypes_StringArray
+	LastCaseID                        whereHelperint64
 }{
-	GuildID:                 whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
-	Enabled:                 whereHelperbool{field: "\"moderation_config\".\"enabled\""},
-	EnabledTriggerDeletion:  whereHelperbool{field: "\"moderation_config\".\"enabled_trigger_deletion\""},
-	SecondsToDeleteTrigger:  whereHelperint{field: "\"moderation_config\".\"seconds_to_delete_trigger\""},
-	EnabledResponseDeletion: whereHelperbool{field: "\"moderation_config\".\"enabled_response_deletion\""},
-	SecondsToDeleteResponse: whereHelperint{field: "\"moderation_config\".\"seconds_to_delete_response\""},
-	ModLog:                  whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
-	ManageMuteRole:          whereHelperbool{field: "\"moderation_config\".\"manage_mute_role\""},
-	MuteRole:                whereHelpernull_String{field: "\"moderation_config\".\"mute_role\""},
-	UpdateRoles:             whereHelpertypes_StringArray{field: "\"moderation_config\".\"update_roles\""},
-	LastCaseID:              whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
+	GuildID:                           whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
+	ModerationEnabled:                 whereHelperbool{field: "\"moderation_config\".\"moderation_enabled\""},
+	ModerationTriggerDeletionEnabled:  whereHelperbool{field: "\"moderation_config\".\"moderation_trigger_deletion_enabled\""},
+	ModerationTriggerDeletionSeconds:  whereHelperint{field: "\"moderation_config\".\"moderation_trigger_deletion_seconds\""},
+	ModerationResponseDeletionEnabled: whereHelperbool{field: "\"moderation_config\".\"moderation_response_deletion_enabled\""},
+	ModerationResponseDeletionSeconds: whereHelperint{field: "\"moderation_config\".\"moderation_response_deletion_seconds\""},
+	ModerationLogChannel:              whereHelperstring{field: "\"moderation_config\".\"moderation_log_channel\""},
+	WarnRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"warn_required_roles\""},
+	MuteRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"mute_required_roles\""},
+	MuteRole:                          whereHelperstring{field: "\"moderation_config\".\"mute_role\""},
+	MuteManageRole:                    whereHelperbool{field: "\"moderation_config\".\"mute_manage_role\""},
+	MuteUpdateRoles:                   whereHelpertypes_StringArray{field: "\"moderation_config\".\"mute_update_roles\""},
+	KickRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"kick_required_roles\""},
+	BanRequiredRoles:                  whereHelpertypes_StringArray{field: "\"moderation_config\".\"ban_required_roles\""},
+	LastCaseID:                        whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
 }
 
 // ModerationConfigRels is where relationship names are stored.
 var ModerationConfigRels = struct {
-	GuildModerationBans        string
-	GuildModerationCases       string
-	GuildModerationConfigRoles string
-	GuildModerationMutes       string
+	GuildModerationBans  string
+	GuildModerationCases string
+	GuildModerationMutes string
 }{
-	GuildModerationBans:        "GuildModerationBans",
-	GuildModerationCases:       "GuildModerationCases",
-	GuildModerationConfigRoles: "GuildModerationConfigRoles",
-	GuildModerationMutes:       "GuildModerationMutes",
+	GuildModerationBans:  "GuildModerationBans",
+	GuildModerationCases: "GuildModerationCases",
+	GuildModerationMutes: "GuildModerationMutes",
 }
 
 // moderationConfigR is where relationships are stored.
 type moderationConfigR struct {
-	GuildModerationBans        ModerationBanSlice        `boil:"GuildModerationBans" json:"GuildModerationBans" toml:"GuildModerationBans" yaml:"GuildModerationBans"`
-	GuildModerationCases       ModerationCaseSlice       `boil:"GuildModerationCases" json:"GuildModerationCases" toml:"GuildModerationCases" yaml:"GuildModerationCases"`
-	GuildModerationConfigRoles ModerationConfigRoleSlice `boil:"GuildModerationConfigRoles" json:"GuildModerationConfigRoles" toml:"GuildModerationConfigRoles" yaml:"GuildModerationConfigRoles"`
-	GuildModerationMutes       ModerationMuteSlice       `boil:"GuildModerationMutes" json:"GuildModerationMutes" toml:"GuildModerationMutes" yaml:"GuildModerationMutes"`
+	GuildModerationBans  ModerationBanSlice  `boil:"GuildModerationBans" json:"GuildModerationBans" toml:"GuildModerationBans" yaml:"GuildModerationBans"`
+	GuildModerationCases ModerationCaseSlice `boil:"GuildModerationCases" json:"GuildModerationCases" toml:"GuildModerationCases" yaml:"GuildModerationCases"`
+	GuildModerationMutes ModerationMuteSlice `boil:"GuildModerationMutes" json:"GuildModerationMutes" toml:"GuildModerationMutes" yaml:"GuildModerationMutes"`
 }
 
 // NewStruct creates a new relationship struct
@@ -237,22 +261,6 @@ func (r *moderationConfigR) GetGuildModerationCases() ModerationCaseSlice {
 	return r.GuildModerationCases
 }
 
-func (o *ModerationConfig) GetGuildModerationConfigRoles() ModerationConfigRoleSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetGuildModerationConfigRoles()
-}
-
-func (r *moderationConfigR) GetGuildModerationConfigRoles() ModerationConfigRoleSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.GuildModerationConfigRoles
-}
-
 func (o *ModerationConfig) GetGuildModerationMutes() ModerationMuteSlice {
 	if o == nil {
 		return nil
@@ -273,9 +281,9 @@ func (r *moderationConfigR) GetGuildModerationMutes() ModerationMuteSlice {
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "manage_mute_role", "mute_role", "update_roles", "last_case_id"}
+	moderationConfigAllColumns            = []string{"guild_id", "moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "manage_mute_role", "mute_role", "update_roles", "last_case_id"}
+	moderationConfigColumnsWithDefault    = []string{"moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )
@@ -417,20 +425,6 @@ func (o *ModerationConfig) GuildModerationCases(mods ...qm.QueryMod) moderationC
 	)
 
 	return ModerationCases(queryMods...)
-}
-
-// GuildModerationConfigRoles retrieves all the moderation_config_role's ModerationConfigRoles with an executor via guild_id column.
-func (o *ModerationConfig) GuildModerationConfigRoles(mods ...qm.QueryMod) moderationConfigRoleQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"moderation_config_roles\".\"guild_id\"=?", o.GuildID),
-	)
-
-	return ModerationConfigRoles(queryMods...)
 }
 
 // GuildModerationMutes retrieves all the moderation_mute's ModerationMutes with an executor via guild_id column.
@@ -649,112 +643,6 @@ func (moderationConfigL) LoadGuildModerationCases(ctx context.Context, e boil.Co
 				local.R.GuildModerationCases = append(local.R.GuildModerationCases, foreign)
 				if foreign.R == nil {
 					foreign.R = &moderationCaseR{}
-				}
-				foreign.R.Guild = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// LoadGuildModerationConfigRoles allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (moderationConfigL) LoadGuildModerationConfigRoles(ctx context.Context, e boil.ContextExecutor, singular bool, maybeModerationConfig interface{}, mods queries.Applicator) error {
-	var slice []*ModerationConfig
-	var object *ModerationConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeModerationConfig.(*ModerationConfig)
-		if !ok {
-			object = new(ModerationConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeModerationConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeModerationConfig))
-			}
-		}
-	} else {
-		s, ok := maybeModerationConfig.(*[]*ModerationConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeModerationConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeModerationConfig))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &moderationConfigR{}
-		}
-		args[object.GuildID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &moderationConfigR{}
-			}
-			args[obj.GuildID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`moderation_config_roles`),
-		qm.WhereIn(`moderation_config_roles.guild_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load moderation_config_roles")
-	}
-
-	var resultSlice []*ModerationConfigRole
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice moderation_config_roles")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on moderation_config_roles")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for moderation_config_roles")
-	}
-
-	if singular {
-		object.R.GuildModerationConfigRoles = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &moderationConfigRoleR{}
-			}
-			foreign.R.Guild = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.GuildID == foreign.GuildID {
-				local.R.GuildModerationConfigRoles = append(local.R.GuildModerationConfigRoles, foreign)
-				if foreign.R == nil {
-					foreign.R = &moderationConfigRoleR{}
 				}
 				foreign.R.Guild = local
 				break
@@ -986,68 +874,6 @@ func (o *ModerationConfig) AddGuildModerationCases(ctx context.Context, exec boi
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &moderationCaseR{
-				Guild: o,
-			}
-		} else {
-			rel.R.Guild = o
-		}
-	}
-	return nil
-}
-
-// AddGuildModerationConfigRolesG adds the given related objects to the existing relationships
-// of the moderation_config, optionally inserting them as new records.
-// Appends related to o.R.GuildModerationConfigRoles.
-// Sets related.R.Guild appropriately.
-// Uses the global database handle.
-func (o *ModerationConfig) AddGuildModerationConfigRolesG(ctx context.Context, insert bool, related ...*ModerationConfigRole) error {
-	return o.AddGuildModerationConfigRoles(ctx, boil.GetContextDB(), insert, related...)
-}
-
-// AddGuildModerationConfigRoles adds the given related objects to the existing relationships
-// of the moderation_config, optionally inserting them as new records.
-// Appends related to o.R.GuildModerationConfigRoles.
-// Sets related.R.Guild appropriately.
-func (o *ModerationConfig) AddGuildModerationConfigRoles(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ModerationConfigRole) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.GuildID = o.GuildID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"moderation_config_roles\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
-				strmangle.WhereClause("\"", "\"", 2, moderationConfigRolePrimaryKeyColumns),
-			)
-			values := []interface{}{o.GuildID, rel.ActionType, rel.RoleID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.GuildID = o.GuildID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &moderationConfigR{
-			GuildModerationConfigRoles: related,
-		}
-	} else {
-		o.R.GuildModerationConfigRoles = append(o.R.GuildModerationConfigRoles, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &moderationConfigRoleR{
 				Guild: o,
 			}
 		} else {
