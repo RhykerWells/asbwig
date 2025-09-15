@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -19,8 +20,11 @@ var (
 		"lower": lower,
 
 	// Forms content
+		"toggleSwitch": toggleSwitch,
+		"numberSelect": numberSelection,
 		"roleOptionsMulti": roleOptionsMulti,
 		"roleOptionsSingle": roleOptionsSingle,
+		"channelOptionsSingle": channelOptionsSingle,
 	}
 )
 
@@ -32,7 +36,6 @@ func dict(pairs ...interface{}) map[int]interface{} {
 	}
 	return result
 }
-
 
 func seq(start, end int) []int {
 	var result []int
@@ -67,6 +70,40 @@ func toJson(v interface{}) template.JS {
 
 func lower(str string) string {
 	return strings.ToLower(str)
+}
+
+// toggleSwitch generates a HTML object for the custom switch.
+// currentState: the bool of the current state of the switch
+// uniqueID: string for the input ID (used to retrieve and store changed data)
+func toggleSwitch(currentState bool, uniqueID string) template.HTML {
+	checked := ""
+	if currentState {
+		checked = " checked"
+	}
+
+	var menu strings.Builder
+	menu.WriteString(`<label class="switch" name="` + uniqueID + `>`)
+	menu.WriteString(`<input type="checkbox" id="` + uniqueID + `"` + checked + `/>`)
+	menu.WriteString(`<span class="slider" style="left: 5px;"></span>`)
+	menu.WriteString(`<span class="knob" style="left: 7px;"></span>`)
+	menu.WriteString(`</label>`)
+
+	return template.HTML(menu.String())
+}
+
+// numberSelection generates HTML options for a number picker
+// min: lowest number possible
+// max: highest number possible
+// currentNumber: the current number
+// uniqueID: string for the hidden input ID (used to retrieve and store changed data)
+func numberSelection(min int64, max int64, currentNumber int64, uniqueID string) template.HTML {
+	var menu strings.Builder
+	menu.WriteString(`<div class="input-group mb-3">`)
+	menu.WriteString(`<input type="number" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10)+ `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10)+ `">`)
+	menu.WriteString(`<span class="input-group-text text-light" id="basic-addon2" style="background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)">seconds</span>`)
+	menu.WriteString(`</div>`)
+
+	return template.HTML(menu.String())
 }
 
 // roleOptionsSingle generates HTML options for singular role selection
@@ -208,6 +245,64 @@ func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniq
 	}
 	menu.WriteString(`</ul>`)
 	jsonVal, _ := json.Marshal(selectedRoleIDs)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
+	menu.WriteString(`</div>`)
+	return template.HTML(menu.String())
+}
+
+// channelOptionsSingle generates HTML options for singular channel selection
+// channels: slice of Discord channel objects
+// selectedChannelID: string ID of currently selected channel
+// uniqueID: string for the hidden input ID (used to retrieve and store changed data)
+func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID string, uniqueID string) template.HTML {
+	filteredChannels := make([]*discordgo.Channel, 0, len(channels))
+	for _, channel := range channels {
+		if channel.Type != 0 {
+			continue
+		}
+		filteredChannels = append(filteredChannels, channel)
+	}
+	sort.Slice(filteredChannels, func(i, j int) bool {
+		return filteredChannels[i].Position > filteredChannels[j].Position
+	})
+
+		// Button label
+	displayText := "Select channel"
+	if len(selectedChannelID) > 0 {
+		label := ""
+		for _, channel := range filteredChannels {
+			if selectedChannelID != channel.ID {
+				continue
+			}
+			label = channel.Name
+			break
+		}
+		if len(label) > 30 {
+			displayText = "1 Selected"
+		} else {
+			displayText = label
+		}
+	}
+
+	var menu strings.Builder
+	menu.WriteString(`<div class="input-group mb-3">`)
+	menu.WriteString(`
+		<button class="btn dropdown-toggle text-start flex-grow-1 text-white" type="button" data-bs-toggle="dropdown" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey); border-top-right-radius: var(--bs-btn-border-radius); border-bottom-right-radius: var(--bs-btn-border-radius);">
+			<span id="` + uniqueID + `Label">` + template.HTMLEscapeString(displayText) + `</span>
+		</button>
+		<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;" aria-labelledby="` + uniqueID + `Dropdown">
+		<li><a class="dropdown-item channelListItem" data-value="">None</a></li>
+	`)
+
+	for _, channel := range filteredChannels {
+		menu.WriteString(`<li>`)
+		menu.WriteString(`<a class="dropdown-item channelListItem" data-value="` + channel.ID + `">`)
+		menu.WriteString(template.HTMLEscapeString(channel.Name))
+		menu.WriteString(`</a></li>`)
+	}
+
+	menu.WriteString(`</ul>`)
+	jsonVal, _ := json.Marshal(selectedChannelID)
 	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
