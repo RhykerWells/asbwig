@@ -13,6 +13,7 @@ import (
 
 func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Moderation", GuildModerationSchema...)
+	initWeb()
 	scheduleAllPendingUnmutes()
 	cmdHandler.RegisterCommands(
 		warnCommand,
