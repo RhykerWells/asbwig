@@ -22,8 +22,8 @@ var (
 	// Forms content
 		"toggleSwitch": toggleSwitch,
 		"numberSelect": numberSelection,
-		"roleOptionsMulti": roleOptionsMulti,
 		"roleOptionsSingle": roleOptionsSingle,
+		"roleOptionsMulti": roleOptionsMulti,
 		"channelOptionsSingle": channelOptionsSingle,
 	}
 )
@@ -82,7 +82,7 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 	}
 
 	var menu strings.Builder
-	menu.WriteString(`<label class="switch" name="` + uniqueID + `>`)
+	menu.WriteString(`<label class="switch" name="` + uniqueID + `">`)
 	menu.WriteString(`<input type="checkbox" id="` + uniqueID + `"` + checked + `/>`)
 	menu.WriteString(`<span class="slider" style="left: 5px;"></span>`)
 	menu.WriteString(`<span class="knob" style="left: 7px;"></span>`)
