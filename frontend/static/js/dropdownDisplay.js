@@ -91,7 +91,7 @@ function updateChannelOptionsSingle() {
 			const value = item.getAttribute('data-value');
 			const hiddenInput = container.querySelector('input[type=hidden]');
 			
-			hiddenInput.value = JSON.stringify(value);
+			hiddenInput.value = value;
 			
 			const label = container.querySelector('span[id$="Label"]');
 			let displayText = "Select channel";
