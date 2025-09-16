@@ -302,8 +302,7 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	}
 
 	menu.WriteString(`</ul>`)
-	jsonVal, _ := json.Marshal(selectedChannelID)
-	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(selectedChannelID) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
 }
