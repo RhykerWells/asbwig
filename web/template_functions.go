@@ -166,8 +166,7 @@ func roleOptionsSingle(roles []*discordgo.Role, selectedRoleID string, uniqueID 
 	}
 
 	menu.WriteString(`</ul>`)
-	jsonVal, _ := json.Marshal(selectedRoleID)
-	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(selectedRoleID) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
 }
