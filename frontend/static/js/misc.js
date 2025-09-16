@@ -1,6 +1,6 @@
 function disableScreenPassthrough() {
     const overlay = document.createElement("div");
-	overlay.className = "page-overlay d-flex";
+	overlay.className = "screen-passthrough d-flex";
     overlay.innerHTML = `<div class="spinner-border text-success" role="status"></div>`
 
     Object.assign(overlay.style, {
@@ -18,6 +18,13 @@ function disableScreenPassthrough() {
         cursor: "none"
     });
 	document.body.prepend(overlay);
+}
+
+function enableScreenPassthrough() {
+    const overlay = document.querySelector(".screen-passthrough");
+    if (overlay) {
+        overlay.remove();
+    }
 }
 
 function reloadPage(delaySeconds) {
