@@ -99,7 +99,7 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 func numberSelection(min int64, max int64, currentNumber int64, uniqueID string) template.HTML {
 	var menu strings.Builder
 	menu.WriteString(`<div class="input-group mb-3">`)
-	menu.WriteString(`<input type="number" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10)+ `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10)+ `">`)
+	menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10)+ `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10)+ `">`)
 	menu.WriteString(`<span class="input-group-text text-light" id="basic-addon2" style="background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)">seconds</span>`)
 	menu.WriteString(`</div>`)
 
