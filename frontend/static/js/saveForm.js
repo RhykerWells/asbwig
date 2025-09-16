@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			}*/
 
 			const body = new URLSearchParams(formData);
-
 			const postURL = window.location.origin + window.location.pathname;
 
 			try {
+				disableScreenPassthrough()
 				const response = await fetch(postURL, {
 					method: "POST",
 					body,
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			} catch (err) {
 				sendFailureToast("Network error: " + err.message)
 			}
+			reloadPage()
 		})
 	});
 });
