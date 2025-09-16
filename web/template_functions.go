@@ -82,8 +82,8 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 	}
 
 	var menu strings.Builder
-	menu.WriteString(`<label class="switch" name="` + uniqueID + `">`)
-	menu.WriteString(`<input type="checkbox" id="` + uniqueID + `"` + checked + `/>`)
+	menu.WriteString(`<label class="switch">`)
+	menu.WriteString(`<input type="checkbox" name="` + uniqueID + `" id="` + uniqueID + `"` + checked + `/>`)
 	menu.WriteString(`<span class="slider" style="left: 5px;"></span>`)
 	menu.WriteString(`<span class="knob" style="left: 7px;"></span>`)
 	menu.WriteString(`</label>`)
