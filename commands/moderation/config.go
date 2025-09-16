@@ -43,7 +43,7 @@ func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 		ModerationTriggerDeletionEnabled: c.ModerationTriggerDeletionEnabled,
 		ModerationTriggerDeletionSeconds: int(c.ModerationTriggerDeletionSeconds),
 		ModerationResponseDeletionEnabled: c.ModerationResponseDeletionEnabled,
-		ModerationResponseDeletionSeconds: int(c.ModerationTriggerDeletionSeconds),
+		ModerationResponseDeletionSeconds: int(c.ModerationResponseDeletionSeconds),
 
 		ModerationLogChannel:  c.ModerationLogChannel,
 
