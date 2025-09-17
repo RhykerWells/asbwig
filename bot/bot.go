@@ -23,7 +23,7 @@ var (
 )
 
 func Run(s *discordgo.Session) {
-	events.InitEvents()
+	events.InitEvents(s)
 	commands.InitCommands(s)
 	s.Identify.Intents = gatewayIntentsUsed
 }
