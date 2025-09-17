@@ -40,6 +40,7 @@ func Init() error {
 	if err != nil {
 		log.WithError(err).Fatal()
 	}
+	Session = s
 
 	db := "asbwig"
 	if ConfigPGDB != "" {
@@ -58,8 +59,7 @@ func Init() error {
 	log.Infof("Initializing DB schema")
 	InitSchema("Core", CoreSchema...)
 
-	Session = s
-	return err
+	return nil
 }
 
 func Run(s *discordgo.Session) {
