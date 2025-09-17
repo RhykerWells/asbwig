@@ -25,8 +25,8 @@ var (
 
 var CoreSchema = []string{`
 CREATE TABLE IF NOT EXISTS core_config (
-	guild_id BIGINT PRIMARY KEY,
-	guild_prefix TEXT
+	guild_id TEXT PRIMARY KEY,
+	guild_prefix TEXT DEFAULT '~' NOT NULL
 );
 `, `
 CREATE TABLE IF NOT EXISTS banned_guilds (
