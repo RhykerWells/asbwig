@@ -15,12 +15,13 @@ import (
 
 func Init() {
 	err := common.Init()
-	bot.Run(common.Session)
-	common.Run(common.Session)
-	web.Run()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
 	}
+
+	bot.Run(common.Session, common.PQ)
+	common.Run(common.Session)
+	web.Run()
 }
 
 func Run() {

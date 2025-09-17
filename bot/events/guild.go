@@ -3,14 +3,17 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/prefix"
-	"github.com/RhykerWells/asbwig/commands/economy"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/models"
+	"github.com/RhykerWells/asbwig/bot/core/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
+
+var scheduledGuildJoinFunctions []func(g *discordgo.GuildCreate)
+
+func RegisterGuildJoinfunctions(funcMap []func(g *discordgo.GuildCreate)) {
+	scheduledGuildJoinFunctions = append(scheduledGuildJoinFunctions, funcMap...)
+}
 
 // guildJoin is called when the bot is added to a new guild
 // This adds the guild to the relevant database tables
@@ -22,11 +25,19 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}).Infoln("Joined guild: ", g.Name)
 	banned := isGuildBanned(g.ID)
 	if banned {
-		common.Session.GuildLeave(g.ID)
+		s.GuildLeave(g.ID)
 		return
 	}
-	prefix.GuildPrefix(g.ID)
-	economy.GuildEconomyAdd(g.ID)
+
+	for _, joinFunction := range scheduledGuildJoinFunctions {
+		joinFunction(g)
+	}
+}
+
+var scheduledGuildLeaveFunctions []func(g *discordgo.GuildDelete)
+
+func RegisterGuildLeavefunctions(funcMap []func(g *discordgo.GuildDelete)) {
+	scheduledGuildLeaveFunctions = append(scheduledGuildLeaveFunctions, funcMap...)
 }
 
 // guildLeave is called when the bot is removed from a guild
@@ -35,17 +46,15 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	if g.Unavailable {
 		return
 	}
-	removeGuildConfig(g.ID)
 	log.Infoln("Left guild: ", g.ID)
-}
 
-func removeGuildConfig(guildID string) {
-	const query = `DELETE FROM core_config WHERE guild_id=$1`
-	common.PQ.Exec(query, guildID)
+	for _, leaveFunction := range scheduledGuildLeaveFunctions {
+		leaveFunction(g)
+	}
 }
 
 func isGuildBanned(guildID string) bool {
-	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), common.PQ)
+	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), db)
 	if err != nil {
 		return false
 	}

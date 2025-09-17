@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -24,8 +23,8 @@ import (
 
 // CoreConfig is an object representing the database table.
 type CoreConfig struct {
-	GuildID     int64       `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	GuildPrefix null.String `boil:"guild_prefix" json:"guild_prefix,omitempty" toml:"guild_prefix" yaml:"guild_prefix,omitempty"`
+	GuildID     string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	GuildPrefix string `boil:"guild_prefix" json:"guild_prefix" toml:"guild_prefix" yaml:"guild_prefix"`
 
 	R *coreConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L coreConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -49,91 +48,12 @@ var CoreConfigTableColumns = struct {
 
 // Generated where
 
-type whereHelperint64 struct{ field string }
-
-func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" LIKE ?", x)
-}
-func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT LIKE ?", x)
-}
-func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" ILIKE ?", x)
-}
-func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT ILIKE ?", x)
-}
-func (w whereHelpernull_String) SIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) NSIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var CoreConfigWhere = struct {
-	GuildID     whereHelperint64
-	GuildPrefix whereHelpernull_String
+	GuildID     whereHelperstring
+	GuildPrefix whereHelperstring
 }{
-	GuildID:     whereHelperint64{field: "\"core_config\".\"guild_id\""},
-	GuildPrefix: whereHelpernull_String{field: "\"core_config\".\"guild_prefix\""},
+	GuildID:     whereHelperstring{field: "\"core_config\".\"guild_id\""},
+	GuildPrefix: whereHelperstring{field: "\"core_config\".\"guild_prefix\""},
 }
 
 // CoreConfigRels is where relationship names are stored.
@@ -283,13 +203,13 @@ func CoreConfigs(mods ...qm.QueryMod) coreConfigQuery {
 }
 
 // FindCoreConfigG retrieves a single record by ID.
-func FindCoreConfigG(ctx context.Context, guildID int64, selectCols ...string) (*CoreConfig, error) {
+func FindCoreConfigG(ctx context.Context, guildID string, selectCols ...string) (*CoreConfig, error) {
 	return FindCoreConfig(ctx, boil.GetContextDB(), guildID, selectCols...)
 }
 
 // FindCoreConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCoreConfig(ctx context.Context, exec boil.ContextExecutor, guildID int64, selectCols ...string) (*CoreConfig, error) {
+func FindCoreConfig(ctx context.Context, exec boil.ContextExecutor, guildID string, selectCols ...string) (*CoreConfig, error) {
 	coreConfigObj := &CoreConfig{}
 
 	sel := "*"
@@ -815,12 +735,12 @@ func (o *CoreConfigSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // CoreConfigExistsG checks if the CoreConfig row exists.
-func CoreConfigExistsG(ctx context.Context, guildID int64) (bool, error) {
+func CoreConfigExistsG(ctx context.Context, guildID string) (bool, error) {
 	return CoreConfigExists(ctx, boil.GetContextDB(), guildID)
 }
 
 // CoreConfigExists checks if the CoreConfig row exists.
-func CoreConfigExists(ctx context.Context, exec boil.ContextExecutor, guildID int64) (bool, error) {
+func CoreConfigExists(ctx context.Context, exec boil.ContextExecutor, guildID string) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"core_config\" where \"guild_id\"=$1 limit 1)"
 

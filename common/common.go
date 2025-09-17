@@ -1,7 +1,5 @@
 package common
 
-//go:generate sqlboiler --no-hooks psql
-
 import (
 	"database/sql"
 	"fmt"
@@ -25,8 +23,8 @@ var (
 
 var CoreSchema = []string{`
 CREATE TABLE IF NOT EXISTS core_config (
-	guild_id BIGINT PRIMARY KEY,
-	guild_prefix TEXT
+	guild_id TEXT PRIMARY KEY,
+	guild_prefix TEXT DEFAULT '~' NOT NULL
 );
 `, `
 CREATE TABLE IF NOT EXISTS banned_guilds (
@@ -40,6 +38,7 @@ func Init() error {
 	if err != nil {
 		log.WithError(err).Fatal()
 	}
+	Session = s
 
 	db := "asbwig"
 	if ConfigPGDB != "" {
@@ -58,8 +57,7 @@ func Init() error {
 	log.Infof("Initializing DB schema")
 	InitSchema("Core", CoreSchema...)
 
-	Session = s
-	return err
+	return nil
 }
 
 func Run(s *discordgo.Session) {
