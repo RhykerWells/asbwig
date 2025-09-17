@@ -29,14 +29,23 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	economy.GuildEconomyAdd(g.ID)
 }
 
+var scheduledGuildLeaveFunctions []func(g *discordgo.GuildDelete)
+
+func RegisterGuildLeavefunctions(funcMap []func(g *discordgo.GuildDelete)) {
+	scheduledGuildLeaveFunctions = append(scheduledGuildLeaveFunctions, funcMap...)
+}
+
 // guildLeave is called when the bot is removed from a guild
 // This removes the guild from any tables that it is part of
 func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	if g.Unavailable {
 		return
 	}
-	removeGuildConfig(g.ID)
 	log.Infoln("Left guild: ", g.ID)
+
+	for _, leaveFunction := range scheduledGuildLeaveFunctions {
+		leaveFunction(g)
+	}
 }
 
 func removeGuildConfig(guildID string) {
