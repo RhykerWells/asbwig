@@ -3,9 +3,6 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/prefix"
-	"github.com/RhykerWells/asbwig/commands/economy"
-	"github.com/RhykerWells/asbwig/commands/moderation"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -13,7 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// guildJoin is called when the bot is added to a new guild
+var scheduledJoinFunctions []func(g *discordgo.GuildCreate)
+
+func RegisterGuildJoinfunctions(funcMap []func(g *discordgo.GuildCreate)) {
+	scheduledJoinFunctions = append(scheduledJoinFunctions, funcMap...)
+}
+
+// guildJoin is called when the bot is added to a new guild (or upon connecting to the guild)
 // This adds the guild to the relevant database tables
 func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	log.WithFields(log.Fields{
@@ -26,10 +29,16 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 		common.Session.GuildLeave(g.ID)
 		return
 	}
-	moderation.RefreshMuteSettings(g.ID)
-	prefix.GuildPrefix(g.ID)
-	economy.GuildEconomyAdd(g.ID)
-	moderation.GuildModerationAdd(g.ID)
+
+	for _, joinFunction := range scheduledJoinFunctions {
+		joinFunction(g)
+	}
+}
+
+var scheduledLeaveFunctions []func(g *discordgo.GuildDelete)
+
+func RegisterGuildLeavefunctions(funcMap []func(g *discordgo.GuildDelete)) {
+	scheduledLeaveFunctions = append(scheduledLeaveFunctions, funcMap...)
 }
 
 // guildLeave is called when the bot is removed from a guild
@@ -38,13 +47,11 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	if g.Unavailable {
 		return
 	}
-	removeGuildConfig(g.ID)
 	log.Infoln("Left guild: ", g.ID)
-}
 
-func removeGuildConfig(guildID string) {
-	const query = `DELETE FROM core_config WHERE guild_id=$1`
-	common.PQ.Exec(query, guildID)
+	for _, leaveFunction := range scheduledLeaveFunctions {
+		leaveFunction(g)
+	}
 }
 
 func isGuildBanned(guildID string) bool {
