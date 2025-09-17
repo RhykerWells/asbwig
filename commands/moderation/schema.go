@@ -6,27 +6,27 @@ CREATE TABLE IF NOT EXISTS moderation_config (
 	guild_id TEXT PRIMARY KEY,
 	moderation_enabled BOOL DEFAULT FALSE NOT NULL,
 	moderation_trigger_deletion_enabled BOOL DEFAULT FALSE NOT NULL,
-	moderation_trigger_deletion_seconds INT DEFAULT 0 NOT NULL,
+	moderation_trigger_deletion_seconds BIGINT DEFAULT 0 NOT NULL,
 	moderation_response_deletion_enabled BOOL DEFAULT FALSE NOT NULL,
-	moderation_response_deletion_seconds INT DEFAULT 0 NOT NULL,
+	moderation_response_deletion_seconds BIGINT DEFAULT 0 NOT NULL,
 
 	moderation_log_channel TEXT DEFAULT '' NOT NULL,
 
 	-- Warn
-	warn_required_roles TEXT[],
+	warn_required_roles TEXT[] DEFAULT '{}' NOT NULL,
 
 	-- Mute/Unmute
-	mute_required_roles TEXT[],
+	mute_required_roles TEXT[] DEFAULT '{}' NOT NULL,
 	mute_role TEXT DEFAULT '' NOT NULL,
 	mute_manage_role BOOL DEFAULT FALSE NOT NULL,
-	mute_update_roles TEXT[],
+	mute_update_roles TEXT[] DEFAULT '{}' NOT NULL,
 
 
 	-- Kick
-	kick_required_roles TEXT[],
+	kick_required_roles TEXT[] DEFAULT '{}' NOT NULL,
 
 	-- Ban/Unban
-	ban_required_roles TEXT[],
+	ban_required_roles TEXT[] DEFAULT '{}' NOT NULL,
 
 
 	last_case_id BIGINT DEFAULT 0 NOT NULL

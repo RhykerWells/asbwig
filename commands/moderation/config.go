@@ -41,9 +41,9 @@ func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 		GuildID: c.GuildID,
 		ModerationEnabled: c.ModerationEnabled,
 		ModerationTriggerDeletionEnabled: c.ModerationTriggerDeletionEnabled,
-		ModerationTriggerDeletionSeconds: int(c.ModerationTriggerDeletionSeconds),
+		ModerationTriggerDeletionSeconds: c.ModerationTriggerDeletionSeconds,
 		ModerationResponseDeletionEnabled: c.ModerationResponseDeletionEnabled,
-		ModerationResponseDeletionSeconds: int(c.ModerationResponseDeletionSeconds),
+		ModerationResponseDeletionSeconds: c.ModerationResponseDeletionSeconds,
 
 		ModerationLogChannel:  c.ModerationLogChannel,
 
@@ -71,9 +71,9 @@ func ConfigFromModel(m *models.ModerationConfig) *Config {
 		GuildID: m.GuildID,
 		ModerationEnabled: m.ModerationEnabled,
 		ModerationTriggerDeletionEnabled: m.ModerationTriggerDeletionEnabled,
-		ModerationTriggerDeletionSeconds: int64(m.ModerationTriggerDeletionSeconds),
+		ModerationTriggerDeletionSeconds: m.ModerationTriggerDeletionSeconds,
 		ModerationResponseDeletionEnabled: m.ModerationResponseDeletionEnabled,
-		ModerationResponseDeletionSeconds: int64(m.ModerationResponseDeletionSeconds),
+		ModerationResponseDeletionSeconds: m.ModerationResponseDeletionSeconds,
 
 		ModerationLogChannel: m.ModerationLogChannel,
 

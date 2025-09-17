@@ -27,17 +27,17 @@ type ModerationConfig struct {
 	GuildID                           string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	ModerationEnabled                 bool              `boil:"moderation_enabled" json:"moderation_enabled" toml:"moderation_enabled" yaml:"moderation_enabled"`
 	ModerationTriggerDeletionEnabled  bool              `boil:"moderation_trigger_deletion_enabled" json:"moderation_trigger_deletion_enabled" toml:"moderation_trigger_deletion_enabled" yaml:"moderation_trigger_deletion_enabled"`
-	ModerationTriggerDeletionSeconds  int               `boil:"moderation_trigger_deletion_seconds" json:"moderation_trigger_deletion_seconds" toml:"moderation_trigger_deletion_seconds" yaml:"moderation_trigger_deletion_seconds"`
+	ModerationTriggerDeletionSeconds  int64             `boil:"moderation_trigger_deletion_seconds" json:"moderation_trigger_deletion_seconds" toml:"moderation_trigger_deletion_seconds" yaml:"moderation_trigger_deletion_seconds"`
 	ModerationResponseDeletionEnabled bool              `boil:"moderation_response_deletion_enabled" json:"moderation_response_deletion_enabled" toml:"moderation_response_deletion_enabled" yaml:"moderation_response_deletion_enabled"`
-	ModerationResponseDeletionSeconds int               `boil:"moderation_response_deletion_seconds" json:"moderation_response_deletion_seconds" toml:"moderation_response_deletion_seconds" yaml:"moderation_response_deletion_seconds"`
+	ModerationResponseDeletionSeconds int64             `boil:"moderation_response_deletion_seconds" json:"moderation_response_deletion_seconds" toml:"moderation_response_deletion_seconds" yaml:"moderation_response_deletion_seconds"`
 	ModerationLogChannel              string            `boil:"moderation_log_channel" json:"moderation_log_channel" toml:"moderation_log_channel" yaml:"moderation_log_channel"`
-	WarnRequiredRoles                 types.StringArray `boil:"warn_required_roles" json:"warn_required_roles,omitempty" toml:"warn_required_roles" yaml:"warn_required_roles,omitempty"`
-	MuteRequiredRoles                 types.StringArray `boil:"mute_required_roles" json:"mute_required_roles,omitempty" toml:"mute_required_roles" yaml:"mute_required_roles,omitempty"`
+	WarnRequiredRoles                 types.StringArray `boil:"warn_required_roles" json:"warn_required_roles" toml:"warn_required_roles" yaml:"warn_required_roles"`
+	MuteRequiredRoles                 types.StringArray `boil:"mute_required_roles" json:"mute_required_roles" toml:"mute_required_roles" yaml:"mute_required_roles"`
 	MuteRole                          string            `boil:"mute_role" json:"mute_role" toml:"mute_role" yaml:"mute_role"`
 	MuteManageRole                    bool              `boil:"mute_manage_role" json:"mute_manage_role" toml:"mute_manage_role" yaml:"mute_manage_role"`
 	MuteUpdateRoles                   types.StringArray `boil:"mute_update_roles" json:"mute_update_roles,omitempty" toml:"mute_update_roles" yaml:"mute_update_roles,omitempty"`
-	KickRequiredRoles                 types.StringArray `boil:"kick_required_roles" json:"kick_required_roles,omitempty" toml:"kick_required_roles" yaml:"kick_required_roles,omitempty"`
-	BanRequiredRoles                  types.StringArray `boil:"ban_required_roles" json:"ban_required_roles,omitempty" toml:"ban_required_roles" yaml:"ban_required_roles,omitempty"`
+	KickRequiredRoles                 types.StringArray `boil:"kick_required_roles" json:"kick_required_roles" toml:"kick_required_roles" yaml:"kick_required_roles"`
+	BanRequiredRoles                  types.StringArray `boil:"ban_required_roles" json:"ban_required_roles" toml:"ban_required_roles" yaml:"ban_required_roles"`
 	LastCaseID                        int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -123,36 +123,13 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelperint struct{ field string }
-
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint) IN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperint) NIN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
 type whereHelpertypes_StringArray struct{ field string }
 
 func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
 func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
 func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
@@ -176,9 +153,9 @@ var ModerationConfigWhere = struct {
 	GuildID                           whereHelperstring
 	ModerationEnabled                 whereHelperbool
 	ModerationTriggerDeletionEnabled  whereHelperbool
-	ModerationTriggerDeletionSeconds  whereHelperint
+	ModerationTriggerDeletionSeconds  whereHelperint64
 	ModerationResponseDeletionEnabled whereHelperbool
-	ModerationResponseDeletionSeconds whereHelperint
+	ModerationResponseDeletionSeconds whereHelperint64
 	ModerationLogChannel              whereHelperstring
 	WarnRequiredRoles                 whereHelpertypes_StringArray
 	MuteRequiredRoles                 whereHelpertypes_StringArray
@@ -192,9 +169,9 @@ var ModerationConfigWhere = struct {
 	GuildID:                           whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
 	ModerationEnabled:                 whereHelperbool{field: "\"moderation_config\".\"moderation_enabled\""},
 	ModerationTriggerDeletionEnabled:  whereHelperbool{field: "\"moderation_config\".\"moderation_trigger_deletion_enabled\""},
-	ModerationTriggerDeletionSeconds:  whereHelperint{field: "\"moderation_config\".\"moderation_trigger_deletion_seconds\""},
+	ModerationTriggerDeletionSeconds:  whereHelperint64{field: "\"moderation_config\".\"moderation_trigger_deletion_seconds\""},
 	ModerationResponseDeletionEnabled: whereHelperbool{field: "\"moderation_config\".\"moderation_response_deletion_enabled\""},
-	ModerationResponseDeletionSeconds: whereHelperint{field: "\"moderation_config\".\"moderation_response_deletion_seconds\""},
+	ModerationResponseDeletionSeconds: whereHelperint64{field: "\"moderation_config\".\"moderation_response_deletion_seconds\""},
 	ModerationLogChannel:              whereHelperstring{field: "\"moderation_config\".\"moderation_log_channel\""},
 	WarnRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"warn_required_roles\""},
 	MuteRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"mute_required_roles\""},
