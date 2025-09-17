@@ -211,6 +211,40 @@ func SetRoles(guildID, memberID string, roleIDs []string) error {
 	return err
 }
 
+// HighestRole returns the role object of a members highest role
+// Will return nil if no role is found
+func HighestRole(guildID string, member *discordgo.Member) (role *discordgo.Role) {
+	guild := GetGuild(guildID)
+	for _, memberRoleID := range member.Roles {
+		for _, guildRole := range guild.Roles {
+			if memberRoleID != guildRole.ID {
+				continue
+			}
+			if role == nil || IsRoleHigher(guildRole, role) {
+				role = guildRole
+			}
+			break
+		}
+	}
+	return role
+}
+
+// IsRoleHigher returns a boolean if the position of role A is higher than role B
+// If they are both 1 (denoting a new role), we check against the ID
+func IsRoleHigher(higher, lower *discordgo.Role) bool {
+	if higher.Position != lower.Position {
+		return higher.Position > lower.Position
+	}
+	if higher.ID == lower.ID {
+		// Don't want to allow against ourselves or other similarly ranked users
+		return false
+	}
+
+	// Failed both checks above. Roles both have a position of 1
+	// Returns true if highers role is less then lower
+	return higher.ID < lower.ID
+}
+
 // Misc
 func SetStatus(statusText string) {
 	// TODO VERSION on nothing
