@@ -19,7 +19,7 @@ func Init() {
 		log.WithError(err).Fatal("Failed to start core")
 	}
 
-	bot.Run(common.Session)
+	bot.Run(common.Session, common.PQ)
 	common.Run(common.Session)
 	web.Run()
 }
