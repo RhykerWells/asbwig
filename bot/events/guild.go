@@ -3,7 +3,6 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/commands/economy"
 	"github.com/RhykerWells/asbwig/common/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
@@ -33,7 +32,6 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	for _, joinFunction := range scheduledGuildJoinFunctions {
 		joinFunction(g)
 	}
-	economy.GuildEconomyAdd(g.ID)
 }
 
 var scheduledGuildLeaveFunctions []func(g *discordgo.GuildDelete)
