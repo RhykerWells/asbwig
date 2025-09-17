@@ -3,13 +3,18 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/prefix"
 	"github.com/RhykerWells/asbwig/commands/economy"
 	"github.com/RhykerWells/asbwig/common/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
+
+var scheduledGuildJoinFunctions []func(g *discordgo.GuildCreate)
+
+func RegisterGuildJoinfunctions(funcMap []func(g *discordgo.GuildCreate)) {
+	scheduledGuildJoinFunctions = append(scheduledGuildJoinFunctions, funcMap...)
+}
 
 // guildJoin is called when the bot is added to a new guild
 // This adds the guild to the relevant database tables
@@ -24,7 +29,10 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 		s.GuildLeave(g.ID)
 		return
 	}
-	prefix.GuildPrefix(g.ID)
+
+	for _, joinFunction := range scheduledGuildJoinFunctions {
+		joinFunction(g)
+	}
 	economy.GuildEconomyAdd(g.ID)
 }
 
