@@ -1,7 +1,5 @@
 package common
 
-//go:generate sqlboiler --no-hooks psql
-
 import (
 	"database/sql"
 	"fmt"
