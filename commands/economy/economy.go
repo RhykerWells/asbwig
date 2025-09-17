@@ -46,6 +46,12 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete) {
 		guildDeleteEconomyConfig,
 	})
+	events.RegisterGuildMemberJoinfunctions([]func(g *discordgo.GuildMemberAdd) {
+		guildMemberAddToEconomy,
+	})
+	events.RegisterGuildMemberLeavefunctions([]func(g *discordgo.GuildMemberRemove) {
+		guildMemberRemoveFromEconomy,
+	})
 
 	cmdHandler.RegisterCommands(
 		//Info

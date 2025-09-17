@@ -17,6 +17,7 @@ type Config struct {
 	Max int64
 	Maxbet int64
 	Symbol string
+	Startbalance int64
 	Customworkresponses bool
 	Customcrimeresponses bool
 }
@@ -28,6 +29,7 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 		Max: c.Max,
 		Maxbet: c.Maxbet,
 		Symbol: c.Symbol,
+		Startbalance: c.Startbalance,
 		Customworkresponses: c.Customworkresponses,
 		Customcrimeresponses: c.Customcrimeresponses,
 	}
@@ -40,6 +42,7 @@ func ConfigFromModel(m *models.EconomyConfig) *Config {
 		Max: m.Max,
 		Maxbet: m.Maxbet,
 		Symbol: m.Symbol,
+		Startbalance: m.Startbalance,
 		Customworkresponses: m.Customworkresponses,
 		Customcrimeresponses: m.Customcrimeresponses,
 	}
@@ -77,4 +80,21 @@ func guildDeleteEconomyConfig(g *discordgo.GuildDelete) {
 	}
 
 	config.Delete(context.Background(), common.PQ)
+}
+
+func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
+	config := GetConfig(m.GuildID)
+	userEntry := models.EconomyUser{
+		GuildID: config.GuildID,
+		UserID:  m.User.ID,
+		Cash:    config.Startbalance,
+		Bank:    0,
+	}
+	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
+}
+
+func guildMemberRemoveFromEconomy(m *discordgo.GuildMemberRemove) {
+	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
 }
