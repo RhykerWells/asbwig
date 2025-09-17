@@ -1,6 +1,8 @@
 package web
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"text/template"
@@ -118,4 +120,16 @@ func runWebServer(multiplexer *goji.Mux) {
 // Called by plugins to add their routes
 func RegisterDashboardRoutes(route func(*goji.Mux)) {
 	dashboardRoutes = append(dashboardRoutes, route)
+}
+
+type FormResponse struct {
+    Success bool   `json:"Success"`
+    Message string `json:"Message"`
+}
+
+func SendErrorToast(w http.ResponseWriter, message string) {
+	json.NewEncoder(w).Encode(FormResponse{Success: false, Message: fmt.Sprintf("%s (ask support for help)", message)})
+}
+func SendSuccessToast(w http.ResponseWriter, message string) {
+	json.NewEncoder(w).Encode(FormResponse{Success: true, Message: message})
 }
