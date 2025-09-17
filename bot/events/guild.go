@@ -5,7 +5,6 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/prefix"
 	"github.com/RhykerWells/asbwig/commands/economy"
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
@@ -22,7 +21,7 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}).Infoln("Joined guild: ", g.Name)
 	banned := isGuildBanned(g.ID)
 	if banned {
-		common.Session.GuildLeave(g.ID)
+		s.GuildLeave(g.ID)
 		return
 	}
 	prefix.GuildPrefix(g.ID)
@@ -48,13 +47,8 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	}
 }
 
-func removeGuildConfig(guildID string) {
-	const query = `DELETE FROM core_config WHERE guild_id=$1`
-	common.PQ.Exec(query, guildID)
-}
-
 func isGuildBanned(guildID string) bool {
-	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), common.PQ)
+	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), db)
 	if err != nil {
 		return false
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/RhykerWells/asbwig/commands/economy/models"
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
@@ -15,14 +14,14 @@ import (
 func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	guildid := m.GuildID
 	userid := m.Member.User.ID
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", guildid)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", guildid)).One(context.Background(), db)
 	userEntry := models.EconomyUser{
 		GuildID: guildid,
 		UserID:  userid,
 		Cash:    guild.Startbalance,
 		Bank:    0,
 	}
-	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	userEntry.Insert(context.Background(), db, boil.Infer())
 }
 
 // guildMemberLeave is called when a member leaves a guild the bot is in
@@ -30,6 +29,6 @@ func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 func guildMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 	guildid := m.GuildID
 	userid := m.Member.User.ID
-	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
-	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), db)
+	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", guildid, userid)).DeleteAll(context.Background(), db)
 }
