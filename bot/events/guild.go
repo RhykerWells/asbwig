@@ -3,7 +3,7 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/common/models"
+	"github.com/RhykerWells/asbwig/bot/core/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"

@@ -7,7 +7,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/RhykerWells/asbwig/common/models"
+	"github.com/RhykerWells/asbwig/bot/core/models"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
