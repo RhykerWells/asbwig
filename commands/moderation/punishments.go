@@ -14,112 +14,102 @@ import (
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
-func RefreshMuteSettings(guildID string) {
-	config, err := models.ModerationConfigs(qm.Where("guild_id = ?", guildID)).One(context.Background(), common.PQ)
-	if err != nil {
-		return
-	}
-	managed := config.ManageMuteRole
-	if !managed {
-		return
-	}
-	if config.MuteRole.String == "" {
-		return
-	}
-	channels, _ := common.Session.GuildChannels(guildID)
-	for _, channel := range channels {
-		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole.String,  discordgo.PermissionOverwriteTypeRole, 0, discordgo.PermissionSendMessages)
-	}
-}
+var (
+	errNotMuted = errors.New("user not muted")
+	errNotBanned = errors.New("user not banned")
+	errNotMember = errors.New("user not a member")
+)
 
-func muteUser(guildID string, target string, duration time.Duration) error {
-	moderationConfig, _ := models.ModerationConfigs(qm.Where("guild_id = ?", guildID)).One(context.Background(), common.PQ)
-	err := functions.AddRole(guildID, target, moderationConfig.MuteRole.String)
+func muteUser(config *Config, targetID string, duration time.Duration) error {
+	err := functions.AddRole(config.GuildID, targetID, config.MuteRole)
 	if err != nil {
 		return err
 	}
+
 	rolesRemoved := []string{}
-	member, _ := functions.GetMember(guildID, target)
-	if len(moderationConfig.UpdateRoles) > 0 {
-		roleSet := make(map[string]struct{}, len(moderationConfig.UpdateRoles))
-		for _, role := range moderationConfig.UpdateRoles {
+	member, _ := functions.GetMember(config.GuildID, targetID)
+	if len(config.MuteUpdateRoles) > 0 {
+		roleSet := make(map[string]struct{}, len(config.MuteUpdateRoles))
+		for _, role := range config.MuteUpdateRoles {
 			roleSet[role] = struct{}{}
 		}
 
 		for _, userRole := range member.Roles {
 			if _, exists := roleSet[userRole]; exists {
 				rolesRemoved = append(rolesRemoved, userRole)
-				functions.RemoveRole(guildID, target, userRole)
+				functions.RemoveRole(config.GuildID, targetID, userRole)
 			}
 		}
 	}
 
 	unmuteTime := time.Now().Add(duration)
 	muteEntry := models.ModerationMute{
-		GuildID: guildID,
-		UserID: target,
+		GuildID: config.GuildID,
+		UserID: targetID,
 		Roles: rolesRemoved,
 		UnmuteAt: unmuteTime,
 	}
 	muteEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unmute_at"), boil.Infer())
 
-	scheduleUnmute(guildID, target, unmuteTime)
+	scheduleUnmute(config, targetID, unmuteTime)
 
 	return nil
 }
 
-var (
-	errNotMuted = errors.New("user not muted")
-	errAlreadyBanned = errors.New("user already banned")
-	errNotBanned = errors.New("user not banned")
-	errNotMember = errors.New("user not a member")
-)
-
-
-func unmuteUser(guildID string, author, target string) error {
-	moderationConfig, _ := models.ModerationConfigs(qm.Where("guild_id = ?", guildID)).One(context.Background(), common.PQ)
-	muteUser, err := models.ModerationMutes(qm.Where("guild_id = ?", guildID), qm.Where("user_id = ?", target)).One(context.Background(), common.PQ)
+func unmuteUser(config *Config, authorID, targetID string) error {
+	mutedUser, err := models.ModerationMutes(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
 	if err != nil {
 		return errNotMuted
 	}
 
-	targetMember, err := functions.GetMember(guildID, target)
+	targetMember, err := functions.GetMember(config.GuildID, targetID)
 	if err != nil {
-		if author == common.Bot.ID {
-			muteUser.Delete(context.Background(), common.PQ)
+		if authorID == common.Bot.ID {
+			mutedUser.Delete(context.Background(), common.PQ)
 		}
 		return errNotMember
 	}
 
-	for _, roleID := range muteUser.Roles {
-		functions.AddRole(guildID, target, roleID)
+	for _, roleID := range mutedUser.Roles {
+		functions.AddRole(config.GuildID, targetID, roleID)
 	}
-	err = functions.RemoveRole(guildID, target, moderationConfig.MuteRole.String)
-	if err != nil {
-		return err
-	}
+	functions.RemoveRole(config.GuildID, targetID, config.MuteRole)
 
-	muteUser.Delete(context.Background(), common.PQ)
+	mutedUser.Delete(context.Background(), common.PQ)
 
-	if author == common.Bot.ID {
-		modlogChannel, _ := getGuildModLogChannel(guildID)
-		botMember, _ := functions.GetMember(guildID, common.Bot.ID)
-		logCase(guildID, botMember, targetMember, logUnmute, modlogChannel, "Automatic unmute")
+	if authorID == common.Bot.ID {
+		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
+		createCase(config, botMember, targetMember, logUnmute, config.ModerationLogChannel, "Automatic unmute")
 	}
 
 	return nil
 }
 
-func scheduleUnmute(guildID string, target string, unmuteTime time.Time) {
+func RefreshMuteSettings(config *Config) {
+	if !config.MuteManageRole {
+		return
+	}
+
+	if config.MuteRole == "" {
+		return
+	}
+
+	channels, _ := common.Session.GuildChannels(config.GuildID)
+	for _, channel := range channels {
+		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole, discordgo.PermissionOverwriteTypeRole, 0, discordgo.PermissionSendMessages)
+	}
+}
+
+func scheduleUnmute(config *Config, targetID string, unmuteTime time.Time) {
 	delay := time.Until(unmuteTime)
 	if delay <= 0 {
-		go unmuteUser(guildID, common.Bot.ID, target)
+		go unmuteUser(config, common.Bot.ID, targetID)
 		return
 	}
 
 	go func() {
 		time.Sleep(time.Until(unmuteTime))
-		unmuteUser(guildID, common.Bot.ID, target)
+		unmuteUser(config, common.Bot.ID, targetID)
 	}()
 }
 
@@ -130,80 +120,95 @@ func scheduleAllPendingUnmutes() {
 	}
 
 	for _, mute := range mutes {
-		scheduleUnmute(mute.GuildID, mute.UserID, mute.UnmuteAt)
+		config := GetConfig(mute.GuildID)
+		scheduleUnmute(config, mute.UserID, mute.UnmuteAt)
 	}
 }
 
-func kickUser(guildID, author, target, reason string) error {
-	_, err := functions.GetMember(guildID, target)
+func kickUser(config *Config, author, target *discordgo.Member, reason string) error {
+	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
+
+	err := functions.GuildKickMember(config.GuildID, target.User.ID, auditLogReason)
 	if err != nil {
-		return errNotMember
+		return err
 	}
 
-	authorMember, _ := functions.GetMember(guildID, author)
-	auditLogReason := fmt.Sprintf("%s: %s", authorMember.User.Username, reason)
-
-	functions.GuildKickMember(guildID, target, auditLogReason)
 	return nil
 }
 
-func banUser(guildID, author, target, reason string, duration time.Duration) error {
-	_, err := common.Session.GuildBan(guildID, target)
-	if err == nil {
-		return errAlreadyBanned
+func banUser(config *Config, author, target *discordgo.Member, reason string, duration time.Duration) error {
+	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
+
+	err := functions.GuildBanMember(config.GuildID, target.User.ID, auditLogReason)
+	if err != nil {
+		return err
 	}
-	authorMember, _ := functions.GetMember(guildID, author)
-	auditLogReason := fmt.Sprintf("%s: %s", authorMember.User.Username, reason)
 
 	unbanTime := time.Now().Add(duration)
-	functions.GuildBanMember(guildID, target, auditLogReason)
-
 	banEntry := models.ModerationBan{
-		GuildID: guildID,
-		UserID: target,
+		GuildID: config.GuildID,
+		UserID: target.User.ID,
 		UnbanAt: unbanTime,
 	}
 	banEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unban_at"), boil.Infer())
 
-	scheduleUnban(guildID, target, unbanTime)
+	scheduleUnban(config, target.User.ID, unbanTime)
 	return nil
 }
 
-func unbanUser(guildID string, author, target string) error {
-	err := functions.GuildUnbanMember(guildID, target)
+func unbanUser(config *Config, authorID, targetID string) error {
+	bannedUser, _ := models.ModerationBans(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
+
+	err := functions.GuildUnbanMember(config.GuildID, targetID)
 	if err != nil {
 		return errNotBanned
 	}
 
-	targetUser, _ := functions.GetUser(target)
+
+	targetUser, _ := functions.GetUser(targetID)
 	targetMember := &discordgo.Member{
 		User: targetUser,
 	}
 
-	if author == common.Bot.ID {
-		modlogChannel, _ := getGuildModLogChannel(guildID)
-		botMember, _ := functions.GetMember(guildID, common.Bot.ID)
-		logCase(guildID, botMember, targetMember, logUnban, modlogChannel, "Automatic unban")
+	if bannedUser != nil {
+		bannedUser.Delete(context.Background(), common.PQ)
 	}
 
-	banUser, err := models.ModerationBans(qm.Where("guild_id = ?", guildID), qm.Where("user_id = ?", target)).One(context.Background(), common.PQ)
-
-	if err != nil {
-		banUser.Delete(context.Background(), common.PQ)
+	if authorID == common.Bot.ID {
+		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
+		createCase(config, botMember, targetMember, logUnban, config.ModerationLogChannel, "Automatic unban")
 	}
 
 	return nil
 }
 
-func scheduleUnban(guildID string, target string, unmuteTime time.Time) {
+func scheduleUnban(config *Config, targetID string, unmuteTime time.Time) {
 	delay := time.Until(unmuteTime)
 	if delay <= 0 {
-		go unbanUser(guildID, common.Bot.ID, target)
+		go unbanUser(config, common.Bot.ID, targetID)
 		return
 	}
 
 	go func() {
 		time.Sleep(time.Until(unmuteTime))
-		unbanUser(guildID, common.Bot.ID, target)
+		unbanUser(config, common.Bot.ID, targetID)
 	}()
+}
+
+func scheduleAllPendingUnbans() {
+	bannedUsers, err := models.ModerationBans(qm.Where("unban_at > ?", time.Now())).All(context.Background(), common.PQ)
+	if err != nil {
+		return
+	}
+
+	for _, bannedUser := range bannedUsers {
+		config := GetConfig(bannedUser.GuildID)
+		_, err := common.Session.GuildBan(bannedUser.GuildID, bannedUser.UserID)
+		if err != nil {
+			bannedUser.Delete(context.Background(), common.PQ)
+			continue
+		}
+
+		scheduleUnban(config, bannedUser.UserID, bannedUser.UnbanAt)
+	}
 }
