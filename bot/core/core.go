@@ -14,4 +14,6 @@ func Init() {
 	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete) {
 		guildDeleteCoreConfig,
 	})
+
+	initWeb()
 }
