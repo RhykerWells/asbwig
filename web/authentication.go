@@ -28,7 +28,8 @@ func initDiscordOauth() {
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	_, err := checkCookie(w, r)
 	if err == nil {
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
+		return
 	}
 	csrfToken, err := createCSRF()
 	if err != nil {
