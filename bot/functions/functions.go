@@ -20,13 +20,15 @@ func GetGuild(guildID string) *discordgo.Guild {
 }
 
 // GuildKickMember kicks a user from the current guild
-func GuildKickMember(guildID, userID, reason string) {
-	common.Session.GuildMemberDeleteWithReason(guildID, userID, reason)
+func GuildKickMember(guildID, userID, reason string) error {
+	err := common.Session.GuildMemberDeleteWithReason(guildID, userID, reason)
+	return err
 }
 
 // GuildBanMember bans a user from the current guild
-func GuildBanMember(guildID, userID, reason string) {
-	common.Session.GuildBanCreateWithReason(guildID, userID, reason, 0)
+func GuildBanMember(guildID, userID, reason string) error {
+	err := common.Session.GuildBanCreateWithReason(guildID, userID, reason, 0)
+	return err
 }
 
 // GuildUnbanMember unbans a member from the current guild
