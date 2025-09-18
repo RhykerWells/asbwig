@@ -19,6 +19,10 @@ var (
 		Name:        "Economy",
 		Description: "Gambling and other economy based commands",
 	}
+	CategoryModeration = CommandCategory{
+		Name:        "Moderation",
+		Description: "Moderation and guild safety",
+	}
 )
 
 type AsbwigCommand struct {
