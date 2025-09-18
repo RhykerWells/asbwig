@@ -11,19 +11,19 @@ var (
 		Name:        "General",
 		Description: "General bot commands",
 	}
-	CategoryOwner = CommandCategory {
-		Name: "Owner",
+	CategoryOwner = CommandCategory{
+		Name:        "Owner",
 		Description: "Mainanance and other bot-owner commands",
 	}
-	CategoryEconomy = CommandCategory {
-		Name: "Economy",
+	CategoryEconomy = CommandCategory{
+		Name:        "Economy",
 		Description: "Gambling and other economy based commands",
 	}
 )
 
 type AsbwigCommand struct {
 	Command      string
-	Category	 CommandCategory
+	Category     CommandCategory
 	Aliases      []string
 	Description  string
 	Args         []*Args

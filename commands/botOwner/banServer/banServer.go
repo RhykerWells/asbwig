@@ -3,11 +3,11 @@ package banserver
 import (
 	"context"
 
+	"github.com/RhykerWells/asbwig/bot/core/models"
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/RhykerWells/asbwig/bot/core/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 

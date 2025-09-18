@@ -12,38 +12,38 @@ import (
 
 type Config struct {
 	// General
-	GuildID	string
-	Min int64
-	Max int64
-	Maxbet int64
-	Symbol string
-	Startbalance int64
-	Customworkresponses bool
+	GuildID              string
+	Min                  int64
+	Max                  int64
+	Maxbet               int64
+	Symbol               string
+	Startbalance         int64
+	Customworkresponses  bool
 	Customcrimeresponses bool
 }
 
 func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 	return &models.EconomyConfig{
-		GuildID: c.GuildID,
-		Min: c.Min,
-		Max: c.Max,
-		Maxbet: c.Maxbet,
-		Symbol: c.Symbol,
-		Startbalance: c.Startbalance,
-		Customworkresponses: c.Customworkresponses,
+		GuildID:              c.GuildID,
+		Min:                  c.Min,
+		Max:                  c.Max,
+		Maxbet:               c.Maxbet,
+		Symbol:               c.Symbol,
+		Startbalance:         c.Startbalance,
+		Customworkresponses:  c.Customworkresponses,
 		Customcrimeresponses: c.Customcrimeresponses,
 	}
 }
 
 func ConfigFromModel(m *models.EconomyConfig) *Config {
 	return &Config{
-		GuildID: m.GuildID,
-		Min: m.Min,
-		Max: m.Max,
-		Maxbet: m.Maxbet,
-		Symbol: m.Symbol,
-		Startbalance: m.Startbalance,
-		Customworkresponses: m.Customworkresponses,
+		GuildID:              m.GuildID,
+		Min:                  m.Min,
+		Max:                  m.Max,
+		Maxbet:               m.Maxbet,
+		Symbol:               m.Symbol,
+		Startbalance:         m.Startbalance,
+		Customworkresponses:  m.Customworkresponses,
 		Customcrimeresponses: m.Customcrimeresponses,
 	}
 }

@@ -8,10 +8,12 @@ import (
 )
 
 func Init() {
-	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate) {
+	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddCoreConfig,
 	})
-	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete) {
+	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete){
 		guildDeleteCoreConfig,
 	})
+
+	initWeb()
 }

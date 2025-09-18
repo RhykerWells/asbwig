@@ -11,20 +11,20 @@ import (
 
 type Config struct {
 	// General
-	GuildID	string
+	GuildID     string
 	GuildPrefix string
 }
 
 func (c *Config) ConfigToSQLModel() *models.CoreConfig {
 	return &models.CoreConfig{
-		GuildID: c.GuildID,
+		GuildID:     c.GuildID,
 		GuildPrefix: c.GuildPrefix,
 	}
 }
 
 func ConfigFromModel(m *models.CoreConfig) *Config {
 	return &Config{
-		GuildID: m.GuildID,
+		GuildID:     m.GuildID,
 		GuildPrefix: m.GuildPrefix,
 	}
 }
@@ -36,7 +36,7 @@ func GetConfig(guildID string) *Config {
 	}
 
 	return &Config{
-		GuildID: guildID,
+		GuildID:     guildID,
 		GuildPrefix: "~",
 	}
 }

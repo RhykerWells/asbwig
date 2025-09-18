@@ -21,7 +21,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - 8085:8085
+      - 80:80
   db:
     container_name: asbwig-dev-postgres-db
     image: postgres:16

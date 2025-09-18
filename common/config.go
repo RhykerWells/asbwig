@@ -17,7 +17,7 @@ var (
 	ConfigPGUsername = os.Getenv("ASBWIG_PGUSER")
 	ConfigPGPassword = os.Getenv("ASBWIG_PGPASSWORD")
 
-	ConfigTermsURLOverride = os.Getenv("ASBWIG_TERMSURLOVERRIDE")
+	ConfigTermsURLOverride   = os.Getenv("ASBWIG_TERMSURLOVERRIDE")
 	ConfigPrivacyURLOverride = os.Getenv("ASBWIG_PRIVACYURLOVERRIDE")
 
 	ConfigBotOwner = os.Getenv("ASBWIG_OWNERID")

@@ -201,7 +201,7 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 func errorEmbed(cmd string, data *Data, description string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:	data.Author.Username + " - " + cmd,
+			Name:    data.Author.Username + " - " + cmd,
 			IconURL: data.Author.AvatarURL("256"),
 		},
 		Timestamp:   time.Now().Format(time.RFC3339),

@@ -10,7 +10,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:      "createinvite",
-	Category:	  dcommand.CategoryOwner,
+	Category:     dcommand.CategoryOwner,
 	Description:  "Creates an invite to the specified guild",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

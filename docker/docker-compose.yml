@@ -18,7 +18,7 @@ services:
     depends_on:
       - db
     ports:
-      - 8085:8085
+      - 80:80
   db:
     container_name: asbwig-postgres-db
     image: postgres:16

@@ -11,7 +11,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:      "setstatus",
-	Category:	  dcommand.CategoryOwner,
+	Category:     dcommand.CategoryOwner,
 	Description:  "Changes the bot status",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

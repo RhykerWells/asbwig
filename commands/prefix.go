@@ -8,13 +8,13 @@ import (
 
 var prefixCmd = &dcommand.AsbwigCommand{
 	Command:     "prefix",
-	Category: 	 dcommand.CategoryGeneral,
+	Category:    dcommand.CategoryGeneral,
 	Description: "Views the bot prefix",
 	Args: []*dcommand.Args{
 		{Name: "Prefix", Type: dcommand.String},
 	},
 	Run: (func(data *dcommand.Data) {
 		prefix := prfx.GuildPrefix(data.GuildID)
-		functions.SendBasicMessage(data.ChannelID, "This servers prefix is `" + prefix + "`")
+		functions.SendBasicMessage(data.ChannelID, "This servers prefix is `"+prefix+"`")
 	}),
 }

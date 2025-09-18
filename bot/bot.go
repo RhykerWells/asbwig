@@ -12,19 +12,18 @@ import (
 var (
 	gatewayIntentsUsed = discordgo.MakeIntent(
 		discordgo.IntentGuilds |
-		discordgo.IntentGuildMembers |
-		discordgo.IntentGuildModeration |
-		discordgo.IntentGuildVoiceStates |
-		discordgo.IntentGuildPresences |
-		discordgo.IntentGuildMessages |
-		discordgo.IntentGuildMessageReactions |
-		discordgo.IntentDirectMessages |
-		discordgo.IntentDirectMessageReactions |
-		discordgo.IntentMessageContent |
-		discordgo.IntentGuildScheduledEvents,
+			discordgo.IntentGuildMembers |
+			discordgo.IntentGuildModeration |
+			discordgo.IntentGuildVoiceStates |
+			discordgo.IntentGuildPresences |
+			discordgo.IntentGuildMessages |
+			discordgo.IntentGuildMessageReactions |
+			discordgo.IntentDirectMessages |
+			discordgo.IntentDirectMessageReactions |
+			discordgo.IntentMessageContent |
+			discordgo.IntentGuildScheduledEvents,
 	)
 )
-
 
 func Run(s *discordgo.Session, db *sql.DB) {
 	events.InitEvents(s, db)

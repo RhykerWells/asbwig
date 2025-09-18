@@ -9,6 +9,6 @@ COPY ./ .
 WORKDIR /app/cmd/asbwig
 RUN CGO_ENABLED=0 GOOS=linux go build
 
-EXPOSE 8085
+EXPOSE 80
 
 CMD ["/app/cmd/asbwig/asbwig"]
