@@ -38,6 +38,10 @@ func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
 	formType := r.FormValue("form_type")
 	switch formType {
 	case "Core":
+		if r.FormValue("GuildPrefix") == "" {
+			web.SendErrorToast(w, "Prefix cannot be empty.")
+			return
+		}
 		config.GuildPrefix = r.FormValue("GuildPrefix")
 	}
 
