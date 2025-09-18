@@ -24,7 +24,6 @@ const (
 	CtxKeyTmplData CtxKey = iota
 )
 
-
 // createCSRF generates a CSRF token to be used for validating requests such as logins
 func createCSRF() (string, error) {
 	bytes := make([]byte, 32)

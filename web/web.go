@@ -144,6 +144,7 @@ type FormResponse struct {
 func SendSuccessToast(w http.ResponseWriter, message string) {
 	json.NewEncoder(w).Encode(FormResponse{Success: true, Message: message})
 }
+
 // SendErrorToast is used to send a JSON response to the client to send the error toasts
 func SendErrorToast(w http.ResponseWriter, message string) {
 	json.NewEncoder(w).Encode(FormResponse{Success: false, Message: message})
