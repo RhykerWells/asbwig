@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
+	github.com/RhykerWells/durationutil v1.0.1
 	github.com/aarondl/null/v8 v8.1.3
 	github.com/aarondl/sqlboiler/v4 v4.19.5
 	github.com/aarondl/strmangle v0.0.9
@@ -18,6 +19,7 @@ require (
 require (
 	github.com/aarondl/inflect v0.0.2 // indirect
 	github.com/aarondl/randomize v0.0.2 // indirect
+	github.com/ericlagergren/decimal v0.0.0-20190420051523-6335edbaa640 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
