@@ -20,6 +20,24 @@ func GetGuild(guildID string) *discordgo.Guild {
 	return guild
 }
 
+// GuildKickMember kicks a user from the current guild
+func GuildKickMember(guildID, userID, reason string) error {
+	err := common.Session.GuildMemberDeleteWithReason(guildID, userID, reason)
+	return err
+}
+
+// GuildBanMember bans a user from the current guild
+func GuildBanMember(guildID, userID, reason string) error {
+	err := common.Session.GuildBanCreateWithReason(guildID, userID, reason, 0)
+	return err
+}
+
+// GuildUnbanMember unbans a member from the current guild
+func GuildUnbanMember(guildID, userID string) error {
+	err := common.Session.GuildBanDelete(guildID, userID)
+	return err
+}
+
 // Message functions
 
 // SendBasicMessage sends a string as message content to the given channel
@@ -124,14 +142,39 @@ func GetUser(userID string) (*discordgo.User, error) {
 	return u, err
 }
 
-// GetUser returns the member object if possible of a user ID
-func GetMember(guildID string, userID string) (*discordgo.Member, error) {
+// GetMember returns the member object if possible of a user ID/Mention
+func GetMember(guildID string, userStr string) (*discordgo.Member, error) {
 	// Direct mention
-	if strings.HasPrefix(userID, "<@") {
-		userID = userID[2 : len(userID)-1]
+	if strings.HasPrefix(userStr, "<@") {
+		userStr = userStr[2 : len(userStr)-1]
 	}
-	u, err := common.Session.GuildMember(guildID, userID)
+
+	u, err := common.Session.GuildMember(guildID, userStr)
+
 	return u, err
+}
+
+// IsMemberHigher returns true is memberA has a higher highest role than memberB
+func IsMemberHigher(guildID string, memberA, memberB *discordgo.Member) bool {
+	guild := GetGuild(guildID)
+	if memberA.User.ID == guild.OwnerID {
+		return true // MemberA is the Owner so automatically true
+	} else if memberB.User.ID == guild.OwnerID {
+		return false // MemberB is the Owner so automatically false
+	}
+
+	memAHighRole := HighestRole(guildID, memberA)
+	memBHighRole := HighestRole(guildID, memberB)
+
+	if memAHighRole == nil && memBHighRole == nil {
+		return false // Neither have roles
+	} else if memAHighRole != nil && memBHighRole == nil {
+		return true // member B has no roles, so automatically true
+	} else if memAHighRole == nil && memBHighRole != nil {
+		return false // member A has no roles, so automatically false
+	}
+
+	return IsRoleHigher(memAHighRole, memBHighRole)
 }
 
 // Role functions
@@ -142,16 +185,19 @@ func GetRole(guildID, roleStr string) (role *discordgo.Role, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	// Role mention
-	if strings.HasPrefix(roleStr, "<@") {
+	if strings.HasPrefix(roleStr, "<@&") {
 		roleStr = roleStr[3 : len(roleStr)-1]
 	}
+
 	for i := range guild.Roles {
 		if guild.Roles[i].ID == roleStr {
 			role = guild.Roles[i]
 			break
 		}
 	}
+
 	return role, nil
 }
 
