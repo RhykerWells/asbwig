@@ -38,7 +38,7 @@ func setCSRF(w http.ResponseWriter, token string) {
 		Value:   token,
 		Path:    "/",
 		Expires: time.Now().Add(24 * time.Hour),
-		Secure: true,
+		Secure:  true,
 	})
 }
 
@@ -54,7 +54,7 @@ func getCSRF(w http.ResponseWriter, r *http.Request) string {
 		Value:   "",
 		Path:    "/",
 		Expires: time.Unix(0, 0),
-		Secure: true,
+		Secure:  true,
 	})
 	return ""
 }
@@ -146,7 +146,7 @@ func getUserManagedGuilds(userID string) map[string]string {
 }
 
 // isUserManaged returns a boolean of whether or not the user has the permissions to manage the guild
-// Permissions required are: Owner, Manage Server or Administrator 
+// Permissions required are: Owner, Manage Server or Administrator
 func isUserManaged(guildID string, member *discordgo.Member) bool {
 	guild, err := common.Session.State.Guild(guildID)
 	if err == nil && guild.OwnerID == member.User.ID {
@@ -204,7 +204,7 @@ func baseTemplateDataMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
 		baseData := TmplContextData{
 			"HomeURL": URL,
-			"Year": time.Now().UTC().Year(),
+			"Year":    time.Now().UTC().Year(),
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
 
@@ -236,9 +236,9 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 				}
 			}
 			guildList = append(guildList, TmplContextData{
-				"ID":   guildID,
+				"ID":     guildID,
 				"Avatar": avatarURL,
-				"Name": guildName,
+				"Name":   guildName,
 			})
 		}
 
@@ -275,11 +275,11 @@ func currentGuildDataMW(inner http.Handler) http.Handler {
 		role := functions.HighestRole(retrievedGuild.ID, member)
 
 		guildData := map[string]interface{}{
-			"ID": retrievedGuild.ID,
-			"Name": retrievedGuild.Name,
-			"Avatar": retrievedGuild.IconURL("1024"),
-			"Channels": channels,
-			"Roles": roles,
+			"ID":                     retrievedGuild.ID,
+			"Name":                   retrievedGuild.Name,
+			"Avatar":                 retrievedGuild.IconURL("1024"),
+			"Channels":               channels,
+			"Roles":                  roles,
 			"BotHighestRolePosition": role.Position,
 		}
 		if guildData["Avatar"] == "" {

@@ -40,16 +40,16 @@ import (
 
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
-	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate) {
+	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddEconomyConfig,
 	})
-	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete) {
+	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete){
 		guildDeleteEconomyConfig,
 	})
-	events.RegisterGuildMemberJoinfunctions([]func(g *discordgo.GuildMemberAdd) {
+	events.RegisterGuildMemberJoinfunctions([]func(g *discordgo.GuildMemberAdd){
 		guildMemberAddToEconomy,
 	})
-	events.RegisterGuildMemberLeavefunctions([]func(g *discordgo.GuildMemberRemove) {
+	events.RegisterGuildMemberLeavefunctions([]func(g *discordgo.GuildMemberRemove){
 		guildMemberRemoveFromEconomy,
 	})
 

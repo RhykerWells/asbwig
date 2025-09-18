@@ -14,7 +14,6 @@ import (
 	"goji.io/v3/pat"
 )
 
-
 var (
 	RootMultiplexer      *goji.Mux
 	DashboardMultiplexer *goji.Mux
@@ -73,7 +72,7 @@ func setupWebRoutes() *goji.Mux {
 
 	// Create a sub-mux for dashboard-related routes
 	DashboardMultiplexer = goji.SubMux()
-	
+
 	// Middlewares
 	DashboardMultiplexer.Use(validateGuild)
 	DashboardMultiplexer.Use(userAndManagedGuildsInfoMW)
@@ -123,8 +122,8 @@ func RegisterDashboardRoutes(route func(*goji.Mux)) {
 }
 
 type FormResponse struct {
-    Success bool   `json:"Success"`
-    Message string `json:"Message"`
+	Success bool   `json:"Success"`
+	Message string `json:"Message"`
 }
 
 func SendErrorToast(w http.ResponseWriter, message string) {

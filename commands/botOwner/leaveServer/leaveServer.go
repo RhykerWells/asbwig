@@ -8,7 +8,7 @@ import (
 
 var Command = &dcommand.AsbwigCommand{
 	Command:      "leaveserver",
-	Category:	  dcommand.CategoryOwner,
+	Category:     dcommand.CategoryOwner,
 	Description:  "Forces the bot to leave a given server",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{

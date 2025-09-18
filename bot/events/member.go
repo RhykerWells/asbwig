@@ -10,7 +10,6 @@ func RegisterGuildMemberJoinfunctions(funcMap []func(g *discordgo.GuildMemberAdd
 	scheduledGuildMemberJoinFunctions = append(scheduledGuildMemberJoinFunctions, funcMap...)
 }
 
-
 // guildMemberAdd is called when a member joins a guild the bot is in
 // This adds the user to any tables that are relevant to them
 func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
