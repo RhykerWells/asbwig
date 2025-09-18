@@ -21,8 +21,8 @@ func registerCoreRoute(dashboard *goji.Mux) {
 	dashboard.Handle(pat.New("/core"), coreMux)
 	dashboard.Handle(pat.New("/core/"), coreMux)
 
-	coreMux.HandleFunc(pat.Get(""), web.EmbedHTML("core.html"))
-	coreMux.HandleFunc(pat.Get("/"), web.EmbedHTML("core.html"))
+	coreMux.HandleFunc(pat.Get(""), web.RenderPage("core.html"))
+	coreMux.HandleFunc(pat.Get("/"), web.RenderPage("core.html"))
 
 	coreMux.HandleFunc(pat.Post(""), saveConfigHandler)
 	coreMux.HandleFunc(pat.Post("/"), saveConfigHandler)

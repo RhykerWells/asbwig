@@ -35,7 +35,8 @@ func Run() {
 	runWebServer(multiplexer)
 }
 
-func EmbedHTML(filename string) http.HandlerFunc {
+// RenderPage
+func RenderPage(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.New("").Funcs(templateFunctions)
 
