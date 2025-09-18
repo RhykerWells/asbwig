@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"net/http"
 	"text/template"
@@ -147,5 +146,5 @@ func SendSuccessToast(w http.ResponseWriter, message string) {
 }
 // SendErrorToast is used to send a JSON response to the client to send the error toasts
 func SendErrorToast(w http.ResponseWriter, message string) {
-	json.NewEncoder(w).Encode(FormResponse{Success: false, Message: fmt.Sprintf("%s (ask support for help)", message)})
+	json.NewEncoder(w).Encode(FormResponse{Success: false, Message: message})
 }
