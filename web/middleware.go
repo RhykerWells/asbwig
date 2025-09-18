@@ -24,6 +24,8 @@ const (
 	CtxKeyTmplData CtxKey = iota
 )
 
+
+// createCSRF generates a CSRF token to be used for validating requests such as logins
 func createCSRF() (string, error) {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
@@ -32,6 +34,7 @@ func createCSRF() (string, error) {
 	return base64.URLEncoding.EncodeToString(bytes), nil
 }
 
+// setCSRF sets the csrf token in the clients web cache as a cookie
 func setCSRF(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "asbwig_csrf",
@@ -42,6 +45,7 @@ func setCSRF(w http.ResponseWriter, token string) {
 	})
 }
 
+// getCSRF returns the csrf token from the clients cookies
 func getCSRF(w http.ResponseWriter, r *http.Request) string {
 	cookie, err := r.Cookie("asbwig_csrf")
 	if err == nil {
@@ -59,9 +63,9 @@ func getCSRF(w http.ResponseWriter, r *http.Request) string {
 	return ""
 }
 
-// setCookie sets the cookie containing the users Oauth2 scope information
-func setCookie(w http.ResponseWriter, userData map[string]interface{}) error {
-	encodedValue, err := encodeCookie(userData)
+// setUserDataCookie sets the cookie containing the users account data
+func setUserDataCookie(w http.ResponseWriter, userData map[string]interface{}) error {
+	encodedValue, err := encodeUserData(userData)
 	if err != nil {
 		return err
 	}
@@ -76,7 +80,8 @@ func setCookie(w http.ResponseWriter, userData map[string]interface{}) error {
 	return nil
 }
 
-func encodeCookie(data map[string]interface{}) (string, error) {
+// encodeUserData encodes the users account data into base64
+func encodeUserData(data map[string]interface{}) (string, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return "", err
@@ -84,6 +89,7 @@ func encodeCookie(data map[string]interface{}) (string, error) {
 	return base64.StdEncoding.EncodeToString(jsonData), nil
 }
 
+// decodeCookie decodes the base64 encoded user data into a map[string]interface{} and returns the decoded cookie
 func decodeCookie(encoded string) (map[string]interface{}, error) {
 	decodedBytes, err := base64.StdEncoding.DecodeString(encoded)
 	if err != nil {
@@ -98,8 +104,8 @@ func decodeCookie(encoded string) (map[string]interface{}, error) {
 	return data, nil
 }
 
-// checkCookie checks the stored browser cookie and returns the users information or an error
-func checkCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}, error) {
+// checkUserCookie checks the stored browser cookie and returns the users information or an error
+func checkUserCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}, error) {
 	cookie, err := r.Cookie("asbwig_userinfo")
 	if err == nil {
 		// Decode and verify cookie
@@ -174,7 +180,7 @@ func validateGuild(inner http.Handler) http.Handler {
 			return
 		}
 
-		userData, err := checkCookie(w, r)
+		userData, err := checkUserCookie(w, r)
 		if err != nil {
 			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
 			return
@@ -219,7 +225,7 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		userData, err := checkCookie(w, r)
+		userData, err := checkUserCookie(w, r)
 		if err != nil {
 			http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 			return

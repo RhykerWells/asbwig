@@ -10,7 +10,7 @@ import (
 
 var OauthConf *oauth2.Config
 
-// Handles the Oauth2 scopes for sign-in and the redirect URL
+// initDiscordOauthHandles the creating Oauth2 config for authenticating user sign ins
 func initDiscordOauth() {
 	OauthConf = &oauth2.Config{
 		ClientID:     common.ConfigBotClientID,
@@ -24,13 +24,16 @@ func initDiscordOauth() {
 	OauthConf.RedirectURL = "https://" + common.ConfigASBWIGHost + "/confirm"
 }
 
-// handleLogin will check for the users signin cookie, if it exists, automatically log them in, if not they are redirected to the login portal
+// handleLogin attempts to log in a user if they have a valid session, otherwise redirects them to the specified Auth URL
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-	_, err := checkCookie(w, r)
+	// checks for valid user session and automatically redirect if exists
+	_, err := checkUserCookie(w, r)
 	if err == nil {
 		http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
+
+	// generates a CSRF token and begins the login sequence
 	csrfToken, err := createCSRF()
 	if err != nil {
 		return
@@ -40,8 +43,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-// confirmLogin handles the successful Discord Oauth login
-// and redirects users to the dashboard
+// confirmLogin handles the successful Discord Oauth login and redirects users to the dashboard
 func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	csrf := getCSRF(w, r)
@@ -69,11 +71,12 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	var userData map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&userData)
 
-	setCookie(w, userData)
+	setUserDataCookie(w, userData)
 
 	http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 }
 
+// handleLogout handles the logout route and ensures that all cookies related to data storage are removed
 func handleLogout(w http.ResponseWriter, r *http.Request) {
 	userCookie, err := r.Cookie("asbwig_userinfo")
 	if err != nil {
