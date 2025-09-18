@@ -9,25 +9,34 @@ import (
 	"goji.io/v3/pat"
 )
 
+// initWeb adds the specified routes the list of web routes for the web package to initialise
 func initWeb() {
 	web.RegisterDashboardRoutes(registerCoreRoute)
 }
 
+// registerCoreRoute initialises the core web routes
+// and attaches the required middlewares for validation and template data
 func registerCoreRoute(dashboard *goji.Mux) {
+	// Create a sub-mux for core-related routes
 	coreMux := goji.SubMux()
 
+	// Middlewares
 	coreMux.Use(coreConfigMW)
 
+	// Server core pages
 	dashboard.Handle(pat.New("/core"), coreMux)
 	dashboard.Handle(pat.New("/core/"), coreMux)
 
 	coreMux.HandleFunc(pat.Get(""), web.RenderPage("core.html"))
 	coreMux.HandleFunc(pat.Get("/"), web.RenderPage("core.html"))
 
+	// Data saving routes
 	coreMux.HandleFunc(pat.Post(""), saveConfigHandler)
 	coreMux.HandleFunc(pat.Post("/"), saveConfigHandler)
 }
 
+// saveConfigHandler parses form data sent to the server, validates and saves it if possible.
+// sends either an error or success toast response to the server
 func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	r.ParseForm()
