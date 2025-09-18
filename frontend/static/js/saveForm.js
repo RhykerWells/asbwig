@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const postURL = window.location.origin + window.location.pathname;
 
 			try {
-				disableScreenPassthrough()
+				disableScreenPassthrough();
 				const response = await fetch(postURL, {
 					method: "POST",
 					body,
@@ -30,11 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
 					sendSuccessToast(unmarshalledResponse.Message);
 				} else {
 					sendFailureToast(unmarshalledResponse.Message);
+					enableScreenPassthrough();
+					return
 				}
 			} catch (err) {
-				sendFailureToast("Network error: " + err.message)
+				sendFailureToast("Network error: " + err.message);
 			}
-			reloadPage()
+			reloadPage();
 		})
 	});
 });
