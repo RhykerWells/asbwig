@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/RhykerWells/asbwig/commands/economy"
+	"github.com/RhykerWells/asbwig/commands/moderation"
 	"github.com/RhykerWells/asbwig/commands/invite"
 	"github.com/RhykerWells/asbwig/commands/ping"
 
@@ -35,5 +36,6 @@ func InitCommands(session *discordgo.Session) {
 	)
 
 	economy.EconomySetup(cmdHandler)
+	moderation.ModerationSetup(cmdHandler)
 	session.AddHandler(cmdHandler.HandleMessageCreate)
 }
