@@ -13,6 +13,8 @@ import (
 
 var (
 	templateFunctions = map[string]interface{}{
+		"dict": dict,
+		"lower": lower,
 		// Forms content
 		"textInput":            textInput,
 		"toggleSwitch":         toggleSwitch,
@@ -22,6 +24,21 @@ var (
 		"channelOptionsSingle": channelOptionsSingle,
 	}
 )
+
+
+func dict(pairs ...interface{}) map[int]interface{} {
+	result := make(map[int]interface{})
+	for i := 0; i < len(pairs); i += 2 {
+		key, _ := pairs[i].(int)
+		result[key] = pairs[i+1]
+	}
+	return result
+}
+
+func lower(str string) string {
+	return strings.ToLower(str)
+}
+
 
 // textInput generates a HTML object for the custom input.
 // currentInput: the current input of the input
