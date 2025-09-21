@@ -18,16 +18,17 @@ func RegisterGuildJoinfunctions(funcMap []func(g *discordgo.GuildCreate)) {
 // guildJoin is called when the bot is added to a new guild
 // This adds the guild to the relevant database tables
 func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
-	log.WithFields(log.Fields{
-		"guild":       g.ID,
-		"owner":       g.OwnerID,
-		"membercount": g.MemberCount,
-	}).Infoln("Joined guild: ", g.Name)
 	banned := isGuildBanned(g.ID)
 	if banned {
 		s.GuildLeave(g.ID)
 		return
 	}
+
+	log.WithFields(log.Fields{
+		"guild":       g.ID,
+		"owner":       g.OwnerID,
+		"membercount": g.MemberCount,
+	}).Infoln("Joined guild: ", g.Name)
 
 	for _, joinFunction := range scheduledGuildJoinFunctions {
 		joinFunction(g)
@@ -46,7 +47,11 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	if g.Unavailable {
 		return
 	}
-	log.Infoln("Left guild: ", g.ID)
+
+	banned := isGuildBanned(g.ID)
+	if !banned {
+		log.Infoln("Left guild: ", g.ID)
+	}
 
 	for _, leaveFunction := range scheduledGuildLeaveFunctions {
 		leaveFunction(g)
