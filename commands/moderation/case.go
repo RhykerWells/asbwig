@@ -22,7 +22,7 @@ type logAction struct {
 }
 
 var (
-	logWarn   = logAction{Name: "Warned", CaseType: "Warning", Colour: 0xFCA253}
+	logWarn   = logAction{Name: "Warned", CaseType: "Warn", Colour: 0xFCA253}
 	logMute   = logAction{Name: "Muted", CaseType: "Mute", Colour: 0x5772BE}
 	logUnmute = logAction{Name: "Unmuted", CaseType: "Unmute", Colour: common.SuccessGreen}
 	logKick   = logAction{Name: "Kicked", CaseType: "Kick", Colour: 0xF2A013}
@@ -90,7 +90,7 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 		StaffID:    author.User.ID,
 		OffenderID: target.User.ID,
 		Reason:     null.StringFrom(reason),
-		Action:     action.Name,
+		Action:     action.CaseType,
 		Loglink:    "",
 	}
 	if err := caseData.Insert(context.Background(), common.PQ, boil.Infer()); err != nil {
