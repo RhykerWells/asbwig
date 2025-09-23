@@ -24,52 +24,62 @@ import (
 
 // ModerationCase is an object representing the database table.
 type ModerationCase struct {
-	CaseID     int64       `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
-	GuildID    string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	StaffID    string      `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
-	OffenderID string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
-	Reason     null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
-	Action     string      `boil:"action" json:"action" toml:"action" yaml:"action"`
-	Loglink    string      `boil:"loglink" json:"loglink" toml:"loglink" yaml:"loglink"`
+	CaseID           int64       `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
+	GuildID          string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	StaffID          string      `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
+	OffenderID       string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
+	Reason           null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
+	Action           string      `boil:"action" json:"action" toml:"action" yaml:"action"`
+	LogLink          string      `boil:"log_link" json:"log_link" toml:"log_link" yaml:"log_link"`
+	OffenderUsername string      `boil:"offender_username" json:"offender_username" toml:"offender_username" yaml:"offender_username"`
+	StaffUsername    string      `boil:"staff_username" json:"staff_username" toml:"staff_username" yaml:"staff_username"`
 
 	R *moderationCaseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationCaseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationCaseColumns = struct {
-	CaseID     string
-	GuildID    string
-	StaffID    string
-	OffenderID string
-	Reason     string
-	Action     string
-	Loglink    string
+	CaseID           string
+	GuildID          string
+	StaffID          string
+	OffenderID       string
+	Reason           string
+	Action           string
+	LogLink          string
+	OffenderUsername string
+	StaffUsername    string
 }{
-	CaseID:     "case_id",
-	GuildID:    "guild_id",
-	StaffID:    "staff_id",
-	OffenderID: "offender_id",
-	Reason:     "reason",
-	Action:     "action",
-	Loglink:    "loglink",
+	CaseID:           "case_id",
+	GuildID:          "guild_id",
+	StaffID:          "staff_id",
+	OffenderID:       "offender_id",
+	Reason:           "reason",
+	Action:           "action",
+	LogLink:          "log_link",
+	OffenderUsername: "offender_username",
+	StaffUsername:    "staff_username",
 }
 
 var ModerationCaseTableColumns = struct {
-	CaseID     string
-	GuildID    string
-	StaffID    string
-	OffenderID string
-	Reason     string
-	Action     string
-	Loglink    string
+	CaseID           string
+	GuildID          string
+	StaffID          string
+	OffenderID       string
+	Reason           string
+	Action           string
+	LogLink          string
+	OffenderUsername string
+	StaffUsername    string
 }{
-	CaseID:     "moderation_cases.case_id",
-	GuildID:    "moderation_cases.guild_id",
-	StaffID:    "moderation_cases.staff_id",
-	OffenderID: "moderation_cases.offender_id",
-	Reason:     "moderation_cases.reason",
-	Action:     "moderation_cases.action",
-	Loglink:    "moderation_cases.loglink",
+	CaseID:           "moderation_cases.case_id",
+	GuildID:          "moderation_cases.guild_id",
+	StaffID:          "moderation_cases.staff_id",
+	OffenderID:       "moderation_cases.offender_id",
+	Reason:           "moderation_cases.reason",
+	Action:           "moderation_cases.action",
+	LogLink:          "moderation_cases.log_link",
+	OffenderUsername: "moderation_cases.offender_username",
+	StaffUsername:    "moderation_cases.staff_username",
 }
 
 // Generated where
@@ -154,21 +164,25 @@ func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereI
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var ModerationCaseWhere = struct {
-	CaseID     whereHelperint64
-	GuildID    whereHelperstring
-	StaffID    whereHelperstring
-	OffenderID whereHelperstring
-	Reason     whereHelpernull_String
-	Action     whereHelperstring
-	Loglink    whereHelperstring
+	CaseID           whereHelperint64
+	GuildID          whereHelperstring
+	StaffID          whereHelperstring
+	OffenderID       whereHelperstring
+	Reason           whereHelpernull_String
+	Action           whereHelperstring
+	LogLink          whereHelperstring
+	OffenderUsername whereHelperstring
+	StaffUsername    whereHelperstring
 }{
-	CaseID:     whereHelperint64{field: "\"moderation_cases\".\"case_id\""},
-	GuildID:    whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
-	StaffID:    whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
-	OffenderID: whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
-	Reason:     whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
-	Action:     whereHelperstring{field: "\"moderation_cases\".\"action\""},
-	Loglink:    whereHelperstring{field: "\"moderation_cases\".\"loglink\""},
+	CaseID:           whereHelperint64{field: "\"moderation_cases\".\"case_id\""},
+	GuildID:          whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
+	StaffID:          whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
+	OffenderID:       whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
+	Reason:           whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
+	Action:           whereHelperstring{field: "\"moderation_cases\".\"action\""},
+	LogLink:          whereHelperstring{field: "\"moderation_cases\".\"log_link\""},
+	OffenderUsername: whereHelperstring{field: "\"moderation_cases\".\"offender_username\""},
+	StaffUsername:    whereHelperstring{field: "\"moderation_cases\".\"staff_username\""},
 }
 
 // ModerationCaseRels is where relationship names are stored.
@@ -208,8 +222,8 @@ func (r *moderationCaseR) GetGuild() *ModerationConfig {
 type moderationCaseL struct{}
 
 var (
-	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "loglink"}
-	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action", "loglink"}
+	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "log_link", "offender_username", "staff_username"}
+	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action", "log_link", "offender_username", "staff_username"}
 	moderationCaseColumnsWithDefault    = []string{"reason"}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}

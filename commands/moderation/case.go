@@ -91,7 +91,7 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 		OffenderID: target.User.ID,
 		Reason:     null.StringFrom(reason),
 		Action:     action.CaseType,
-		Loglink:    "",
+		LogLink:    "",
 	}
 	if err := caseData.Insert(context.Background(), common.PQ, boil.Infer()); err != nil {
 		return err
@@ -104,7 +104,7 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 		return err
 	}
 
-	caseData.Loglink = generateLogLink(config.GuildID, config.ModerationLogChannel, msg.ID)
+	caseData.LogLink = generateLogLink(config.GuildID, config.ModerationLogChannel, msg.ID)
 	if _, err := caseData.Update(context.Background(), common.PQ, boil.Infer()); err != nil {
 		functions.DeleteMessage(config.ModerationLogChannel, msg.ID)
 		removeFailedCase(caseData)
