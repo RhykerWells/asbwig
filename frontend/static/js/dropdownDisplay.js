@@ -210,6 +210,7 @@ function filterCases(tableID, noRowID, filters, resetPage = true) {
 		const btn = document.createElement("button");
 		btn.textContent = i;
 		btn.className = "btn btn-sm " + (i === currentPage ? "btn-primary" : "btn-outline-primary") + " mx-1";
+		btn.style.cssText = "background-color: var(--basePurple); border: 1px solid var(--accentGrey);"
 		btn.onclick = () => { currentPage = i; filterCases(tableID, noRowID, filters, false); };
 		container.appendChild(btn);
 	}
