@@ -285,3 +285,13 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 	margin-left: 0px !important;
 	margin-right: 0.5rem
 }
+
+.form-control::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+            color: white !important;
+}
+.form-control::-ms-input-placeholder { /* Microsoft Edge */
+            color: white !important;
+}
+.form-control:-ms-input-placeholder { /* Internet Explorer 10-11 */
+            color: white !important;
+}
