@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 type Config struct {
@@ -113,4 +115,13 @@ func SaveConfig(config *Config) error {
 	}
 
 	return nil
+}
+
+func getGuildCases(guildID string) models.ModerationCaseSlice {
+	models, err := models.ModerationCases(qm.Where("guild_id = ?", guildID)).All(context.Background(), common.PQ)
+	if err != nil {
+		return nil
+	}
+
+	return models
 }

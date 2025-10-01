@@ -19,16 +19,19 @@ func initWeb() {
 func registerModerationRoutes(dashboard *goji.Mux) {
 	moderationMux := goji.SubMux()
 
-	moderationMux.Use(moderationConfigMW)
+	moderationMux.Use(moderationMW)
 
 	dashboard.Handle(pat.New("/moderation"), moderationMux)
-	dashboard.Handle(pat.New("/moderation/"), moderationMux)
+	dashboard.Handle(pat.New("/moderation/*"), moderationMux)
 
 	moderationMux.HandleFunc(pat.Get(""), web.RenderPage("moderation.html"))
 	moderationMux.HandleFunc(pat.Get("/"), web.RenderPage("moderation.html"))
 
 	moderationMux.HandleFunc(pat.Post(""), saveConfigHandler)
 	moderationMux.HandleFunc(pat.Post("/"), saveConfigHandler)
+
+	moderationMux.HandleFunc(pat.Get("/cases"), web.RenderPage("cases.html"))
+	moderationMux.HandleFunc(pat.Get("/cases/"), web.RenderPage("cases.html"))
 }
 
 func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,8 +119,8 @@ func unmarshalJsonArrayToGoArray(jsonStr string) ([]string, error) {
 	return result, nil
 }
 
-// moderationConfigMW provides middleware to parse the moderation config data to the template data
-func moderationConfigMW(inner http.Handler) http.Handler {
+// moderationMW provides middleware to parse all the moderation data to the template data
+func moderationMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		guildID := pat.Param(r, "server")
@@ -126,6 +129,9 @@ func moderationConfigMW(inner http.Handler) http.Handler {
 
 		tmplData, _ := ctx.Value(web.CtxKeyTmplData).(web.TmplContextData)
 		tmplData["ModerationConfig"] = config
+
+		cases := getGuildCases(guildID)
+		tmplData["Cases"] = cases
 
 		ctx = context.WithValue(ctx, web.CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
