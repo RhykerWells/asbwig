@@ -21,15 +21,38 @@
 	{{template "dashboard_nav" .}}
 	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="m-4 w-100">
-			<h2 style="margin-top: 2px">Primary config</h2>
+			<h2 style="margin-top: 2px">Core</h2>
 			<div class="container-fluid my-4 px-0">
 				<div class="row row-cols-1 row-cols-md-3 g-4">
 					<div class="col">
 						<div class="card">
-							<h5 class="card-header">Core</h5>
+							<h5 class="card-header">Core settings</h5>
 							<div class="card-body">
-								<p class="card-text">Core server settings</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/core" class="btn text-light">Edit core config</a>
+								<p class="card-text">Configure and manage your servers core settings</p>
+								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/core" class="btn text-light">Edit Settings</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<h2 style="margin-top: 2px">Moderation</h2>
+			<div class="container-fluid my-4 px-0">
+				<div class="row row-cols-1 row-cols-md-3 g-4">
+					<div class="col">
+						<div class="card">
+							<h5 class="card-header">Moderation settings</h5>
+							<div class="card-body">
+								<p class="card-text">Configure and manage your servers moderation settings</p>
+								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation" class="btn text-light">Edit Settings</a>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card">
+							<h5 class="card-header">Cases</h5>
+							<div class="card-body">
+								<p class="card-text">View, filter, and search all recorded moderation cases.</p>
+								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation/cases" class="btn text-light">View Cases</a>
 							</div>
 						</div>
 					</div>
