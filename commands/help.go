@@ -22,6 +22,9 @@ var helpCmd = &dcommand.AsbwigCommand{
 	Run:         helpFunc,
 }
 
+// helpFunc is the entry point for the "help" command.
+// If a command name is provided in Args, it will show detailed help for that command.
+// Otherwise, it will show a generic category overview of all commands.
 func helpFunc(data *dcommand.Data) {
 	command := ""
 	if len(data.Args) > 0 {
@@ -38,6 +41,9 @@ func helpFunc(data *dcommand.Data) {
 	genericCategoryHelp(data.ChannelID)
 }
 
+// genericCategoryHelp builds and sends an embed listing all available categories
+// and their commands. The "General" category is always listed first, followed
+// by the other categories sorted alphabetically.
 func genericCategoryHelp(channelID string) {
 	cmdMap := dcommand.CmdHndlr.RegisteredCommands()
 	categories := make(map[string][]string)
@@ -79,6 +85,9 @@ func genericCategoryHelp(channelID string) {
 	functions.SendMessage(channelID, message)
 }
 
+// help shows detailed help for a specific command, including its description,
+// aliases, and expected arguments. If the command cannot be found, a simple
+// error message is sent instead.
 func help(command string, channelID string) {
 	cmdMap := dcommand.CmdHndlr.RegisteredCommands()
 	cmd, ok := cmdMap[command]
@@ -105,6 +114,10 @@ func help(command string, channelID string) {
 	functions.SendMessage(channelID, message)
 }
 
+
+// getArgs builds the formatted string of arguments for a given command.
+// Required arguments are enclosed in <angle brackets>, and optional arguments
+// are enclosed in [square brackets].
 func getArgs(command dcommand.RegisteredCommand) (str string) {
 	for _, arg := range command.Args {
 		if arg.Optional {
@@ -116,6 +129,9 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 	return
 }
 
+
+// argHelp returns a formatted string for a single argument, showing both its
+// name and type.
 func argHelp(arg *dcommand.Args) (str string) {
 	argType := arg.Type.Help()
 	str = fmt.Sprintf("%s:%s", arg.Name, argType)

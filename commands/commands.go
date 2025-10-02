@@ -16,10 +16,14 @@ import (
 	"github.com/RhykerWells/asbwig/commands/botOwner/unbanServer"
 )
 
-var cmdHandler *dcommand.CommandHandler
-
+// InitCommands initializes the command handler, registers all
+// available commands, and attaches the handler to the Discord session.
+//
+// After registration, the handler is connected to the session so that
+// incoming message events are processed and routed to the correct
+// command.
 func InitCommands(session *discordgo.Session) {
-	cmdHandler = dcommand.NewCommandHandler()
+	cmdHandler := dcommand.NewCommandHandler()
 
 	cmdHandler.RegisterCommands(
 		helpCmd,
