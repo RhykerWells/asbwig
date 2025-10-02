@@ -1,11 +1,29 @@
 #!/bin/bash
 
+## Discord 
+# Your Discord bot token
 export ASBWIG_TOKEN="tokenXXXX"
-export ASBWIG_PGHOST="localhost"
-export ASBWIG_PGDB="asbwig"
-export ASBWIG_PGUSER="asbwig"
-export ASBWIG_CLIENTID="clientID"
+# Your Discord bot client ID
+export ASBWIG_CLIENTID="clientIDXXXX"
+# Your Discord bot client secret
 export ASBWIG_CLIENTSECRET="secretXXXX"
-export ASBWIG_HOST="your domain here"
-export ASBWIG_ASBWIG_TERMSURLOVERRIDE="your URL here" # optional
-export ASBWIG_PRIVACYURLOVERRIDE="your URL here" # optional
+# Your user ID (to access bot admin commands)
+export ASBWIG_OWNERID="userIDXXXX"
+
+## Database
+# The host address of the PostgreSQL database
+export ASBWIG_PGHOST="localhost"
+# The name of the PostgreSQL database
+export ASBWIG_PGDB="asbwig"
+# The PostgreSQL username for connecting
+export ASBWIG_PGUSER="asbwig"
+# The password for the PostgreSQL account for connecting
+export ASBWIG_PGPASSWORD="password"
+
+## Dashboard
+# The domain name or IP address where the bot dashboard is hosted
+export ASBWIG_HOST="your_domain_here"
+# An optional override for the terms page link
+export ASBWIG_TERMSURLOVERRIDE="your_full_URL_here" # optional
+# An optional override for the privacy page link
+export ASBWIG_PRIVACYURLOVERRIDE="your_full_URL_here" # optional
