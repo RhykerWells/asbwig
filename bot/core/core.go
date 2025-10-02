@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Init registers the required guild join & leave functions as well as initialises the web plugin
 func Init() {
 	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddCoreConfig,
