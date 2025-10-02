@@ -9,6 +9,7 @@ import (
 
 var db *sql.DB
 
+// InitEvents registers the required event handlers to pass data to the bot
 func InitEvents(s *discordgo.Session, database *sql.DB) {
 	db = database
 

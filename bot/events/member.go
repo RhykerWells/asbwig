@@ -4,8 +4,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// scheduledGuildMemberJoinFunctions serves as a map of all the functions that is run when a user joins a guild the bot is on
 var scheduledGuildMemberJoinFunctions []func(g *discordgo.GuildMemberAdd)
 
+// RegisterGuildMemberJoinfunctions adds each guild member join function to the map of functions ran when a user joins a guild the bot is on
 func RegisterGuildMemberJoinfunctions(funcMap []func(g *discordgo.GuildMemberAdd)) {
 	scheduledGuildMemberJoinFunctions = append(scheduledGuildMemberJoinFunctions, funcMap...)
 }
@@ -18,8 +20,10 @@ func guildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	}
 }
 
+// scheduledGuildMemberLeaveFunctions serves as a map of all the functions that is run when a user leaves a guild the bot is on
 var scheduledGuildMemberLeaveFunctions []func(g *discordgo.GuildMemberRemove)
 
+// RegisterGuildMemberLeavefunctions adds each guild member leave function to the map of functions ran when a user leaves a guild the bot is on
 func RegisterGuildMemberLeavefunctions(funcMap []func(g *discordgo.GuildMemberRemove)) {
 	scheduledGuildMemberLeaveFunctions = append(scheduledGuildMemberLeaveFunctions, funcMap...)
 }

@@ -9,8 +9,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the
 var scheduledGuildJoinFunctions []func(g *discordgo.GuildCreate)
 
+// RegisterGuildJoinfunctions adds each guild join function to the map of functions ran when a guild adds the bot
 func RegisterGuildJoinfunctions(funcMap []func(g *discordgo.GuildCreate)) {
 	scheduledGuildJoinFunctions = append(scheduledGuildJoinFunctions, funcMap...)
 }
@@ -35,8 +37,10 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}
 }
 
+// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the
 var scheduledGuildLeaveFunctions []func(g *discordgo.GuildDelete)
 
+// RegisterGuildJoinfunctions adds each guild join function to the map of functions ran when a guild adds the bot
 func RegisterGuildLeavefunctions(funcMap []func(g *discordgo.GuildDelete)) {
 	scheduledGuildLeaveFunctions = append(scheduledGuildLeaveFunctions, funcMap...)
 }
@@ -58,6 +62,7 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	}
 }
 
+// isGuildBanned returns a boolean checking against the bots banned guild database
 func isGuildBanned(guildID string) bool {
 	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), db)
 	if err != nil {
