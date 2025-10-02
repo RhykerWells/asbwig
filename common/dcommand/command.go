@@ -25,6 +25,7 @@ var (
 	}
 )
 
+// AsbwigCommand defines the general data that must be set during the addition of a new command
 type AsbwigCommand struct {
 	Command      string
 	Category     CommandCategory
@@ -36,16 +37,19 @@ type AsbwigCommand struct {
 	Data         *Data
 }
 
+// CommandCategory defines the available category types for commands
 type CommandCategory struct {
 	Name        string
 	Description string
 }
 
+// CommandHandler defines the general command handler, the full instances of a command and a string map to retireve them
 type CommandHandler struct {
 	cmdInstances []AsbwigCommand
 	cmdMap       map[string]AsbwigCommand
 }
 
+// RegisteredCommand defines the context required to access data surrounding a command
 type RegisteredCommand struct {
 	Trigger     string
 	Category    CommandCategory
@@ -54,6 +58,7 @@ type RegisteredCommand struct {
 	Args        []*Args
 }
 
+// RegisterCommands adds each command to the command handler
 func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
@@ -68,6 +73,7 @@ func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
 	}
 }
 
+// RegisteredCommands returns an array of each RegisteredCommand
 func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	cmdMap := make(map[string]RegisteredCommand)
 	for _, cmd := range c.cmdMap {
