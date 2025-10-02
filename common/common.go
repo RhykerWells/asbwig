@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS banned_guilds (
 `,
 }
 
+// Init creates a new discord session, attempts to connect to the postgres database, and
+// intialises all the databases
 func Init() error {
 	s, err := discordgo.New(ConfigDgoBotToken())
 	if err != nil {
@@ -60,12 +62,14 @@ func Init() error {
 	return nil
 }
 
+// Run connects the bot account to the Discord session
 func Run(s *discordgo.Session) {
 	s.Open()
 	Bot = s.State.User
 	log.Infoln("Bot is now running. Press CTRL-C to exit.")
 }
 
+// postgresConnect opens the database connection and sets the global variables to be accessible
 func postgresConnect(database string, host string, username string, password string) error {
 	if host == "" {
 		host = "localhost"
@@ -82,6 +86,7 @@ func postgresConnect(database string, host string, username string, password str
 	return err
 }
 
+// InitSchema initialises the schemas passed to the bot
 func InitSchema(schemaname string, schemas ...string) {
 	for _, schema := range schemas {
 		_, err := PQ.Exec(schema)
