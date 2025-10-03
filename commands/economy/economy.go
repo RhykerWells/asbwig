@@ -3,9 +3,12 @@ package economy
 //go:generate sqlboiler --no-hooks psql
 
 import (
+	"context"
+
 	"github.com/RhykerWells/asbwig/bot/events"
 	"github.com/RhykerWells/asbwig/commands/economy/informational/balance"
 	"github.com/RhykerWells/asbwig/commands/economy/informational/leaderboard"
+	"github.com/RhykerWells/asbwig/commands/economy/models"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/chickenFight"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/coinFlip"
 	"github.com/RhykerWells/asbwig/commands/economy/moneyMaking/crime"
@@ -35,9 +38,15 @@ import (
 	"github.com/RhykerWells/asbwig/commands/economy/shop/useItem"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
+// EconomySetup runs the following:
+//  - The schema initialiser
+//  - Registration of the guild and user join/leave functions
+//  - Registration of the economy commands & their pagination
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
 	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
@@ -94,4 +103,39 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.Session.AddHandler(inventory.Pagination)
 	common.Session.AddHandler(iteminfo.Pagination)
 	common.Session.AddHandler(shop.Pagination)
+}
+
+// guildAddEconomyConfig creates the intial configs for the economy system for a specified guild
+func guildAddEconomyConfig(g *discordgo.GuildCreate) {
+	config := GetConfig(g.ID)
+	SaveConfig(config)
+}
+
+// guildAddEconomyConfig deletes the configs for the economy system for a specified guild
+func guildDeleteEconomyConfig(g *discordgo.GuildDelete) {
+	config, err := models.EconomyConfigs(qm.Where("guild_id = ?", g.ID)).One(context.Background(), common.PQ)
+	if err != nil {
+		return
+	}
+
+	config.Delete(context.Background(), common.PQ)
+}
+
+// guildMemberAddToEconomy adds a member to the economy system
+func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
+	config := GetConfig(m.GuildID)
+	userEntry := models.EconomyUser{
+		GuildID: config.GuildID,
+		UserID:  m.User.ID,
+		Cash:    config.Startbalance,
+		Bank:    0,
+	}
+	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
+}
+
+// guildMemberRemoveFromEconomy removes a guild member from the economy system
+func guildMemberRemoveFromEconomy(m *discordgo.GuildMemberRemove) {
+	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
 }
