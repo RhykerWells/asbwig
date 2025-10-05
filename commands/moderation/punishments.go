@@ -20,6 +20,8 @@ var (
 	errNotMember = errors.New("user not a member")
 )
 
+// muteUser automatically applies a mute role to the target user and removes any roles set to be removed
+// within the configuration and saves the mute to the database
 func muteUser(config *Config, targetID string, duration time.Duration) error {
 	err := functions.AddRole(config.GuildID, targetID, config.MuteRole)
 	if err != nil {
@@ -36,8 +38,11 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 
 		for _, userRole := range member.Roles {
 			if _, exists := roleSet[userRole]; exists {
+				err := functions.RemoveRole(config.GuildID, targetID, userRole)
+				if err != nil {
+					continue
+				}
 				rolesRemoved = append(rolesRemoved, userRole)
-				functions.RemoveRole(config.GuildID, targetID, userRole)
 			}
 		}
 	}
@@ -56,6 +61,8 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 	return nil
 }
 
+// unmuteUser automatically removes the mute role from the target user and restores any roles set to be removed
+// within the configuration and saves the mute to the database
 func unmuteUser(config *Config, authorID, targetID string) error {
 	mutedUser, err := models.ModerationMutes(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
 	if err != nil {
@@ -85,6 +92,9 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 	return nil
 }
 
+// RefreshMuteSettings ensures that the configured mute role has correct
+// permissions applied across all channels in the guild. It restricts muted
+// users from sending messages.
 func RefreshMuteSettings(config *Config) {
 	if !config.MuteManageRole {
 		return
@@ -100,6 +110,7 @@ func RefreshMuteSettings(config *Config) {
 	}
 }
 
+// scheduleUnmute triggers an unmute a target at unmuteTime
 func scheduleUnmute(config *Config, targetID string, unmuteTime time.Time) {
 	delay := time.Until(unmuteTime)
 	if delay <= 0 {
@@ -113,6 +124,7 @@ func scheduleUnmute(config *Config, targetID string, unmuteTime time.Time) {
 	}()
 }
 
+// scheduleAllPendingUnmutes schedules unmutes for all users with pending unmutes
 func scheduleAllPendingUnmutes() {
 	mutes, err := models.ModerationMutes(qm.Where("unmute_at > ?", time.Now())).All(context.Background(), common.PQ)
 	if err != nil {
@@ -125,6 +137,7 @@ func scheduleAllPendingUnmutes() {
 	}
 }
 
+// kickUser kicks the user from the given guild
 func kickUser(config *Config, author, target *discordgo.Member, reason string) error {
 	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
 
@@ -136,6 +149,7 @@ func kickUser(config *Config, author, target *discordgo.Member, reason string) e
 	return nil
 }
 
+// banUser bans the user from the current guild and adds an entry to the banned entry list
 func banUser(config *Config, author, target *discordgo.Member, reason string, duration time.Duration) error {
 	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
 
@@ -156,6 +170,7 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 	return nil
 }
 
+// unbanUser removes a ban from a guild member and removes the user from the banned config
 func unbanUser(config *Config, authorID, targetID string) error {
 	bannedUser, _ := models.ModerationBans(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
 
@@ -182,19 +197,21 @@ func unbanUser(config *Config, authorID, targetID string) error {
 	return nil
 }
 
-func scheduleUnban(config *Config, targetID string, unmuteTime time.Time) {
-	delay := time.Until(unmuteTime)
+// scheduleUnban triggers an unban a target at unbanTime
+func scheduleUnban(config *Config, targetID string, unbanTime time.Time) {
+	delay := time.Until(unbanTime)
 	if delay <= 0 {
 		go unbanUser(config, common.Bot.ID, targetID)
 		return
 	}
 
 	go func() {
-		time.Sleep(time.Until(unmuteTime))
+		time.Sleep(time.Until(unbanTime))
 		unbanUser(config, common.Bot.ID, targetID)
 	}()
 }
 
+// scheduleAllPendingUnbans schedules unbans for all users with pending unbans
 func scheduleAllPendingUnbans() {
 	bannedUsers, err := models.ModerationBans(qm.Where("unban_at > ?", time.Now())).All(context.Background(), common.PQ)
 	if err != nil {

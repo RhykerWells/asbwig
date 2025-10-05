@@ -4,14 +4,11 @@ import (
 	"context"
 
 	"github.com/RhykerWells/asbwig/commands/economy/models"
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"github.com/bwmarrin/discordgo"
 )
 
+// Config defines the general struct to pass data to and from the dashboard template/context data
 type Config struct {
-	// General
 	GuildID              string
 	Min                  int64
 	Max                  int64
@@ -22,6 +19,7 @@ type Config struct {
 	Customcrimeresponses bool
 }
 
+// ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
 func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 	return &models.EconomyConfig{
 		GuildID:              c.GuildID,
@@ -35,6 +33,7 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 	}
 }
 
+// ConfigFromModel converts the guild config SQLBoiler model to a Config struct 
 func ConfigFromModel(m *models.EconomyConfig) *Config {
 	return &Config{
 		GuildID:              m.GuildID,
@@ -48,6 +47,7 @@ func ConfigFromModel(m *models.EconomyConfig) *Config {
 	}
 }
 
+// GetConfig returns the current or default guild config as a Config struct
 func GetConfig(guildID string) *Config {
 	model, err := models.FindEconomyConfigG(context.Background(), guildID)
 	if err == nil {
@@ -59,6 +59,7 @@ func GetConfig(guildID string) *Config {
 	}
 }
 
+// SaveConfig saves the passed Config struct via SQLBoiler
 func SaveConfig(config *Config) error {
 	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{"guild_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
@@ -66,35 +67,4 @@ func SaveConfig(config *Config) error {
 	}
 
 	return nil
-}
-
-func guildAddEconomyConfig(g *discordgo.GuildCreate) {
-	config := GetConfig(g.ID)
-	SaveConfig(config)
-}
-
-func guildDeleteEconomyConfig(g *discordgo.GuildDelete) {
-	config, err := models.EconomyConfigs(qm.Where("guild_id = ?", g.ID)).One(context.Background(), common.PQ)
-	if err != nil {
-		return
-	}
-
-	config.Delete(context.Background(), common.PQ)
-}
-
-func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
-	config := GetConfig(m.GuildID)
-	userEntry := models.EconomyUser{
-		GuildID: config.GuildID,
-		UserID:  m.User.ID,
-		Cash:    config.Startbalance,
-		Bank:    0,
-	}
-	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
-}
-
-func guildMemberRemoveFromEconomy(m *discordgo.GuildMemberRemove) {
-	models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
-	models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
-	models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.User.ID)).DeleteAll(context.Background(), common.PQ)
 }

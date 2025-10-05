@@ -15,6 +15,7 @@ import (
 
 var CmdHndlr *CommandHandler
 
+// NewCommandHandler creates a new command handler
 func NewCommandHandler() *CommandHandler {
 	handler := &CommandHandler{
 		cmdInstances: make([]AsbwigCommand, 0),
@@ -75,7 +76,7 @@ outer:
 	go runCommand(cmd, data)
 }
 
-// Checkmessage checks a given content for the prefix or bot mention of the guild
+// checkMessagePrefix checks a given content for the prefix or bot mention of the guild
 func checkMessagePrefix(botID string, event *discordgo.MessageCreate) (prefix string, found bool) {
 	prefix, ok := findBasicPrefix(event.Content, event.GuildID)
 	if ok {
@@ -112,6 +113,7 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 	return prefix, ok
 }
 
+// runCommand logs the command called by the bot, checks the required args, their types and then runs the command
 func runCommand(cmd AsbwigCommand, data *Data) {
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
@@ -134,6 +136,7 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 	cmd.Run(data)
 }
 
+// handleMissingArgs sends message notifying that their are required arguments missing
 func handleMissingArgs(cmd AsbwigCommand, data *Data) {
 	args := cmd.Args
 	var missingArgs []*Args
@@ -151,6 +154,7 @@ func handleMissingArgs(cmd AsbwigCommand, data *Data) {
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }
 
+// handleInvalidArgs sends a message notifying the user that an argument they have attempted to use is invalid
 func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, bool) {
 	for i, arg := range cmd.Args {
 		input := data.Args[i]
@@ -198,6 +202,7 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 	return nil, false
 }
 
+// errorEmbed returns a populated embed object to denote an error in the command execution 
 func errorEmbed(cmd string, data *Data, description string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{

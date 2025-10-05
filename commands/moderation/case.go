@@ -15,6 +15,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+// logAction defines the structure of each moderation action and the properties used within the log
 type logAction struct {
 	CaseType string
 	Name     string
@@ -38,11 +39,12 @@ const (
 	reasonEmoji  string = "<:Reason:1369744280310124624>"
 )
 
-// Case generation
+// getNewCaseID returns the next case ID
 func getNewCaseID(config *Config) int64 {
 	return config.LastCaseID + 1
 }
 
+// incrementCaseID increments the case ID within the guild config
 func incrementCaseID(config *Config) error {
 	config.LastCaseID++
 	err := SaveConfig(config)
@@ -50,11 +52,12 @@ func incrementCaseID(config *Config) error {
 	return err
 }
 
+// removeFailedCase removes a case from the database
 func removeFailedCase(caseData models.ModerationCase) {
 	caseData.Delete(context.Background(), common.PQ)
 }
 
-// Log handling
+// buildLogEmbed constructs and returns the embed object to be sent within the case log
 func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logAction, channelID, reason string, duration ...time.Duration) *discordgo.MessageEmbed {
 	humanReadableCaseNumber := humanize.Comma(caseNumber)
 
@@ -76,11 +79,12 @@ func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logA
 	return embed
 }
 
+// genjerateLogLink returns the log link of the case within discord 
 func generateLogLink(guildID, channelID, messageID string) string {
 	return fmt.Sprintf("https://discord.com/channels/%s/%s/%s", guildID, channelID, messageID)
 }
 
-// Case storage
+// createCase generates the moderationc case for the database and saves it, then attempts to build and log the Discord case log, if this fails the case will be removed
 func createCase(config *Config, author, target *discordgo.Member, action logAction, channelID, reason string, duration ...time.Duration) error {
 	caseID := getNewCaseID(config)
 

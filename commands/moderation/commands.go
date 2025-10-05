@@ -37,15 +37,17 @@ func hasRequiredRole(member *discordgo.Member, requiredRoles []string) bool {
 	return false
 }
 
+// triggerDeletion returns the enabled status and time for the deleting the trigger
 func triggerDeletion(config *Config) (bool, int64) {
-	return config.ModerationTriggerDeletionEnabled, config.ModerationResponseDeletionSeconds
+	return config.ModerationTriggerDeletionEnabled, config.ModerationTriggerDeletionSeconds
 }
 
+// responseDeletion returns the enabled status and time for the deleting the response
 func responseDeletion(config *Config) (bool, int64) {
 	return config.ModerationResponseDeletionEnabled, config.ModerationResponseDeletionSeconds
 }
 
-// response returns the fully-populated embed for responses
+// responseEmbed returns the fully-populated embed for responses
 func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{

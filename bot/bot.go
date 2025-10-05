@@ -25,6 +25,8 @@ var (
 	)
 )
 
+// Run initialises all the core bot modules such as the event system
+// the core bot config, the command system and the intents the bot needs
 func Run(s *discordgo.Session, db *sql.DB) {
 	events.InitEvents(s, db)
 	core.Init()
