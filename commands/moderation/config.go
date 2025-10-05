@@ -9,6 +9,7 @@ import (
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
+// Config defines the general struct to pass data to and from the dashboard template/context data
 type Config struct {
 	// General
 	GuildID	string
@@ -37,6 +38,7 @@ type Config struct {
 	LastCaseID int64
 }
 
+// ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
 func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 	return &models.ModerationConfig{
 		// General
@@ -67,6 +69,7 @@ func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 	}
 }
 
+// ConfigFromModel converts the guild config SQLBoiler model to a Config struct 
 func ConfigFromModel(m *models.ModerationConfig) *Config {
 	return &Config{
 		GuildID: m.GuildID,
@@ -97,6 +100,7 @@ func ConfigFromModel(m *models.ModerationConfig) *Config {
 	}
 }
 
+// GetConfig returns the current or default guild config as a Config struct
 func GetConfig(guildID string) *Config {
 	model, err := models.FindModerationConfigG(context.Background(), guildID)
 	if err == nil {
@@ -108,6 +112,7 @@ func GetConfig(guildID string) *Config {
 	}
 }
 
+// SaveConfig saves the passed Config struct via SQLBoiler
 func SaveConfig(config *Config) error {
 	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{"guild_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
@@ -117,6 +122,7 @@ func SaveConfig(config *Config) error {
 	return nil
 }
 
+// getGuildCases returns the guild cases
 func getGuildCases(guildID string) models.ModerationCaseSlice {
 	models, err := models.ModerationCases(qm.Where("guild_id = ?", guildID)).All(context.Background(), common.PQ)
 	if err != nil {
