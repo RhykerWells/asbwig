@@ -50,9 +50,9 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		receivingCash = receivingCash + conversionAmount
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
-		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist("cash"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 		receivingEntry := models.EconomyUser{GuildID: data.GuildID, UserID: receiving.User.ID, Cash: receivingCash}
-		receivingEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist("cash"), boil.Infer())
+		receivingEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }

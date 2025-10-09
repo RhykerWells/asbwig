@@ -111,9 +111,9 @@ var Command = &dcommand.AsbwigCommand{
 			embed.Color = common.SuccessGreen
 			cash = cash - bet
 			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
-			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist("cash"), boil.Infer())
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "russianroulette", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
-			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist("expires_at"), boil.Infer())
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			time.AfterFunc(2*time.Minute, func() { startGame(data.GuildID, data.ChannelID, data.Author.ID) })
 			return
@@ -143,7 +143,7 @@ var Command = &dcommand.AsbwigCommand{
 		embed.Color = common.SuccessGreen
 		cash = cash - bet
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
-		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist("cash"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }
@@ -190,7 +190,7 @@ func startGame(guildID, channelID, ownerID string) {
 		field := &discordgo.MessageEmbedField{Name: member.User.Username, Value: member.Mention(), Inline: false}
 		fields = append(fields, field)
 		userEntry := models.EconomyUser{GuildID: guildID, UserID: player, Cash: cash + payout}
-		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist("cash"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 	}
 	embed.Title = "Russian roulette winners"
 	embed.Description = fmt.Sprintf("Payout is %s%s per winner", guild.Symbol, humanize.Comma(payout))
