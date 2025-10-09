@@ -8,7 +8,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 var Command = &dcommand.AsbwigCommand{
@@ -24,7 +23,7 @@ var Command = &dcommand.AsbwigCommand{
 		if !banned {
 			functions.SendBasicMessage(data.ChannelID, "That guild was not banned")
 		} else {
-			models.BannedGuilds(qm.Where("guild_id=?", data.Args[0])).DeleteAll(context.Background(), common.PQ)
+			models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(data.Args[0])).DeleteAll(context.Background(), common.PQ)
 		}
 	}),
 }
