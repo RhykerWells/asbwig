@@ -10,7 +10,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -27,14 +26,14 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+		guildConfig, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
 		if len(data.Args) <= 0 {
 			embed.Description = "No `Item` argument provided\nUse `inventory [Page]` to view all your items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		inventoryItem, exists := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=? AND name=?", data.GuildID, data.Author.ID, name)).One(context.Background(), common.PQ)
+		inventoryItem, exists := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), models.EconomyUserInventoryWhere.Name.EQ(name)).One(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "You don't have this item\nUse `inventory [Page]` to view all your items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

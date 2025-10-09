@@ -9,7 +9,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,7 +30,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		name := data.ArgsNotLowered[0]
 		var item models.EconomyShop
-		matchedItems, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
+		matchedItems, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(name)).All(context.Background(), common.PQ)
 		if len(matchedItems) == 0 {
 			embed.Description = "This item doesn't exist. Use `shop` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

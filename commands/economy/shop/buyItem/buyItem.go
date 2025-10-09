@@ -10,7 +10,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -28,13 +27,13 @@ var Command = &dcommand.AsbwigCommand{
 	Run: func(data *dcommand.Data) {
 		guild, _ := common.Session.Guild(data.GuildID)
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		guildConfig, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
+		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		economyUserInventory, _ := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).All(context.Background(), common.PQ)
+		economyUserInventory, _ := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID)).All(context.Background(), common.PQ)
 		if len(data.Args) <= 0 {
 			embed.Description = "No `Item` argument provided\nUse `shop [Page]` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -42,7 +41,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		name := data.ArgsNotLowered[0]
 		var item models.EconomyShop
-		matchedItems, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
+		matchedItems, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(name)).All(context.Background(), common.PQ)
 		if len(matchedItems) == 0 {
 			embed.Description = "This item doesn't exist. Use `shop` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

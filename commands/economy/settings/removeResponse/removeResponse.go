@@ -10,7 +10,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -35,7 +34,7 @@ func removeResponse(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	guildResponses, err := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", data.GuildID, responseType)).All(context.Background(), common.PQ)
+	guildResponses, err := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ(responseType)).All(context.Background(), common.PQ)
 	if err != nil {
 		embed.Description = "There are no responses to delete."
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

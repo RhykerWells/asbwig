@@ -10,7 +10,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -25,9 +24,9 @@ var Command = &dcommand.AsbwigCommand{
 func viewsettings(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " settings", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
-	guildConfig, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-	customWorkResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type='work'", data.GuildID)).All(context.Background(), common.PQ)
-	customCrimeResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type='crime'", data.GuildID)).All(context.Background(), common.PQ)
+	guildConfig, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
+	customWorkResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("work")).All(context.Background(), common.PQ)
+	customCrimeResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("crime")).All(context.Background(), common.PQ)
 	maxBet := ""
 	symbol := guildConfig.Symbol
 	startbalance := ""

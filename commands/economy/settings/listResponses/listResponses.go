@@ -42,7 +42,7 @@ func listResponses(data *dcommand.Data) {
 	}
 	offset := (page - 1) * 10
 	display := ""
-	guildResponses, _ := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", data.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
+	guildResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ(responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if len(guildResponses) <= 0 {
 		display = "There are no responses on this page\nAdd some with `addresponse <Type> <Responses>`"
 	}

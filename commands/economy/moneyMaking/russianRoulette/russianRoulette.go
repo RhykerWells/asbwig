@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -40,8 +39,8 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
+		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
@@ -94,7 +93,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		game, exists := activeGames[data.GuildID]
 		if !exists {
-			cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type='russianroulette'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+			cooldown, err := models.EconomyCooldowns(models.EconomyCooldownWhere.GuildID.EQ(data.GuildID), models.EconomyCooldownWhere.UserID.EQ(data.Author.ID), models.EconomyCooldownWhere.Type.EQ("russianroulette")).One(context.Background(), common.PQ)
 			if err == nil {
 				if cooldown.ExpiresAt.Time.After(time.Now()) {
 					embed.Description = fmt.Sprintf("You are on cooldown. You can start another game <t:%d:R>", (time.Now().Unix() + int64(time.Until(cooldown.ExpiresAt.Time).Seconds())))
@@ -156,7 +155,7 @@ func startGame(guildID, channelID, ownerID string) {
 	}
 	user, _ := functions.GetUser(game.OwnerID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: user.Username, IconURL: user.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(guildID)).One(context.Background(), common.PQ)
 	removeLeftPlayers(guildID, game)
 	if len(game.PlayerIDs) <= 1 {
 		functions.SendBasicMessage(channelID, "There weren't enough players to start russian roulette. Please start a new one.")
@@ -182,7 +181,7 @@ func startGame(guildID, channelID, ownerID string) {
 		if loser.User.ID == player {
 			continue
 		}
-		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildID, player)).One(context.Background(), common.PQ)
+		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(guildID), models.EconomyUserWhere.UserID.EQ(player)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash

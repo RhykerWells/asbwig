@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -38,7 +37,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		matchedItems, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name)).All(context.Background(), common.PQ)
+		matchedItems, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(name)).All(context.Background(), common.PQ)
 		if len(matchedItems) == 0 {
 			embed.Description = "This item doesn't exist. Use `shop` to view all items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -78,7 +77,7 @@ var Command = &dcommand.AsbwigCommand{
 		switch option {
 		case "name":
 			value = data.ArgsNotLowered[2]
-			itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, value)).One(context.Background(), common.PQ)
+			itemExists, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(value)).One(context.Background(), common.PQ)
 			if itemExists != nil {
 				embed.Description = "There is already an item with this name"
 				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})

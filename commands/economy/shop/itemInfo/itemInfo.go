@@ -42,7 +42,7 @@ var Command = &dcommand.AsbwigCommand{
 		offset := (page - 1)
 		name := data.ArgsNotLowered[0]
 		display := ""
-		matchedItems, err := models.EconomyShops(qm.Where("guild_id=? AND name=?", data.GuildID, name), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+		matchedItems, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(name), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		if err != nil || len(matchedItems) == 0 {
 			display = "No items are in the shop for this page.\nAdd some with `createitem`"
 		} else {
