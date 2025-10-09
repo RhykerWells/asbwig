@@ -68,14 +68,14 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		item := models.EconomyShop{GuildID: data.GuildID, Name: inventoryItem.Name, Description: inventoryItem.Description, Price: price, Quantity: sellQuantity, Role: inventoryItem.Role, Reply: inventoryItem.Reply, Soldby: data.Author.ID}
-		item.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "name", "soldby"}, boil.Whitelist("description", "price", "quantity", "role", "reply"), boil.Infer())
+		item.Upsert(context.Background(), common.PQ, true, []string{models.EconomyShopColumns.GuildID, models.EconomyShopColumns.Name, models.EconomyShopColumns.Soldby}, boil.Whitelist("description", "price", "quantity", "role", "reply"), boil.Infer())
 		quantity := inventoryItem.Quantity
 		newQuantity := quantity - 1
 		if newQuantity == 0 {
 			inventoryItem.Delete(context.Background(), common.PQ)
 		} else if newQuantity > 0 {
 			inventoryItem.Quantity = newQuantity
-			inventoryItem.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
+			inventoryItem.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist("quantity"), boil.Infer())
 		}
 		embed.Description = fmt.Sprintf("Added %s to the shop. Selling for %s%s!", name, guildConfig.Symbol, humanize.Comma(price))
 		embed.Color = common.SuccessGreen

@@ -45,7 +45,7 @@ func settings(data *dcommand.Data) {
 	var settings models.EconomyConfig
 	if setting == "default" {
 		settings.GuildID = data.GuildID
-		settings.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("maxbet", "symbol", "startbalance"), boil.Infer())
+		settings.Upsert(context.Background(), common.PQ, true, []string{models.EconomyConfigColumns.GuildID}, boil.Whitelist("maxbet", "symbol", "startbalance"), boil.Infer())
 		embed.Description = "Economy settings have been reset to default values"
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
