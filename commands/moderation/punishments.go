@@ -53,7 +53,7 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 		Roles: rolesRemoved,
 		UnmuteAt: unmuteTime,
 	}
-	muteEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unmute_at"), boil.Infer())
+	muteEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationMuteColumns.GuildID, models.ModerationMuteColumns.UserID}, boil.Whitelist(models.ModerationMuteColumns.UnmuteAt), boil.Infer())
 
 	scheduleUnmute(config, targetID, unmuteTime)
 
@@ -163,7 +163,7 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 		UserID: target.User.ID,
 		UnbanAt: unbanTime,
 	}
-	banEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unban_at"), boil.Infer())
+	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
 
 	scheduleUnban(config, target.User.ID, unbanTime)
 	return nil

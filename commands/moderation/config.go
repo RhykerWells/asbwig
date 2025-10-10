@@ -113,7 +113,7 @@ func GetConfig(guildID string) *Config {
 
 // SaveConfig saves the passed Config struct via SQLBoiler
 func SaveConfig(config *Config) error {
-	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{"guild_id"}, boil.Infer(), boil.Infer())
+	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{models.ModerationConfigColumns.GuildID}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}
