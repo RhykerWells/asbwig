@@ -7,7 +7,6 @@ import (
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -34,7 +33,7 @@ func AdminOrManageServerCommand(inner dcommand.Run) dcommand.Run {
 
 // IsGuildBanned returns a boolean of whether the guild is banned or not
 func IsGuildBanned(guildID string) bool {
-	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), common.PQ)
+	exists, err := models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(guildID)).Exists(context.Background(), common.PQ)
 	if err != nil {
 		return false
 	}
