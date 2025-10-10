@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -40,8 +39,8 @@ var Command = &dcommand.AsbwigCommand{
 	},
 	Run: func(data *dcommand.Data) {
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-		guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
-		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+		guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
+		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
@@ -94,7 +93,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		game, exists := activeGames[data.GuildID]
 		if !exists {
-			cooldown, err := models.EconomyCooldowns(qm.Where("guild_id=? AND user_id=? AND type='russianroulette'", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+			cooldown, err := models.EconomyCooldowns(models.EconomyCooldownWhere.GuildID.EQ(data.GuildID), models.EconomyCooldownWhere.UserID.EQ(data.Author.ID), models.EconomyCooldownWhere.Type.EQ("russianroulette")).One(context.Background(), common.PQ)
 			if err == nil {
 				if cooldown.ExpiresAt.Time.After(time.Now()) {
 					embed.Description = fmt.Sprintf("You are on cooldown. You can start another game <t:%d:R>", (time.Now().Unix() + int64(time.Until(cooldown.ExpiresAt.Time).Seconds())))
@@ -112,9 +111,9 @@ var Command = &dcommand.AsbwigCommand{
 			embed.Color = common.SuccessGreen
 			cash = cash - bet
 			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
-			userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "russianroulette", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
-			cooldowns.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "type"}, boil.Whitelist("expires_at"), boil.Infer())
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			time.AfterFunc(2*time.Minute, func() { startGame(data.GuildID, data.ChannelID, data.Author.ID) })
 			return
@@ -144,7 +143,7 @@ var Command = &dcommand.AsbwigCommand{
 		embed.Color = common.SuccessGreen
 		cash = cash - bet
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
-		userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},
 }
@@ -156,7 +155,7 @@ func startGame(guildID, channelID, ownerID string) {
 	}
 	user, _ := functions.GetUser(game.OwnerID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: user.Username, IconURL: user.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(guildID)).One(context.Background(), common.PQ)
 	removeLeftPlayers(guildID, game)
 	if len(game.PlayerIDs) <= 1 {
 		functions.SendBasicMessage(channelID, "There weren't enough players to start russian roulette. Please start a new one.")
@@ -182,7 +181,7 @@ func startGame(guildID, channelID, ownerID string) {
 		if loser.User.ID == player {
 			continue
 		}
-		economyUser, err := models.EconomyUsers(qm.Where("guild_id=? AND user_id=?", guildID, player)).One(context.Background(), common.PQ)
+		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(guildID), models.EconomyUserWhere.UserID.EQ(player)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
@@ -191,7 +190,7 @@ func startGame(guildID, channelID, ownerID string) {
 		field := &discordgo.MessageEmbedField{Name: member.User.Username, Value: member.Mention(), Inline: false}
 		fields = append(fields, field)
 		userEntry := models.EconomyUser{GuildID: guildID, UserID: player, Cash: cash + payout}
-		userEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("cash"), boil.Infer())
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 	}
 	embed.Title = "Russian roulette winners"
 	embed.Description = fmt.Sprintf("Payout is %s%s per winner", guild.Symbol, humanize.Comma(payout))

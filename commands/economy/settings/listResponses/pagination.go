@@ -34,7 +34,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 	offset := (page - 1) * 10
 	display := ""
-	guildResponses, err := models.EconomyCustomResponses(qm.Where("guild_id=? AND type=?", b.GuildID, responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
+	guildResponses, err := models.EconomyCustomResponses(models.EconomyConfigWhere.GuildID.EQ(b.GuildID), models.EconomyCustomResponseWhere.Type.EQ(responseType), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if err != nil {
 		display = "There are no responses on this page\nAdd some with `addresponse <Type> <Responses>`"
 	}

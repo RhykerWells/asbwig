@@ -6,7 +6,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 // Config defines the general struct to pass data to and from the dashboard template/context data
@@ -114,7 +113,7 @@ func GetConfig(guildID string) *Config {
 
 // SaveConfig saves the passed Config struct via SQLBoiler
 func SaveConfig(config *Config) error {
-	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{"guild_id"}, boil.Infer(), boil.Infer())
+	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{models.ModerationConfigColumns.GuildID}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}
@@ -124,7 +123,7 @@ func SaveConfig(config *Config) error {
 
 // getGuildCases returns the guild cases
 func getGuildCases(guildID string) models.ModerationCaseSlice {
-	models, err := models.ModerationCases(qm.Where("guild_id = ?", guildID)).All(context.Background(), common.PQ)
+	models, err := models.ModerationCases(models.ModerationCaseWhere.GuildID.EQ(guildID)).All(context.Background(), common.PQ)
 	if err != nil {
 		return nil
 	}

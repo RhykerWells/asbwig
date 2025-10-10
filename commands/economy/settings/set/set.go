@@ -13,7 +13,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -46,7 +45,7 @@ func settings(data *dcommand.Data) {
 	var settings models.EconomyConfig
 	if setting == "default" {
 		settings.GuildID = data.GuildID
-		settings.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("maxbet", "symbol", "startbalance"), boil.Infer())
+		settings.Upsert(context.Background(), common.PQ, true, []string{models.EconomyConfigColumns.GuildID}, boil.Whitelist(models.EconomyConfigColumns.Maxbet, models.EconomyConfigColumns.Symbol, models.EconomyConfigColumns.Startbalance), boil.Infer())
 		embed.Description = "Economy settings have been reset to default values"
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -66,7 +65,7 @@ func settings(data *dcommand.Data) {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
 	}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
 	value := data.Args[1]
 	switch setting {
 	case "startbalance", "maxbet", "min", "max":

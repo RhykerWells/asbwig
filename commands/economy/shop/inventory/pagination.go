@@ -17,7 +17,7 @@ import (
 func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: b.Member.User.Username + " inventory", IconURL: b.Member.User.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "inventory_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "inventory_forward"}}}}
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", b.GuildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(b.GuildID)).One(context.Background(), common.PQ)
 	if b.MessageComponentData().CustomID != "inventory_back" && b.MessageComponentData().CustomID != "inventory_forward" {
 		return
 	}
@@ -30,7 +30,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 	offset := (page - 1) * 10
 	display := ""
-	userInventory, err := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", b.GuildID, b.Member.User.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	userInventory, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(b.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(b.Member.User.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if err != nil || len(userInventory) == 0 {
 		display = "There are no item on this page\nBuy some with `buyitem`"
 	} else {

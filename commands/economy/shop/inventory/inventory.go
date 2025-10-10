@@ -35,7 +35,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		offset := (page - 1) * 10
 		display := ""
-		userInventory, err := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+		userInventory, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		if err != nil || len(userInventory) == 0 {
 			display = "There are no item on this page\nBuy some with `buyitem`"
 		} else {

@@ -26,7 +26,7 @@ var Command = &dcommand.AsbwigCommand{
 		guild, _ := common.Session.Guild(data.GuildID)
 		embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 		components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
-		guildSettings, _ := models.EconomyConfigs(qm.Where("guild_id=?", data.GuildID)).One(context.Background(), common.PQ)
+		guildSettings, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
 		page := 1
 		if len(data.Args) > 0 {
 			page, _ = strconv.Atoi(data.Args[0])
@@ -36,7 +36,7 @@ var Command = &dcommand.AsbwigCommand{
 		}
 		offset := (page - 1) * 10
 		display := ""
-		guildShop, err := models.EconomyShops(qm.Where("guild_id=?", data.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+		guildShop, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 		if err != nil || len(guildShop) == 0 {
 			display = "No items are in the shop for this page.\nAdd some with `createitem`"
 		} else {

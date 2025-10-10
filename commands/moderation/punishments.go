@@ -11,7 +11,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 var (
@@ -54,7 +53,7 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 		Roles: rolesRemoved,
 		UnmuteAt: unmuteTime,
 	}
-	muteEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unmute_at"), boil.Infer())
+	muteEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationMuteColumns.GuildID, models.ModerationMuteColumns.UserID}, boil.Whitelist(models.ModerationMuteColumns.UnmuteAt), boil.Infer())
 
 	scheduleUnmute(config, targetID, unmuteTime)
 
@@ -64,7 +63,7 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 // unmuteUser automatically removes the mute role from the target user and restores any roles set to be removed
 // within the configuration and saves the mute to the database
 func unmuteUser(config *Config, authorID, targetID string) error {
-	mutedUser, err := models.ModerationMutes(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
+	mutedUser, err := models.ModerationMutes(models.ModerationMuteWhere.GuildID.EQ(config.GuildID), models.ModerationMuteWhere.UserID.EQ(targetID)).One(context.Background(), common.PQ)
 	if err != nil {
 		return errNotMuted
 	}
@@ -126,7 +125,7 @@ func scheduleUnmute(config *Config, targetID string, unmuteTime time.Time) {
 
 // scheduleAllPendingUnmutes schedules unmutes for all users with pending unmutes
 func scheduleAllPendingUnmutes() {
-	mutes, err := models.ModerationMutes(qm.Where("unmute_at > ?", time.Now())).All(context.Background(), common.PQ)
+	mutes, err := models.ModerationMutes(models.ModerationMuteWhere.UnmuteAt.GT(time.Now())).All(context.Background(), common.PQ)
 	if err != nil {
 		return
 	}
@@ -164,7 +163,7 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 		UserID: target.User.ID,
 		UnbanAt: unbanTime,
 	}
-	banEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unban_at"), boil.Infer())
+	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
 
 	scheduleUnban(config, target.User.ID, unbanTime)
 	return nil
@@ -172,7 +171,7 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 
 // unbanUser removes a ban from a guild member and removes the user from the banned config
 func unbanUser(config *Config, authorID, targetID string) error {
-	bannedUser, _ := models.ModerationBans(qm.Where("guild_id = ?", config.GuildID), qm.Where("user_id = ?", targetID)).One(context.Background(), common.PQ)
+	bannedUser, _ := models.ModerationBans(models.ModerationBanWhere.GuildID.EQ(config.GuildID), models.ModerationBanWhere.UserID.EQ(targetID)).One(context.Background(), common.PQ)
 
 	err := functions.GuildUnbanMember(config.GuildID, targetID)
 	if err != nil {
@@ -213,7 +212,7 @@ func scheduleUnban(config *Config, targetID string, unbanTime time.Time) {
 
 // scheduleAllPendingUnbans schedules unbans for all users with pending unbans
 func scheduleAllPendingUnbans() {
-	bannedUsers, err := models.ModerationBans(qm.Where("unban_at > ?", time.Now())).All(context.Background(), common.PQ)
+	bannedUsers, err := models.ModerationBans(models.ModerationBanWhere.UnbanAt.GT(time.Now())).All(context.Background(), common.PQ)
 	if err != nil {
 		return
 	}

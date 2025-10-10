@@ -7,7 +7,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -52,7 +51,7 @@ func guildAddModerationConfig(g *discordgo.GuildCreate) {
 
 // guildDeleteModerationConfig deletes the config for the moderation system for a specified guild
 func guildDeleteModerationConfig(g *discordgo.GuildDelete) {
-	config, err := models.ModerationConfigs(qm.Where("guild_id = ?", g.ID)).One(context.Background(), common.PQ)
+	config, err := models.ModerationConfigs(models.ModerationConfigWhere.GuildID.EQ(g.ID)).One(context.Background(), common.PQ)
 	if err != nil {
 		return
 	}

@@ -18,7 +18,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	guild, _ := common.Session.Guild(b.GuildID)
 	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
-	guildSettings, _ := models.EconomyConfigs(qm.Where("guild_id=?", b.GuildID)).One(context.Background(), common.PQ)
+	guildSettings, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(b.GuildID)).One(context.Background(), common.PQ)
 	if b.MessageComponentData().CustomID != "shop_back" && b.MessageComponentData().CustomID != "shop_forward" {
 		return
 	}
@@ -31,7 +31,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 	offset := (page - 1) * 10
 	display := ""
-	guildShop, err := models.EconomyShops(qm.Where("guild_id=?", b.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	guildShop, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(b.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 	if err != nil || len(guildShop) == 0 {
 		display = "No items are in the shop for this page.\nAdd some with `createitem`"
 	} else {

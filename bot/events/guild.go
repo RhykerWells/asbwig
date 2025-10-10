@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/RhykerWells/asbwig/bot/core/models"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
@@ -64,7 +63,7 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 
 // isGuildBanned returns a boolean checking against the bots banned guild database
 func isGuildBanned(guildID string) bool {
-	exists, err := models.BannedGuilds(qm.Where("guild_id = ?", guildID)).Exists(context.Background(), db)
+	exists, err := models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(guildID)).Exists(context.Background(), db)
 	if err != nil {
 		return false
 	}

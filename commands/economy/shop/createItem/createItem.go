@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 )
@@ -36,7 +35,7 @@ var Command = &dcommand.AsbwigCommand{
 func itemCreation(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Title: "Item info", Footer: &discordgo.MessageEmbedFooter{Text: "Type cancel to cancel the setup"}, Timestamp: time.Now().Format(time.RFC3339), Color: 0x0088CC}
-	_, err := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", data.GuildID, data.Author.ID)).One(context.Background(), common.PQ)
+	_, err := models.EconomyCreateitems(models.EconomyCreateitemWhere.GuildID.EQ(data.GuildID), models.EconomyCreateitemWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 	channel, activeSession := activeSessions[data.Author.ID]
 	if err == nil || activeSession {
 		functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("You are already creating an item in <#%s>", channel))
@@ -52,7 +51,7 @@ func itemCreation(data *dcommand.Data) {
 		resetTimeout(data.GuildID, data.ChannelID, data.Author.ID)
 		return
 	}
-	itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=? AND soldby=0", data.GuildID, data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+	itemExists, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(data.ArgsNotLowered[0]), models.EconomyShopWhere.Soldby.EQ("0")).One(context.Background(), common.PQ)
 	if itemExists != nil {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Content: "Please start again and enter a name that doesn't already exist"})
 		return
@@ -73,26 +72,26 @@ func resetTimeout(guildID, channelID, userID string) {
 
 	activeTimers[userID] = time.AfterFunc(2*time.Minute, func() {
 		delete(activeSessions, userID)
-		models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", guildID, userID)).DeleteAll(context.Background(), common.PQ)
+		models.EconomyCreateitems(models.EconomyCreateitemWhere.GuildID.EQ(guildID), models.EconomyCreateitemWhere.UserID.EQ(userID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(channelID, "The item creation session has timed out due to inactivity. Please try again")
 	})
 }
 
 func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	guild, _ := models.EconomyConfigs(qm.Where("guild_id=?", m.GuildID)).One(context.Background(), common.PQ)
+	guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(m.GuildID)).One(context.Background(), common.PQ)
 	channelID, exists := activeSessions[m.Author.ID]
 	if !exists || m.ChannelID != channelID {
 		return
 	}
 	if m.Content == "cancel" {
 		delete(activeSessions, m.Author.ID)
-		models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.Author.ID)).DeleteAll(context.Background(), common.PQ)
+		models.EconomyCreateitems(models.EconomyCreateitemWhere.GuildID.EQ(m.GuildID), models.EconomyCreateitemWhere.UserID.EQ(m.Author.ID)).DeleteAll(context.Background(), common.PQ)
 		functions.SendBasicMessage(m.ChannelID, "Create item cancelled")
 		return
 	}
 	resetTimeout(m.GuildID, m.ChannelID, m.Author.ID)
 	delay := 10 * time.Second
-	createItem, _ := models.EconomyCreateitems(qm.Where("guild_id=? AND user_id=?", m.GuildID, m.Author.ID)).One(context.Background(), common.PQ)
+	createItem, _ := models.EconomyCreateitems(models.EconomyCreateitemWhere.GuildID.EQ(m.GuildID), models.EconomyCreateitemWhere.UserID.EQ(m.Author.ID)).One(context.Background(), common.PQ)
 	message, _ := common.Session.ChannelMessage(m.ChannelID, createItem.MSGID)
 	embed := message.Embeds[0]
 	if !createItem.Name.Valid {
@@ -102,14 +101,14 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name for the item (under 60 chars)"}, delay)
 			return
 		}
-		itemExists, _ := models.EconomyShops(qm.Where("guild_id=? AND name=? AND soldby=0", m.GuildID, name)).One(context.Background(), common.PQ)
+		itemExists, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(m.GuildID), models.EconomyShopWhere.Name.EQ(name), models.EconomyShopWhere.Soldby.EQ("0")).One(context.Background(), common.PQ)
 		if itemExists != nil {
 			functions.DeleteMessage(m.ChannelID, m.ID)
 			functions.SendMessage(m.ChannelID, &discordgo.MessageSend{Content: "Please enter a name that doesn't already exist"}, delay)
 			return
 		}
 		createItem.Name = null.StringFrom(name)
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("name"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Name))
 		embed.Fields = []*discordgo.MessageEmbedField{{Name: "name", Value: name, Inline: true}}
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a price for this item", Embed: embed})
 		return
@@ -122,7 +121,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Price = null.Int64From(functions.ToInt64(price))
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("price"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Price))
 		priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
 		embed.Fields = append(embed.Fields, priceField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)", Embed: embed})
@@ -135,7 +134,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Description = null.StringFrom(m.Content)
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("description"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Description))
 		descriptionField := &discordgo.MessageEmbedField{Name: "Description", Value: m.Content}
 		embed.Fields = append(embed.Fields, descriptionField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "How much of this item should the store stock?\nType `skip` or `inf` to skip this step", Embed: embed})
@@ -153,7 +152,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			displayQuantity = "Infinite"
 		}
 		createItem.Quantity = null.Int64From(functions.ToInt64(quantity))
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("quantity"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Quantity))
 		quantityField := &discordgo.MessageEmbedField{Name: "Stock", Value: displayQuantity}
 		embed.Fields = append(embed.Fields, quantityField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What role should be given when this item is used? (Role ID/Mention)\nType `skip` to skip this step", Embed: embed})
@@ -173,7 +172,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			displayRole = fmt.Sprintf("<@&%s>", roleID)
 		}
 		createItem.Role = null.StringFrom(roleID)
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("role"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Role))
 		roleField := &discordgo.MessageEmbedField{Name: "Role given", Value: displayRole}
 		embed.Fields = append(embed.Fields, roleField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "What reply should be given when this item is used?", Embed: embed})
@@ -186,7 +185,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		createItem.Reply = null.StringFrom(m.Content)
-		createItem.Update(context.Background(), common.PQ, boil.Whitelist("reply"))
+		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Reply))
 		replyField := &discordgo.MessageEmbedField{Name: "Reply message", Value: m.Content}
 		embed.Fields = append(embed.Fields, replyField)
 	}
@@ -207,6 +206,6 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if timer, exists := activeTimers[m.Author.ID]; exists {
 		timer.Stop()
 	}
-	models.EconomyCreateitems(qm.Where("guild_id=? AND user=?", m.GuildID, m.Author.ID)).DeleteAll(context.Background(), common.PQ)
+	models.EconomyCreateitems(models.EconomyCreateitemWhere.GuildID.EQ(m.GuildID), models.EconomyCreateitemWhere.UserID.EQ(m.Author.ID)).DeleteAll(context.Background(), common.PQ)
 	functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Item created! ✅", Embed: embed})
 }

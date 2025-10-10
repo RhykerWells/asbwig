@@ -9,7 +9,6 @@ import (
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,7 +30,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		name := data.ArgsNotLowered[0]
-		item, exists := models.EconomyUserInventories(qm.Where("guild_id=? AND user_id=? AND name=?", data.GuildID, data.Author.ID, name)).One(context.Background(), common.PQ)
+		item, exists := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), models.EconomyUserInventoryWhere.Name.EQ(name)).One(context.Background(), common.PQ)
 		if exists != nil {
 			embed.Description = "You don't have this item\nUse `inventory [Page]` to view your items"
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -46,7 +45,7 @@ var Command = &dcommand.AsbwigCommand{
 			item.Delete(context.Background(), common.PQ)
 		} else if newQuantity > 0 {
 			item.Quantity = newQuantity
-			item.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id", "name"}, boil.Whitelist("quantity"), boil.Infer())
+			item.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist(models.EconomyUserInventoryColumns.Quantity), boil.Infer())
 		}
 		functions.SendBasicMessage(data.ChannelID, item.Reply, 10)
 	},

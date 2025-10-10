@@ -19,7 +19,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	guild, _ := common.Session.Guild(b.GuildID)
 	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "economy_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "economy_forward"}}}}
-	guildSettings, _ := models.EconomyConfigs(qm.Where("guild_id=?", b.GuildID)).One(context.Background(), common.PQ)
+	guildSettings, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(b.GuildID)).One(context.Background(), common.PQ)
 	if b.MessageComponentData().CustomID != "economy_back" && b.MessageComponentData().CustomID != "economy_forward" {
 		return
 	}
@@ -31,7 +31,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		page = page - 1
 	}
 	offset := (page - 1) * 10
-	economyUsers, err := models.EconomyUsers(qm.Where("guild_id=?", b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	economyUsers, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
 	display := ""
 	if err != nil || len(economyUsers) == 0 {
 		display = "No users are in the leaderboard"
