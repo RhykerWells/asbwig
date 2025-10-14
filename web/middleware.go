@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -15,11 +14,14 @@ import (
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
+	"github.com/patrickmn/go-cache"
 	"goji.io/v3/pat"
 )
 
-type CtxKey int
+var sessionStore = cache.New(24*time.Hour*30, 1*time.Hour)
 
+type CtxKey int
 const (
 	CtxKeyTmplData CtxKey = iota
 )
@@ -39,7 +41,7 @@ func setCSRF(w http.ResponseWriter, token string) {
 		Name:    "asbwig_csrf",
 		Value:   token,
 		Path:    "/",
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires: time.Now().Add(300 * time.Second),
 		Secure:  true,
 	})
 }
@@ -63,57 +65,36 @@ func getCSRF(w http.ResponseWriter, r *http.Request) string {
 }
 
 // setUserDataCookie sets the cookie containing the users account data
-func setUserDataCookie(w http.ResponseWriter, userData map[string]interface{}) error {
-	encodedValue, err := encodeUserData(userData)
-	if err != nil {
-		return err
-	}
+func setUserSession(w http.ResponseWriter, user *discordgo.User) {
+	sessionID := uuid.NewString()
+	sessionStore.Set(sessionID, user, cache.DefaultExpiration)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "asbwig_userinfo",
-		Value:   encodedValue,
+		Value:   sessionID,
 		Path:    "/",
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires: time.Now().Add(24*time.Hour*30),
 	})
-
-	return nil
 }
 
-// encodeUserData encodes the users account data into base64
-func encodeUserData(data map[string]interface{}) (string, error) {
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(jsonData), nil
-}
-
-// decodeCookie decodes the base64 encoded user data into a map[string]interface{} and returns the decoded cookie
-func decodeCookie(encoded string) (map[string]interface{}, error) {
-	decodedBytes, err := base64.StdEncoding.DecodeString(encoded)
-	if err != nil {
-		return nil, err
-	}
-
-	var data map[string]interface{}
-	if err := json.Unmarshal(decodedBytes, &data); err != nil {
-		return nil, err
-	}
-
-	return data, nil
+// getUserSession retrieves the user data from the user session cookie
+func getUserSession(sessionID string) (*discordgo.User, bool) {
+    if data, found := sessionStore.Get(sessionID); found {
+        return data.(*discordgo.User), true
+    }
+    return nil, false
 }
 
 // checkUserCookie checks the stored browser cookie and returns the users information or an error
-func checkUserCookie(w http.ResponseWriter, r *http.Request) (map[string]interface{}, error) {
+func checkUserCookie(w http.ResponseWriter, r *http.Request) (*discordgo.User, error) {
 	cookie, err := r.Cookie("asbwig_userinfo")
 	if err == nil {
-		// Decode and verify cookie
-		userData, err := decodeCookie(cookie.Value)
-		if err == nil {
-			return userData, nil
+		// Verify cookie session
+		if user, found := getUserSession(cookie.Value); found {
+			return user, nil
 		}
 
-		// If decoding failed — clear the bad cookie
+		// If verification failed — clear the bad cookie
 		http.SetCookie(w, &http.Cookie{
 			Name:    "asbwig_userinfo",
 			Value:   "",
@@ -121,7 +102,7 @@ func checkUserCookie(w http.ResponseWriter, r *http.Request) (map[string]interfa
 			Expires: time.Unix(0, 0),
 		})
 	}
-	return nil, errors.New("no session ")
+	return nil, errors.New("no valid session found")
 }
 
 // deleteCookie deletes the specified HTTP cookie from local storage
@@ -179,20 +160,19 @@ func validateGuild(inner http.Handler) http.Handler {
 			return
 		}
 
-		userData, err := checkUserCookie(w, r)
+		user, err := checkUserCookie(w, r)
 		if err != nil {
 			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
 			return
 		}
 
-		userID, _ := userData["id"].(string)
-		user, err := functions.GetMember(guildIDStr, userID)
+		member, err := functions.GetMember(guildIDStr, user.ID)
 		if err != nil {
 			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
 			return
 		}
 
-		managed := isUserManaged(guildIDStr, user)
+		managed := isUserManaged(guildIDStr, member)
 		if !managed {
 			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
 			return
@@ -224,14 +204,13 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		userData, err := checkUserCookie(w, r)
+		user, err := checkUserCookie(w, r)
 		if err != nil {
-			http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
-		userID, _ := userData["id"].(string)
 
-		guilds := getUserManagedGuilds(userID)
+		guilds := getUserManagedGuilds(user.ID)
 		guildList := make([]map[string]interface{}, 0)
 		for guildID, guildName := range guilds {
 			avatarURL := URL + "/static/img/icons/cross.png"
@@ -248,7 +227,7 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 		}
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
-		tmplData["User"] = userData
+		tmplData["User"] = user
 		tmplData["ManagedGuilds"] = guildList
 
 		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
