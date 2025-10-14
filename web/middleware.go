@@ -19,7 +19,7 @@ import (
 	"goji.io/v3/pat"
 )
 
-var sessionStore = cache.New(24*time.Hour, 1*time.Hour)
+var sessionStore = cache.New(24*time.Hour*30, 1*time.Hour)
 
 type CtxKey int
 const (
@@ -41,7 +41,7 @@ func setCSRF(w http.ResponseWriter, token string) {
 		Name:    "asbwig_csrf",
 		Value:   token,
 		Path:    "/",
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires: time.Now().Add(300 * time.Second),
 		Secure:  true,
 	})
 }
@@ -73,7 +73,7 @@ func setUserSession(w http.ResponseWriter, user *discordgo.User) {
 		Name:    "asbwig_userinfo",
 		Value:   sessionID,
 		Path:    "/",
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires: time.Now().Add(24*time.Hour*30),
 	})
 }
 
