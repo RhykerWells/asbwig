@@ -12,6 +12,7 @@ require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/friendsofgo/errors v0.9.2
 	github.com/lib/pq v1.10.9
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.3
 	goji.io/v3 v3.0.0
 )
@@ -26,6 +27,7 @@ require (
 require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
