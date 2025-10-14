@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -24,15 +23,15 @@ import (
 
 // ModerationCase is an object representing the database table.
 type ModerationCase struct {
-	CaseID           int64       `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
-	GuildID          string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	StaffID          string      `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
-	OffenderID       string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
-	Reason           null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
-	Action           string      `boil:"action" json:"action" toml:"action" yaml:"action"`
-	LogLink          string      `boil:"log_link" json:"log_link" toml:"log_link" yaml:"log_link"`
-	OffenderUsername string      `boil:"offender_username" json:"offender_username" toml:"offender_username" yaml:"offender_username"`
-	StaffUsername    string      `boil:"staff_username" json:"staff_username" toml:"staff_username" yaml:"staff_username"`
+	CaseID           int64  `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
+	GuildID          string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	StaffID          string `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
+	OffenderID       string `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
+	Reason           string `boil:"reason" json:"reason" toml:"reason" yaml:"reason"`
+	Action           string `boil:"action" json:"action" toml:"action" yaml:"action"`
+	LogLink          string `boil:"log_link" json:"log_link" toml:"log_link" yaml:"log_link"`
+	OffenderUsername string `boil:"offender_username" json:"offender_username" toml:"offender_username" yaml:"offender_username"`
+	StaffUsername    string `boil:"staff_username" json:"staff_username" toml:"staff_username" yaml:"staff_username"`
 
 	R *moderationCaseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationCaseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -107,68 +106,12 @@ func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" LIKE ?", x)
-}
-func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT LIKE ?", x)
-}
-func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" ILIKE ?", x)
-}
-func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT ILIKE ?", x)
-}
-func (w whereHelpernull_String) SIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) NSIMILAR(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT SIMILAR TO ?", x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var ModerationCaseWhere = struct {
 	CaseID           whereHelperint64
 	GuildID          whereHelperstring
 	StaffID          whereHelperstring
 	OffenderID       whereHelperstring
-	Reason           whereHelpernull_String
+	Reason           whereHelperstring
 	Action           whereHelperstring
 	LogLink          whereHelperstring
 	OffenderUsername whereHelperstring
@@ -178,7 +121,7 @@ var ModerationCaseWhere = struct {
 	GuildID:          whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
 	StaffID:          whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
 	OffenderID:       whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
-	Reason:           whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
+	Reason:           whereHelperstring{field: "\"moderation_cases\".\"reason\""},
 	Action:           whereHelperstring{field: "\"moderation_cases\".\"action\""},
 	LogLink:          whereHelperstring{field: "\"moderation_cases\".\"log_link\""},
 	OffenderUsername: whereHelperstring{field: "\"moderation_cases\".\"offender_username\""},
@@ -223,8 +166,8 @@ type moderationCaseL struct{}
 
 var (
 	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "log_link", "offender_username", "staff_username"}
-	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action", "log_link", "offender_username", "staff_username"}
-	moderationCaseColumnsWithDefault    = []string{"reason"}
+	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "log_link", "offender_username", "staff_username"}
+	moderationCaseColumnsWithDefault    = []string{}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}
 )

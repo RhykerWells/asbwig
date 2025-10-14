@@ -9,7 +9,6 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/durationutil"
-	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
@@ -93,7 +92,7 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 		GuildID:    config.GuildID,
 		StaffID:    author.User.ID,
 		OffenderID: target.User.ID,
-		Reason:     null.StringFrom(reason),
+		Reason:     reason,
 		Action:     action.CaseType,
 		LogLink:    "",
 	}
