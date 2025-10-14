@@ -71,7 +71,7 @@
 					<tbody>
 						{{range .Cases}}
 						<tr>
-							<td>{{.CaseID}}</td>
+							<td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{.CaseID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">{{.CaseID}}</button>
 							<td>{{.OffenderUsername}} (<code>{{.OffenderID}}</code>)</td>
 							<td>{{.StaffUsername}} (<code>{{.StaffID}}</code>)</td>
 							<td>{{.Action}}</td>
@@ -82,6 +82,39 @@
 				</table>
 				<div id="casesTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
+			{{range .Cases}}
+			<div class="modal fade" id="{{.CaseID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+				<div class="modal-dialog modal-dialog-centered modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5>Case #{{.CaseID}}</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body" style="border-bottom-right-radius: var(--bs-modal-inner-border-radius); border-bottom-left-radius: var(--bs-modal-inner-border-radius);">
+							<table class="table table-striped-columns" style="--bs-table-color: white; --bs-table-striped-color: white;">
+								<thead>
+									<tr>
+										<th>Offender</th>
+										<th>Moderator</th>
+										<th>Action</th>
+										<th>Reason</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th>{{.OffenderUsername}} (<code>{{.OffenderID}}</code>)</th>
+										<th>{{.StaffUsername}} (<code>{{.StaffID}}</code>)</th>
+										<th><code style="font-weight: bold;">{{.Action}}</code></th>
+										<th>{{.Reason}}</th>
+									</tr>
+									<tr colspan="4"><td colspan="4"><a class="btn btn-primary w-100" href="{{.LogLink}}" role="button" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Link to Discord case</a></td></tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{end}}
 		</div>
 	</main>
 	<script>

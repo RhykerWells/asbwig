@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS moderation_cases (
 	staff_username TEXT NOT NULL,
 	offender_id TEXT NOT NULL,
 	offender_username TEXT NOT NULL,
-	reason TEXT,
+	reason TEXT NOT NULL,
 	action TEXT NOT NULL,
 	log_link TEXT NOT NULL,
     PRIMARY KEY (guild_id, case_id),
