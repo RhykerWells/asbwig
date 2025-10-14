@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
+	"github.com/bwmarrin/discordgo"
 	"golang.org/x/oauth2"
 )
 
@@ -68,10 +70,12 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	var userData map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&userData)
+	var jsonData map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&jsonData)
+	var user *discordgo.User
+	user, _ = functions.GetUser(jsonData["id"].(string))
 
-	setUserDataCookie(w, userData)
+	setUserSession(w, user)
 
 	http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 }

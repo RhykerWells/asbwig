@@ -58,10 +58,10 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<figure class="profile-picture me-3 mb-0">
-								<img src="https://cdn.discordapp.com/avatars/{{.User.id}}/{{.User.avatar}}?size=64" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+								<img src="{{.User.AvatarURL "1024"}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
 							</figure>
 							<span class="d-flex flex-column">
-								<span>{{.User.global_name}}</span>
+								<span>{{.User.GlobalName}}</span>
 							</span>
 						</a>
 						<ul class="dropdown-menu logoutarea" aria-labelledby="navbarDropdown">
