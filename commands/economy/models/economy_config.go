@@ -17,63 +17,79 @@ import (
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/aarondl/sqlboiler/v4/queries/qmhelper"
+	"github.com/aarondl/sqlboiler/v4/types"
 	"github.com/aarondl/strmangle"
 	"github.com/friendsofgo/errors"
 )
 
 // EconomyConfig is an object representing the database table.
 type EconomyConfig struct {
-	GuildID              string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	Min                  int64  `boil:"min" json:"min" toml:"min" yaml:"min"`
-	Max                  int64  `boil:"max" json:"max" toml:"max" yaml:"max"`
-	Maxbet               int64  `boil:"maxbet" json:"maxbet" toml:"maxbet" yaml:"maxbet"`
-	Symbol               string `boil:"symbol" json:"symbol" toml:"symbol" yaml:"symbol"`
-	Startbalance         int64  `boil:"startbalance" json:"startbalance" toml:"startbalance" yaml:"startbalance"`
-	Customworkresponses  bool   `boil:"customworkresponses" json:"customworkresponses" toml:"customworkresponses" yaml:"customworkresponses"`
-	Customcrimeresponses bool   `boil:"customcrimeresponses" json:"customcrimeresponses" toml:"customcrimeresponses" yaml:"customcrimeresponses"`
+	GuildID                            string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	EconomyEnabled                     bool              `boil:"economy_enabled" json:"economy_enabled" toml:"economy_enabled" yaml:"economy_enabled"`
+	EconomySymbol                      string            `boil:"economy_symbol" json:"economy_symbol" toml:"economy_symbol" yaml:"economy_symbol"`
+	EconomyStartBalance                int64             `boil:"economy_start_balance" json:"economy_start_balance" toml:"economy_start_balance" yaml:"economy_start_balance"`
+	EconomyMinReturn                   int64             `boil:"economy_min_return" json:"economy_min_return" toml:"economy_min_return" yaml:"economy_min_return"`
+	EconomyMaxReturn                   int64             `boil:"economy_max_return" json:"economy_max_return" toml:"economy_max_return" yaml:"economy_max_return"`
+	EconomyMaxBet                      int64             `boil:"economy_max_bet" json:"economy_max_bet" toml:"economy_max_bet" yaml:"economy_max_bet"`
+	EconomyCustomWorkResponsesEnabled  bool              `boil:"economy_custom_work_responses_enabled" json:"economy_custom_work_responses_enabled" toml:"economy_custom_work_responses_enabled" yaml:"economy_custom_work_responses_enabled"`
+	EconomyCustomWorkResponses         types.StringArray `boil:"economy_custom_work_responses" json:"economy_custom_work_responses" toml:"economy_custom_work_responses" yaml:"economy_custom_work_responses"`
+	EconomyCustomCrimeResponsesEnabled bool              `boil:"economy_custom_crime_responses_enabled" json:"economy_custom_crime_responses_enabled" toml:"economy_custom_crime_responses_enabled" yaml:"economy_custom_crime_responses_enabled"`
+	EconomyCustomCrimeResponses        types.StringArray `boil:"economy_custom_crime_responses" json:"economy_custom_crime_responses" toml:"economy_custom_crime_responses" yaml:"economy_custom_crime_responses"`
 
 	R *economyConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L economyConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EconomyConfigColumns = struct {
-	GuildID              string
-	Min                  string
-	Max                  string
-	Maxbet               string
-	Symbol               string
-	Startbalance         string
-	Customworkresponses  string
-	Customcrimeresponses string
+	GuildID                            string
+	EconomyEnabled                     string
+	EconomySymbol                      string
+	EconomyStartBalance                string
+	EconomyMinReturn                   string
+	EconomyMaxReturn                   string
+	EconomyMaxBet                      string
+	EconomyCustomWorkResponsesEnabled  string
+	EconomyCustomWorkResponses         string
+	EconomyCustomCrimeResponsesEnabled string
+	EconomyCustomCrimeResponses        string
 }{
-	GuildID:              "guild_id",
-	Min:                  "min",
-	Max:                  "max",
-	Maxbet:               "maxbet",
-	Symbol:               "symbol",
-	Startbalance:         "startbalance",
-	Customworkresponses:  "customworkresponses",
-	Customcrimeresponses: "customcrimeresponses",
+	GuildID:                            "guild_id",
+	EconomyEnabled:                     "economy_enabled",
+	EconomySymbol:                      "economy_symbol",
+	EconomyStartBalance:                "economy_start_balance",
+	EconomyMinReturn:                   "economy_min_return",
+	EconomyMaxReturn:                   "economy_max_return",
+	EconomyMaxBet:                      "economy_max_bet",
+	EconomyCustomWorkResponsesEnabled:  "economy_custom_work_responses_enabled",
+	EconomyCustomWorkResponses:         "economy_custom_work_responses",
+	EconomyCustomCrimeResponsesEnabled: "economy_custom_crime_responses_enabled",
+	EconomyCustomCrimeResponses:        "economy_custom_crime_responses",
 }
 
 var EconomyConfigTableColumns = struct {
-	GuildID              string
-	Min                  string
-	Max                  string
-	Maxbet               string
-	Symbol               string
-	Startbalance         string
-	Customworkresponses  string
-	Customcrimeresponses string
+	GuildID                            string
+	EconomyEnabled                     string
+	EconomySymbol                      string
+	EconomyStartBalance                string
+	EconomyMinReturn                   string
+	EconomyMaxReturn                   string
+	EconomyMaxBet                      string
+	EconomyCustomWorkResponsesEnabled  string
+	EconomyCustomWorkResponses         string
+	EconomyCustomCrimeResponsesEnabled string
+	EconomyCustomCrimeResponses        string
 }{
-	GuildID:              "economy_config.guild_id",
-	Min:                  "economy_config.min",
-	Max:                  "economy_config.max",
-	Maxbet:               "economy_config.maxbet",
-	Symbol:               "economy_config.symbol",
-	Startbalance:         "economy_config.startbalance",
-	Customworkresponses:  "economy_config.customworkresponses",
-	Customcrimeresponses: "economy_config.customcrimeresponses",
+	GuildID:                            "economy_config.guild_id",
+	EconomyEnabled:                     "economy_config.economy_enabled",
+	EconomySymbol:                      "economy_config.economy_symbol",
+	EconomyStartBalance:                "economy_config.economy_start_balance",
+	EconomyMinReturn:                   "economy_config.economy_min_return",
+	EconomyMaxReturn:                   "economy_config.economy_max_return",
+	EconomyMaxBet:                      "economy_config.economy_max_bet",
+	EconomyCustomWorkResponsesEnabled:  "economy_config.economy_custom_work_responses_enabled",
+	EconomyCustomWorkResponses:         "economy_config.economy_custom_work_responses",
+	EconomyCustomCrimeResponsesEnabled: "economy_config.economy_custom_crime_responses_enabled",
+	EconomyCustomCrimeResponses:        "economy_config.economy_custom_crime_responses",
 }
 
 // Generated where
@@ -109,6 +125,15 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 type whereHelperint64 struct{ field string }
 
 func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -132,45 +157,61 @@ func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelperbool struct{ field string }
+type whereHelpertypes_StringArray struct{ field string }
 
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var EconomyConfigWhere = struct {
-	GuildID              whereHelperstring
-	Min                  whereHelperint64
-	Max                  whereHelperint64
-	Maxbet               whereHelperint64
-	Symbol               whereHelperstring
-	Startbalance         whereHelperint64
-	Customworkresponses  whereHelperbool
-	Customcrimeresponses whereHelperbool
+	GuildID                            whereHelperstring
+	EconomyEnabled                     whereHelperbool
+	EconomySymbol                      whereHelperstring
+	EconomyStartBalance                whereHelperint64
+	EconomyMinReturn                   whereHelperint64
+	EconomyMaxReturn                   whereHelperint64
+	EconomyMaxBet                      whereHelperint64
+	EconomyCustomWorkResponsesEnabled  whereHelperbool
+	EconomyCustomWorkResponses         whereHelpertypes_StringArray
+	EconomyCustomCrimeResponsesEnabled whereHelperbool
+	EconomyCustomCrimeResponses        whereHelpertypes_StringArray
 }{
-	GuildID:              whereHelperstring{field: "\"economy_config\".\"guild_id\""},
-	Min:                  whereHelperint64{field: "\"economy_config\".\"min\""},
-	Max:                  whereHelperint64{field: "\"economy_config\".\"max\""},
-	Maxbet:               whereHelperint64{field: "\"economy_config\".\"maxbet\""},
-	Symbol:               whereHelperstring{field: "\"economy_config\".\"symbol\""},
-	Startbalance:         whereHelperint64{field: "\"economy_config\".\"startbalance\""},
-	Customworkresponses:  whereHelperbool{field: "\"economy_config\".\"customworkresponses\""},
-	Customcrimeresponses: whereHelperbool{field: "\"economy_config\".\"customcrimeresponses\""},
+	GuildID:                            whereHelperstring{field: "\"economy_config\".\"guild_id\""},
+	EconomyEnabled:                     whereHelperbool{field: "\"economy_config\".\"economy_enabled\""},
+	EconomySymbol:                      whereHelperstring{field: "\"economy_config\".\"economy_symbol\""},
+	EconomyStartBalance:                whereHelperint64{field: "\"economy_config\".\"economy_start_balance\""},
+	EconomyMinReturn:                   whereHelperint64{field: "\"economy_config\".\"economy_min_return\""},
+	EconomyMaxReturn:                   whereHelperint64{field: "\"economy_config\".\"economy_max_return\""},
+	EconomyMaxBet:                      whereHelperint64{field: "\"economy_config\".\"economy_max_bet\""},
+	EconomyCustomWorkResponsesEnabled:  whereHelperbool{field: "\"economy_config\".\"economy_custom_work_responses_enabled\""},
+	EconomyCustomWorkResponses:         whereHelpertypes_StringArray{field: "\"economy_config\".\"economy_custom_work_responses\""},
+	EconomyCustomCrimeResponsesEnabled: whereHelperbool{field: "\"economy_config\".\"economy_custom_crime_responses_enabled\""},
+	EconomyCustomCrimeResponses:        whereHelpertypes_StringArray{field: "\"economy_config\".\"economy_custom_crime_responses\""},
 }
 
 // EconomyConfigRels is where relationship names are stored.
 var EconomyConfigRels = struct {
-	GuildEconomyCustomResponse  string
 	GuildEconomyCooldowns       string
 	GuildEconomyCreateitems     string
 	GuildEconomyShops           string
 	GuildEconomyUserInventories string
 	GuildEconomyUsers           string
 }{
-	GuildEconomyCustomResponse:  "GuildEconomyCustomResponse",
 	GuildEconomyCooldowns:       "GuildEconomyCooldowns",
 	GuildEconomyCreateitems:     "GuildEconomyCreateitems",
 	GuildEconomyShops:           "GuildEconomyShops",
@@ -180,7 +221,6 @@ var EconomyConfigRels = struct {
 
 // economyConfigR is where relationships are stored.
 type economyConfigR struct {
-	GuildEconomyCustomResponse  *EconomyCustomResponse    `boil:"GuildEconomyCustomResponse" json:"GuildEconomyCustomResponse" toml:"GuildEconomyCustomResponse" yaml:"GuildEconomyCustomResponse"`
 	GuildEconomyCooldowns       EconomyCooldownSlice      `boil:"GuildEconomyCooldowns" json:"GuildEconomyCooldowns" toml:"GuildEconomyCooldowns" yaml:"GuildEconomyCooldowns"`
 	GuildEconomyCreateitems     EconomyCreateitemSlice    `boil:"GuildEconomyCreateitems" json:"GuildEconomyCreateitems" toml:"GuildEconomyCreateitems" yaml:"GuildEconomyCreateitems"`
 	GuildEconomyShops           EconomyShopSlice          `boil:"GuildEconomyShops" json:"GuildEconomyShops" toml:"GuildEconomyShops" yaml:"GuildEconomyShops"`
@@ -191,22 +231,6 @@ type economyConfigR struct {
 // NewStruct creates a new relationship struct
 func (*economyConfigR) NewStruct() *economyConfigR {
 	return &economyConfigR{}
-}
-
-func (o *EconomyConfig) GetGuildEconomyCustomResponse() *EconomyCustomResponse {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetGuildEconomyCustomResponse()
-}
-
-func (r *economyConfigR) GetGuildEconomyCustomResponse() *EconomyCustomResponse {
-	if r == nil {
-		return nil
-	}
-
-	return r.GuildEconomyCustomResponse
 }
 
 func (o *EconomyConfig) GetGuildEconomyCooldowns() EconomyCooldownSlice {
@@ -293,9 +317,9 @@ func (r *economyConfigR) GetGuildEconomyUsers() EconomyUserSlice {
 type economyConfigL struct{}
 
 var (
-	economyConfigAllColumns            = []string{"guild_id", "min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses"}
+	economyConfigAllColumns            = []string{"guild_id", "economy_enabled", "economy_symbol", "economy_start_balance", "economy_min_return", "economy_max_return", "economy_max_bet", "economy_custom_work_responses_enabled", "economy_custom_work_responses", "economy_custom_crime_responses_enabled", "economy_custom_crime_responses"}
 	economyConfigColumnsWithoutDefault = []string{"guild_id"}
-	economyConfigColumnsWithDefault    = []string{"min", "max", "maxbet", "symbol", "startbalance", "customworkresponses", "customcrimeresponses"}
+	economyConfigColumnsWithDefault    = []string{"economy_enabled", "economy_symbol", "economy_start_balance", "economy_min_return", "economy_max_return", "economy_max_bet", "economy_custom_work_responses_enabled", "economy_custom_work_responses", "economy_custom_crime_responses_enabled", "economy_custom_crime_responses"}
 	economyConfigPrimaryKeyColumns     = []string{"guild_id"}
 	economyConfigGeneratedColumns      = []string{}
 )
@@ -411,17 +435,6 @@ func (q economyConfigQuery) Exists(ctx context.Context, exec boil.ContextExecuto
 	return count > 0, nil
 }
 
-// GuildEconomyCustomResponse pointed to by the foreign key.
-func (o *EconomyConfig) GuildEconomyCustomResponse(mods ...qm.QueryMod) economyCustomResponseQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"guild_id\" = ?", o.GuildID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return EconomyCustomResponses(queryMods...)
-}
-
 // GuildEconomyCooldowns retrieves all the economy_cooldown's EconomyCooldowns with an executor via guild_id column.
 func (o *EconomyConfig) GuildEconomyCooldowns(mods ...qm.QueryMod) economyCooldownQuery {
 	var queryMods []qm.QueryMod
@@ -490,115 +503,6 @@ func (o *EconomyConfig) GuildEconomyUsers(mods ...qm.QueryMod) economyUserQuery 
 	)
 
 	return EconomyUsers(queryMods...)
-}
-
-// LoadGuildEconomyCustomResponse allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-1 relationship.
-func (economyConfigL) LoadGuildEconomyCustomResponse(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig interface{}, mods queries.Applicator) error {
-	var slice []*EconomyConfig
-	var object *EconomyConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeEconomyConfig.(*EconomyConfig)
-		if !ok {
-			object = new(EconomyConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
-			}
-		}
-	} else {
-		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &economyConfigR{}
-		}
-		args[object.GuildID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &economyConfigR{}
-			}
-
-			args[obj.GuildID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`economy_custom_responses`),
-		qm.WhereIn(`economy_custom_responses.guild_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load EconomyCustomResponse")
-	}
-
-	var resultSlice []*EconomyCustomResponse
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice EconomyCustomResponse")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for economy_custom_responses")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_custom_responses")
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.GuildEconomyCustomResponse = foreign
-		if foreign.R == nil {
-			foreign.R = &economyCustomResponseR{}
-		}
-		foreign.R.Guild = object
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.GuildID == foreign.GuildID {
-				local.R.GuildEconomyCustomResponse = foreign
-				if foreign.R == nil {
-					foreign.R = &economyCustomResponseR{}
-				}
-				foreign.R.Guild = local
-				break
-			}
-		}
-	}
-
-	return nil
 }
 
 // LoadGuildEconomyCooldowns allows an eager lookup of values, cached into the
@@ -1128,64 +1032,6 @@ func (economyConfigL) LoadGuildEconomyUsers(ctx context.Context, e boil.ContextE
 		}
 	}
 
-	return nil
-}
-
-// SetGuildEconomyCustomResponseG of the economyConfig to the related item.
-// Sets o.R.GuildEconomyCustomResponse to related.
-// Adds o to related.R.Guild.
-// Uses the global database handle.
-func (o *EconomyConfig) SetGuildEconomyCustomResponseG(ctx context.Context, insert bool, related *EconomyCustomResponse) error {
-	return o.SetGuildEconomyCustomResponse(ctx, boil.GetContextDB(), insert, related)
-}
-
-// SetGuildEconomyCustomResponse of the economyConfig to the related item.
-// Sets o.R.GuildEconomyCustomResponse to related.
-// Adds o to related.R.Guild.
-func (o *EconomyConfig) SetGuildEconomyCustomResponse(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EconomyCustomResponse) error {
-	var err error
-
-	if insert {
-		related.GuildID = o.GuildID
-
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	} else {
-		updateQuery := fmt.Sprintf(
-			"UPDATE \"economy_custom_responses\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
-			strmangle.WhereClause("\"", "\"", 2, economyCustomResponsePrimaryKeyColumns),
-		)
-		values := []interface{}{o.GuildID, related.GuildID}
-
-		if boil.IsDebug(ctx) {
-			writer := boil.DebugWriterFrom(ctx)
-			fmt.Fprintln(writer, updateQuery)
-			fmt.Fprintln(writer, values)
-		}
-		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-			return errors.Wrap(err, "failed to update foreign table")
-		}
-
-		related.GuildID = o.GuildID
-	}
-
-	if o.R == nil {
-		o.R = &economyConfigR{
-			GuildEconomyCustomResponse: related,
-		}
-	} else {
-		o.R.GuildEconomyCustomResponse = related
-	}
-
-	if related.R == nil {
-		related.R = &economyCustomResponseR{
-			Guild: o,
-		}
-	} else {
-		related.R.Guild = o
-	}
 	return nil
 }
 

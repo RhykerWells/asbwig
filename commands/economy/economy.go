@@ -126,7 +126,7 @@ func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
 	userEntry := models.EconomyUser{
 		GuildID: config.GuildID,
 		UserID:  m.User.ID,
-		Cash:    config.Startbalance,
+		Cash:    config.EconomyStartBalance,
 		Bank:    0,
 	}
 	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
