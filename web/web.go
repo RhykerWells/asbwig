@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/fs"
 	"net/http"
+	"path/filepath"
+	"sync"
 	"text/template"
 
 	"github.com/RhykerWells/asbwig/common"
@@ -17,8 +19,11 @@ var (
 	RootMultiplexer      *goji.Mux
 	DashboardMultiplexer *goji.Mux
 
-	HTMLTemplates fs.FS = frontend.HTMLTemplates
-	HTMLPages     fs.FS = frontend.HTMLPages
+	coreHTMLTemplates fs.FS = frontend.HTMLTemplates
+	coreHTMLPages     fs.FS = frontend.HTMLPages
+	additionalHTMLPages	[]fs.FS
+	tmplOnce sync.Once
+	tmpl *template.Template
 	StaticFiles   fs.FS = frontend.StaticFiles
 
 	URL        string = "https://" + common.ConfigASBWIGHost
@@ -36,23 +41,63 @@ func Run() {
 	runWebServer(multiplexer)
 }
 
+func AddHTMLFilesystem(fs fs.FS) {
+	additionalHTMLPages = append(additionalHTMLPages, fs)
+}
+
+func loadTemplates() (*template.Template, error) {
+	var tmplError error
+
+	tmplOnce.Do(func() {
+		// Set the initial template with the template functions
+		t := template.New("").Funcs(templateFunctions)
+
+		// Parse core templates
+		_, err := t.ParseFS(coreHTMLTemplates, "templates/*.html")
+		if err != nil {
+			tmplError = err
+			return
+		}
+
+		// Parse core pages
+		_, err = t.ParseFS(coreHTMLPages, "pages/*.html")
+		if err != nil {
+			tmplError = err
+			return
+		}
+
+		for _, fsys := range additionalHTMLPages {
+            files, err := fs.Glob(fsys, "*/*.html")
+            if err != nil {
+                tmplError = err
+                return
+            }
+
+            for _, file := range files {
+                data, err := fs.ReadFile(fsys, file)
+                if err != nil {
+                    tmplError = err
+                    return
+                }
+                if _, err := t.New(filepath.Base(file)).Parse(string(data)); err != nil {
+                    tmplError = err
+                    return
+                }
+            }
+        }
+        tmpl = t
+	})
+
+	return tmpl, tmplError
+}
+
 // RenderPage serves the given html page
 // It attaches the template function array and the template data
 func RenderPage(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Set the initial template with the template functions
-		tmpl := template.New("").Funcs(templateFunctions)
-
-		// Parse templates
-		_, err := tmpl.ParseFS(frontend.HTMLTemplates, "templates/*.html")
+		tmpl, err := loadTemplates()
 		if err != nil {
-			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
-			return
-		}
-		// Parse pages
-		_, err = tmpl.ParseFS(frontend.HTMLPages, "pages/*.html")
-		if err != nil {
-			http.Error(w, "Failed to parse pages", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -62,7 +107,7 @@ func RenderPage(filename string) http.HandlerFunc {
 		// Attempt to render the HTML templates and pages
 		w.Header().Set("Content-Type", "text/html")
 		if err := tmpl.ExecuteTemplate(w, filename, tmplData); err != nil {
-			http.Error(w, "Failed to render template", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
