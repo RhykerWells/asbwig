@@ -2,6 +2,7 @@ package moderation
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,7 +13,11 @@ import (
 	"goji.io/v3/pat"
 )
 
+//go:embed assets/*
+var PageHTML embed.FS
+
 func initWeb() {
+	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerModerationRoutes)
 }
 

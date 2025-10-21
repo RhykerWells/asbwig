@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"embed"
 	"net/http"
 
 	"github.com/RhykerWells/asbwig/web"
@@ -9,8 +10,12 @@ import (
 	"goji.io/v3/pat"
 )
 
+//go:embed assets/*
+var PageHTML embed.FS
+
 // initWeb adds the specified routes the list of web routes for the web package to initialise
 func initWeb() {
+	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerCoreRoute)
 }
 
