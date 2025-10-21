@@ -11,22 +11,22 @@ import (
 // Config defines the general struct to pass data to and from the dashboard template/context data
 type Config struct {
 	// General
-	GuildID	string
-	ModerationEnabled bool
-	ModerationTriggerDeletionEnabled bool
-	ModerationTriggerDeletionSeconds int64
+	GuildID                           string
+	ModerationEnabled                 bool
+	ModerationTriggerDeletionEnabled  bool
+	ModerationTriggerDeletionSeconds  int64
 	ModerationResponseDeletionEnabled bool
 	ModerationResponseDeletionSeconds int64
-	ModerationLogChannel string
+	ModerationLogChannel              string
 
 	// Warn
 	WarnRequiredRoles []string
 
 	// Mutes/Unmute
 	MuteRequiredRoles []string
-	MuteRole string
-	MuteManageRole bool
-	MuteUpdateRoles []string
+	MuteRole          string
+	MuteManageRole    bool
+	MuteUpdateRoles   []string
 
 	// Kick
 	KickRequiredRoles []string
@@ -41,22 +41,22 @@ type Config struct {
 func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 	return &models.ModerationConfig{
 		// General
-		GuildID: c.GuildID,
-		ModerationEnabled: c.ModerationEnabled,
-		ModerationTriggerDeletionEnabled: c.ModerationTriggerDeletionEnabled,
-		ModerationTriggerDeletionSeconds: c.ModerationTriggerDeletionSeconds,
+		GuildID:                           c.GuildID,
+		ModerationEnabled:                 c.ModerationEnabled,
+		ModerationTriggerDeletionEnabled:  c.ModerationTriggerDeletionEnabled,
+		ModerationTriggerDeletionSeconds:  c.ModerationTriggerDeletionSeconds,
 		ModerationResponseDeletionEnabled: c.ModerationResponseDeletionEnabled,
 		ModerationResponseDeletionSeconds: c.ModerationResponseDeletionSeconds,
-		ModerationLogChannel:  c.ModerationLogChannel,
+		ModerationLogChannel:              c.ModerationLogChannel,
 
 		/* Warn */
 		WarnRequiredRoles: c.WarnRequiredRoles,
 
 		/* Mute/Unmute */
 		MuteRequiredRoles: c.MuteRequiredRoles,
-		MuteRole: c.MuteRole,
-		MuteManageRole: c.MuteManageRole,
-		MuteUpdateRoles: c.MuteUpdateRoles,
+		MuteRole:          c.MuteRole,
+		MuteManageRole:    c.MuteManageRole,
+		MuteUpdateRoles:   c.MuteUpdateRoles,
 
 		/* Kick */
 		KickRequiredRoles: c.KickRequiredRoles,
@@ -68,13 +68,13 @@ func (c *Config) ConfigToSQLModel() *models.ModerationConfig {
 	}
 }
 
-// ConfigFromModel converts the guild config SQLBoiler model to a Config struct 
+// ConfigFromModel converts the guild config SQLBoiler model to a Config struct
 func ConfigFromModel(m *models.ModerationConfig) *Config {
 	return &Config{
-		GuildID: m.GuildID,
-		ModerationEnabled: m.ModerationEnabled,
-		ModerationTriggerDeletionEnabled: m.ModerationTriggerDeletionEnabled,
-		ModerationTriggerDeletionSeconds: m.ModerationTriggerDeletionSeconds,
+		GuildID:                           m.GuildID,
+		ModerationEnabled:                 m.ModerationEnabled,
+		ModerationTriggerDeletionEnabled:  m.ModerationTriggerDeletionEnabled,
+		ModerationTriggerDeletionSeconds:  m.ModerationTriggerDeletionSeconds,
 		ModerationResponseDeletionEnabled: m.ModerationResponseDeletionEnabled,
 		ModerationResponseDeletionSeconds: m.ModerationResponseDeletionSeconds,
 
@@ -85,9 +85,9 @@ func ConfigFromModel(m *models.ModerationConfig) *Config {
 
 		/* Mute */
 		MuteRequiredRoles: m.MuteRequiredRoles,
-		MuteRole: m.MuteRole,
-		MuteManageRole: m.MuteManageRole,
-		MuteUpdateRoles: m.MuteUpdateRoles,
+		MuteRole:          m.MuteRole,
+		MuteManageRole:    m.MuteManageRole,
+		MuteUpdateRoles:   m.MuteUpdateRoles,
 
 		/* Kick */
 		KickRequiredRoles: m.KickRequiredRoles,

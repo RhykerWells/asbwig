@@ -114,7 +114,6 @@ func help(command string, channelID string) {
 	functions.SendMessage(channelID, message)
 }
 
-
 // getArgs builds the formatted string of arguments for a given command.
 // Required arguments are enclosed in <angle brackets>, and optional arguments
 // are enclosed in [square brackets].
@@ -128,7 +127,6 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 	}
 	return
 }
-
 
 // argHelp returns a formatted string for a single argument, showing both its
 // name and type.

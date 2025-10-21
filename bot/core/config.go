@@ -16,7 +16,7 @@ type Config struct {
 	GuildPrefix string
 }
 
-// ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model 
+// ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
 func (c *Config) ConfigToSQLModel() *models.CoreConfig {
 	return &models.CoreConfig{
 		GuildID:     c.GuildID,
@@ -24,7 +24,7 @@ func (c *Config) ConfigToSQLModel() *models.CoreConfig {
 	}
 }
 
-// ConfigFromModel converts the guild config SQLBoiler model to a Config struct 
+// ConfigFromModel converts the guild config SQLBoiler model to a Config struct
 func ConfigFromModel(m *models.CoreConfig) *Config {
 	return &Config{
 		GuildID:     m.GuildID,

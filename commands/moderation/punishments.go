@@ -9,12 +9,12 @@ import (
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
-	"github.com/bwmarrin/discordgo"
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	errNotMuted = errors.New("user not muted")
+	errNotMuted  = errors.New("user not muted")
 	errNotBanned = errors.New("user not banned")
 	errNotMember = errors.New("user not a member")
 )
@@ -48,9 +48,9 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 
 	unmuteTime := time.Now().Add(duration)
 	muteEntry := models.ModerationMute{
-		GuildID: config.GuildID,
-		UserID: targetID,
-		Roles: rolesRemoved,
+		GuildID:  config.GuildID,
+		UserID:   targetID,
+		Roles:    rolesRemoved,
 		UnmuteAt: unmuteTime,
 	}
 	muteEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationMuteColumns.GuildID, models.ModerationMuteColumns.UserID}, boil.Whitelist(models.ModerationMuteColumns.UnmuteAt), boil.Infer())
@@ -160,7 +160,7 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 	unbanTime := time.Now().Add(duration)
 	banEntry := models.ModerationBan{
 		GuildID: config.GuildID,
-		UserID: target.User.ID,
+		UserID:  target.User.ID,
 		UnbanAt: unbanTime,
 	}
 	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
@@ -177,7 +177,6 @@ func unbanUser(config *Config, authorID, targetID string) error {
 	if err != nil {
 		return errNotBanned
 	}
-
 
 	targetUser, _ := functions.GetUser(targetID)
 	targetMember := &discordgo.Member{

@@ -19,12 +19,12 @@ var (
 	RootMultiplexer      *goji.Mux
 	DashboardMultiplexer *goji.Mux
 
-	coreHTMLTemplates fs.FS = frontend.HTMLTemplates
-	coreHTMLPages     fs.FS = frontend.HTMLPages
-	additionalHTMLPages	[]fs.FS
-	tmplOnce sync.Once
-	tmpl *template.Template
-	StaticFiles   fs.FS = frontend.StaticFiles
+	coreHTMLTemplates   fs.FS = frontend.HTMLTemplates
+	coreHTMLPages       fs.FS = frontend.HTMLPages
+	additionalHTMLPages []fs.FS
+	tmplOnce            sync.Once
+	tmpl                *template.Template
+	StaticFiles         fs.FS = frontend.StaticFiles
 
 	URL        string = "https://" + common.ConfigASBWIGHost
 	TermsURL   string = common.ConfigTermsURLOverride
@@ -67,25 +67,25 @@ func loadTemplates() (*template.Template, error) {
 		}
 
 		for _, fsys := range additionalHTMLPages {
-            files, err := fs.Glob(fsys, "*/*.html")
-            if err != nil {
-                tmplError = err
-                return
-            }
+			files, err := fs.Glob(fsys, "*/*.html")
+			if err != nil {
+				tmplError = err
+				return
+			}
 
-            for _, file := range files {
-                data, err := fs.ReadFile(fsys, file)
-                if err != nil {
-                    tmplError = err
-                    return
-                }
-                if _, err := t.New(filepath.Base(file)).Parse(string(data)); err != nil {
-                    tmplError = err
-                    return
-                }
-            }
-        }
-        tmpl = t
+			for _, file := range files {
+				data, err := fs.ReadFile(fsys, file)
+				if err != nil {
+					tmplError = err
+					return
+				}
+				if _, err := t.New(filepath.Base(file)).Parse(string(data)); err != nil {
+					tmplError = err
+					return
+				}
+			}
+		}
+		tmpl = t
 	})
 
 	return tmpl, tmplError
