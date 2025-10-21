@@ -18,7 +18,7 @@ type Config struct {
 	// Money making management
 	EconomyMinReturn                  int64
 	EconomyMaxReturn                  int64
-	EconomyMaxbet               int64
+	EconomyMaxBet               int64
 
 	// Custom responses
 	EconomyCustomWorkResponsesEnabled  bool
@@ -39,7 +39,7 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 		// Money making management
 		EconomyMinReturn:               c.EconomyMinReturn,
 		EconomyMaxReturn:         c.EconomyMaxReturn,
-		EconomyMaxBet:  c.EconomyMaxbet,
+		EconomyMaxBet:  c.EconomyMaxBet,
 
 		// Custom responses
 		EconomyCustomWorkResponsesEnabled: c.EconomyCustomWorkResponsesEnabled,
@@ -61,7 +61,7 @@ func ConfigFromModel(m *models.EconomyConfig) *Config {
 		// Money making management
 		EconomyMinReturn:               m.EconomyMinReturn,
 		EconomyMaxReturn:         m.EconomyMaxReturn,
-		EconomyMaxbet: m.EconomyMaxBet,
+		EconomyMaxBet: m.EconomyMaxBet,
 
 		// Custom responses
 		EconomyCustomWorkResponsesEnabled: m.EconomyCustomWorkResponsesEnabled,
