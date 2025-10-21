@@ -46,8 +46,8 @@ var Command = &dcommand.AsbwigCommand{
 		if amount == "all" {
 			bet = cash
 		} else if amount == "max" {
-			if guild.Maxbet > 0 {
-				bet = guild.Maxbet
+			if guild.EconomyMaxBet > 0 {
+				bet = guild.EconomyMaxBet
 			} else {
 				bet = cash
 			}
@@ -55,12 +55,12 @@ var Command = &dcommand.AsbwigCommand{
 			bet = functions.ToInt64(amount)
 		}
 		if bet > cash {
-			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if guild.Maxbet > 0 && bet > guild.Maxbet {
-			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.Symbol, humanize.Comma(guild.Maxbet))
+		if guild.EconomyMaxBet > 0 && bet > guild.EconomyMaxBet {
+			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.EconomySymbol, humanize.Comma(guild.EconomyMaxBet))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -80,7 +80,7 @@ var Command = &dcommand.AsbwigCommand{
 			condition = "lost"
 			embed.Color = common.ErrorRed
 		}
-		embed.Description = fmt.Sprintf("The ball landed on %d, and you %s %s%s", roll, condition, guild.Symbol, humanize.Comma(bet))
+		embed.Description = fmt.Sprintf("The ball landed on %d, and you %s %s%s", roll, condition, guild.EconomySymbol, humanize.Comma(bet))
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
 		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 		cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "rollnumber", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}

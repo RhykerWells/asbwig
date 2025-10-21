@@ -32,16 +32,16 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
-		workResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("work")).All(context.Background(), common.PQ)
+		workResponses := guild.EconomyCustomWorkResponses
 		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		payout := rand.Int63n(guild.Max - guild.Min)
-		embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guild.Symbol, humanize.Comma(payout))
-		if guild.Customworkresponses && len(workResponses) > 0 {
-			embed.Description = strings.ReplaceAll(workResponses[rand.Intn(len(workResponses))].GuildID, "(amount)", fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(payout)))
+		payout := rand.Int63n(guild.EconomyMaxReturn - guild.EconomyMinReturn)
+		embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guild.EconomySymbol, humanize.Comma(payout))
+		if guild.EconomyCustomWorkResponsesEnabled && len(workResponses) > 0 {
+			embed.Description = strings.ReplaceAll(workResponses[rand.Intn(len(workResponses))], "(amount)", fmt.Sprintf("%s%s", guild.EconomySymbol, humanize.Comma(payout)))
 		}
 		embed.Color = common.SuccessGreen
 		cash = cash + functions.ToInt64(payout)

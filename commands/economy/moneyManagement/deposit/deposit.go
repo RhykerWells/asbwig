@@ -40,12 +40,12 @@ var Command = &dcommand.AsbwigCommand{
 			amount = functions.ToInt64(value)
 		}
 		if amount > cash {
-			embed.Description = fmt.Sprintf("You're unable to deposit more than you have in cash\nYou currently have %s%s", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You're unable to deposit more than you have in cash\nYou currently have %s%s", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
 		if cash < 0 {
-			embed.Description = fmt.Sprintf("You're unable to deposit your overdraft\nYou are currently %s%s in arrears", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You're unable to deposit your overdraft\nYou are currently %s%s in arrears", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -53,7 +53,7 @@ var Command = &dcommand.AsbwigCommand{
 		bank = bank + amount
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Bank: bank}
 		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
-		embed.Description = fmt.Sprintf("You deposited %s%s into your bank\nThere is now %s%s in your bank", guild.Symbol, humanize.Comma(amount), guild.Symbol, humanize.Comma(bank))
+		embed.Description = fmt.Sprintf("You deposited %s%s into your bank\nThere is now %s%s in your bank", guild.EconomySymbol, humanize.Comma(amount), guild.EconomySymbol, humanize.Comma(bank))
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},

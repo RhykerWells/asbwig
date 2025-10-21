@@ -54,7 +54,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		} else {
 			drank = fmt.Sprintf("  %d.", rank) // Default to number if no medal
 		}
-		display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.Symbol, cash)
+		display += fmt.Sprintf("**%v** %s **•** %s%s\n", drank, user.Username, guildSettings.EconomySymbol, cash)
 	}
 	embed[0].Description = display
 	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}

@@ -51,7 +51,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 		if item.Role != "0" {
 			role = "<@&" + item.Role + ">"
 		}
-		itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s%s\nRole given: %s", item.Description, guild.Symbol, humanize.Comma(item.Quantity), role), Inline: false}
+		itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s%s\nRole given: %s", item.Description, guild.EconomySymbol, humanize.Comma(item.Quantity), role), Inline: false}
 		fields = append(fields, itemField)
 	}
 	embed[0].Description = display

@@ -32,22 +32,22 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		guild, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
-		crimeResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("crime")).All(context.Background(), common.PQ)
+		crimeResponses := guild.EconomyCustomCrimeResponses
 		economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(data.Author.ID)).One(context.Background(), common.PQ)
 		var cash int64 = 0
 		if err == nil {
 			cash = economyUser.Cash
 		}
-		amount := rand.Int63n(guild.Max - guild.Min)
+		amount := rand.Int63n(guild.EconomyMaxReturn - guild.EconomyMinReturn)
 		if rand.Int63n(2) == 1 {
-			embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guild.Symbol, humanize.Comma(amount))
-			if guild.Customcrimeresponses && len(crimeResponses) > 0 {
-				embed.Description = strings.ReplaceAll(crimeResponses[rand.Intn(len(crimeResponses))].Response, "(amount)", fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(amount)))
+			embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guild.EconomySymbol, humanize.Comma(amount))
+			if guild.EconomyCustomCrimeResponsesEnabled && len(crimeResponses) > 0 {
+				embed.Description = strings.ReplaceAll(crimeResponses[rand.Intn(len(crimeResponses))], "(amount)", fmt.Sprintf("%s%s", guild.EconomySymbol, humanize.Comma(amount)))
 			}
 			embed.Color = common.SuccessGreen
 			cash = cash + amount
 		} else {
-			embed.Description = fmt.Sprintf("You broke the law and got caught! You were arrested and lost %s%s", guild.Symbol, humanize.Comma(amount))
+			embed.Description = fmt.Sprintf("You broke the law and got caught! You were arrested and lost %s%s", guild.EconomySymbol, humanize.Comma(amount))
 			cash = cash - amount
 		}
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}

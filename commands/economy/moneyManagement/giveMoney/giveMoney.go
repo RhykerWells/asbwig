@@ -36,11 +36,11 @@ var Command = &dcommand.AsbwigCommand{
 		amount := data.Args[1]
 		conversionAmount := functions.ToInt64(amount)
 		if conversionAmount > cash {
-			embed.Description = fmt.Sprintf("You don't have enough cash to give. You have %s%s", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You don't have enough cash to give. You have %s%s", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		embed.Description = fmt.Sprintf("You gave %s%s to %s!", guild.Symbol, humanize.Comma(functions.ToInt64(amount)), receiving.Mention())
+		embed.Description = fmt.Sprintf("You gave %s%s to %s!", guild.EconomySymbol, humanize.Comma(functions.ToInt64(amount)), receiving.Mention())
 		embed.Color = common.SuccessGreen
 		cash = cash - conversionAmount
 		receivingUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(data.GuildID), models.EconomyUserWhere.UserID.EQ(receiving.User.ID)).One(context.Background(), common.PQ)

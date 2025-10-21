@@ -77,7 +77,7 @@ var Command = &dcommand.AsbwigCommand{
 			inventoryItem.Quantity = newQuantity
 			inventoryItem.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist(models.EconomyUserInventoryColumns.Quantity), boil.Infer())
 		}
-		embed.Description = fmt.Sprintf("Added %s to the shop. Selling for %s%s!", name, guildConfig.Symbol, humanize.Comma(price))
+		embed.Description = fmt.Sprintf("Added %s to the shop. Selling for %s%s!", name, guildConfig.EconomySymbol, humanize.Comma(price))
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 	},

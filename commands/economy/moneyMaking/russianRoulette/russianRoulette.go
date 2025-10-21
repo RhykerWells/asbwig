@@ -75,19 +75,19 @@ var Command = &dcommand.AsbwigCommand{
 		if option == "all" {
 			bet = cash
 		} else if option == "max" {
-			if guild.Maxbet > 0 {
-				bet = guild.Maxbet
+			if guild.EconomyMaxBet > 0 {
+				bet = guild.EconomyMaxBet
 			} else {
 				bet = cash
 			}
 		}
 		if bet > cash {
-			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if guild.Maxbet > 0 && bet > guild.Maxbet {
-			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.Symbol, humanize.Comma(guild.Maxbet))
+		if guild.EconomyMaxBet > 0 && bet > guild.EconomyMaxBet {
+			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.EconomySymbol, humanize.Comma(guild.EconomyMaxBet))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -119,7 +119,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		if bet != game.Bet {
-			embed.Description = fmt.Sprintf("All players must bet the same amount. This game's bet is %s%s", guild.Symbol, humanize.Comma(game.Bet))
+			embed.Description = fmt.Sprintf("All players must bet the same amount. This game's bet is %s%s", guild.EconomySymbol, humanize.Comma(game.Bet))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
@@ -139,7 +139,7 @@ var Command = &dcommand.AsbwigCommand{
 			startGame(data.GuildID, data.ChannelID, data.Author.ID)
 			return
 		}
-		embed.Description = fmt.Sprintf("You've joined this game of russian roulette with a bet of %s%s (%d/6)", guild.Symbol, humanize.Comma(bet), len(game.PlayerIDs))
+		embed.Description = fmt.Sprintf("You've joined this game of russian roulette with a bet of %s%s (%d/6)", guild.EconomySymbol, humanize.Comma(bet), len(game.PlayerIDs))
 		embed.Color = common.SuccessGreen
 		cash = cash - bet
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
@@ -193,7 +193,7 @@ func startGame(guildID, channelID, ownerID string) {
 		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 	}
 	embed.Title = "Russian roulette winners"
-	embed.Description = fmt.Sprintf("Payout is %s%s per winner", guild.Symbol, humanize.Comma(payout))
+	embed.Description = fmt.Sprintf("Payout is %s%s per winner", guild.EconomySymbol, humanize.Comma(payout))
 	embed.Fields = fields
 	embed.Color = common.SuccessGreen
 	delete(activeGames, guildID)

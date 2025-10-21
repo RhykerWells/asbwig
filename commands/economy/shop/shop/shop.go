@@ -55,7 +55,7 @@ var Command = &dcommand.AsbwigCommand{
 				quantity = humanize.Comma(item.Quantity)
 			}
 			price := humanize.Comma(item.Price)
-			fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.Symbol, price, item.Name, quantity)
+			fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.EconomySymbol, price, item.Name, quantity)
 			fieldDesc := item.Description
 			if item.Soldby != "0" {
 				fieldDesc = fmt.Sprintf("%s\nSold by: <@%s>", item.Description, item.Soldby)

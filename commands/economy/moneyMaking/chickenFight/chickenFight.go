@@ -45,8 +45,8 @@ var Command = &dcommand.AsbwigCommand{
 		if amount == "all" {
 			bet = cash
 		} else if amount == "max" {
-			if guild.Maxbet > 0 {
-				bet = guild.Maxbet
+			if guild.EconomyMaxBet > 0 {
+				bet = guild.EconomyMaxBet
 			} else {
 				bet = cash
 			}
@@ -54,12 +54,12 @@ var Command = &dcommand.AsbwigCommand{
 			bet = functions.ToInt64(amount)
 		}
 		if bet > cash {
-			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.Symbol, humanize.Comma(cash))
+			embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guild.EconomySymbol, humanize.Comma(cash))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if guild.Maxbet > 0 && bet > guild.Maxbet {
-			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.Symbol, humanize.Comma(guild.Maxbet))
+		if guild.EconomyMaxBet > 0 && bet > guild.EconomyMaxBet {
+			embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guild.EconomySymbol, humanize.Comma(guild.EconomyMaxBet))
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}

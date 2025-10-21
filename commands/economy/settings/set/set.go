@@ -45,7 +45,7 @@ func settings(data *dcommand.Data) {
 	var settings models.EconomyConfig
 	if setting == "default" {
 		settings.GuildID = data.GuildID
-		settings.Upsert(context.Background(), common.PQ, true, []string{models.EconomyConfigColumns.GuildID}, boil.Whitelist(models.EconomyConfigColumns.Maxbet, models.EconomyConfigColumns.Symbol, models.EconomyConfigColumns.Startbalance), boil.Infer())
+		settings.Upsert(context.Background(), common.PQ, true, []string{models.EconomyConfigColumns.GuildID}, boil.Whitelist(models.EconomyConfigColumns.EconomyMaxBet, models.EconomyConfigColumns.EconomySymbol, models.EconomyConfigColumns.EconomyStartBalance), boil.Infer())
 		embed.Description = "Economy settings have been reset to default values"
 		embed.Color = common.SuccessGreen
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
@@ -75,12 +75,12 @@ func settings(data *dcommand.Data) {
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		if setting == "max" && nvalue <= guild.Min {
-			embed.Description = fmt.Sprintf("You can't set `max` to a value under `min`.\n`min` is currently set to %s%d", guild.Symbol, guild.Min)
+		if setting == "max" && nvalue <= guild.EconomyMinReturn {
+			embed.Description = fmt.Sprintf("You can't set `max` to a value under `min`.\n`min` is currently set to %s%d", guild.EconomySymbol, guild.EconomyMinReturn)
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return
 		}
-		displayvalue := fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(nvalue))
+		displayvalue := fmt.Sprintf("%s%s", guild.EconomySymbol, humanize.Comma(nvalue))
 		if nvalue == 0 {
 			displayvalue = "Disabled"
 		}

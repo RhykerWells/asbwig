@@ -25,33 +25,26 @@ func viewsettings(data *dcommand.Data) {
 	guild, _ := common.Session.Guild(data.GuildID)
 	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " settings", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.SuccessGreen}
 	guildConfig, _ := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(data.GuildID)).One(context.Background(), common.PQ)
-	customWorkResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("work")).All(context.Background(), common.PQ)
-	customCrimeResponses, _ := models.EconomyCustomResponses(models.EconomyCustomResponseWhere.GuildID.EQ(data.GuildID), models.EconomyCustomResponseWhere.Type.EQ("crime")).All(context.Background(), common.PQ)
+
+	var workResponsesEnabled, crimeResponsesEnabled bool = guildConfig.EconomyCustomWorkResponsesEnabled, guildConfig.EconomyCustomCrimeResponsesEnabled
+	var workResponsesNum, crimeResponsesNum int = len(guildConfig.EconomyCustomWorkResponses), len(guildConfig.EconomyCustomCrimeResponses)
+	
 	maxBet := ""
-	symbol := guildConfig.Symbol
+	symbol := guildConfig.EconomySymbol
 	startbalance := ""
-	if guildConfig.Maxbet == 0 {
+	if guildConfig.EconomyMaxBet == 0 {
 		maxBet = "Disabled"
 	} else {
-		maxBet = fmt.Sprint(symbol, humanize.Comma(guildConfig.Maxbet))
+		maxBet = fmt.Sprint(symbol, humanize.Comma(guildConfig.EconomyMaxBet))
 	}
-	if guildConfig.Startbalance == 0 {
+	if guildConfig.EconomyStartBalance == 0 {
 		startbalance = "Disabled"
 	} else {
-		startbalance = fmt.Sprint(symbol, humanize.Comma(guildConfig.Startbalance))
+		startbalance = fmt.Sprint(symbol, humanize.Comma(guildConfig.EconomyStartBalance))
 	}
-	var workResponsesEnabled, crimeResponsesEnabled string = "Disabled", "Disabled"
-	var workResponsesNum, crimeResponsesNum int = 0, 0
-	if len(customWorkResponses) > 0 {
-		workResponsesEnabled = "Enabled"
-		workResponsesNum = len(customWorkResponses)
-	}
-	if len(customCrimeResponses) > 0 {
-		crimeResponsesEnabled = "Enabled"
-		crimeResponsesNum = len(customCrimeResponses)
-	}
-	min := fmt.Sprint(symbol, humanize.Comma(guildConfig.Min))
-	max := fmt.Sprint(symbol, humanize.Comma(guildConfig.Max))
+
+	min := fmt.Sprint(symbol, humanize.Comma(guildConfig.EconomyMinReturn))
+	max := fmt.Sprint(symbol, humanize.Comma(guildConfig.EconomyMaxReturn))
 	embed.Description = fmt.Sprintf("min: `%s`\nmax: `%s`\nmaxBet: `%s`\nSymbol: `%s`\nstartBalance: `%s`\nWork responses: `%s` (%d)\nCrime responses: `%s` (%d)", min, max, maxBet, symbol, startbalance, workResponsesEnabled, workResponsesNum, crimeResponsesEnabled, crimeResponsesNum)
 	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 }

@@ -50,7 +50,7 @@ func Pagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 			quantity = humanize.Comma(item.Quantity)
 		}
 		price := humanize.Comma(item.Price)
-		fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.Symbol, price, item.Name, quantity)
+		fieldName := fmt.Sprintf("%s%s - %s - %s", guildSettings.EconomySymbol, price, item.Name, quantity)
 		itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: item.Description, Inline: false}
 		fields = append(fields, itemField)
 	}

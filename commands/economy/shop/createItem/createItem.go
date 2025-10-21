@@ -122,7 +122,7 @@ func handleMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		createItem.Price = null.Int64From(functions.ToInt64(price))
 		createItem.Update(context.Background(), common.PQ, boil.Whitelist(models.EconomyCreateitemColumns.Price))
-		priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.Symbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
+		priceField := &discordgo.MessageEmbedField{Name: "price", Value: fmt.Sprintf("%s%s", guild.EconomySymbol, humanize.Comma(functions.ToInt64(price))), Inline: true}
 		embed.Fields = append(embed.Fields, priceField)
 		functions.EditMessage(m.ChannelID, createItem.MSGID, &discordgo.MessageSend{Content: "Please enter a description for this item (under 200 chars)", Embed: embed})
 		return

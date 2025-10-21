@@ -68,7 +68,7 @@ var Command = &dcommand.AsbwigCommand{
 			return
 		}
 		payout := rand.Int63n(victimCash) + 1
-		embed.Description = fmt.Sprintf("You stole %s%s from %s", guild.Symbol, humanize.Comma(payout), member.Mention())
+		embed.Description = fmt.Sprintf("You stole %s%s from %s", guild.EconomySymbol, humanize.Comma(payout), member.Mention())
 		cash = cash + payout
 		victimCash = victimCash - payout
 		userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}

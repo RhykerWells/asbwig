@@ -125,7 +125,7 @@ var Command = &dcommand.AsbwigCommand{
 			}
 		}
 		embed.Color = common.SuccessGreen
-		embed.Description = fmt.Sprintf("You bought %s of %s for %s%s", humanize.Comma(buyQuantity), name, guildConfig.Symbol, humanize.Comma(item.Price*buyQuantity))
+		embed.Description = fmt.Sprintf("You bought %s of %s for %s%s", humanize.Comma(buyQuantity), name, guildConfig.EconomySymbol, humanize.Comma(item.Price*buyQuantity))
 		userInventory := models.EconomyUserInventory{GuildID: data.GuildID, UserID: data.Author.ID, Name: name, Description: item.Description, Quantity: newQuantity, Role: item.Role, Reply: item.Reply}
 		userInventory.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist(models.EconomyUserInventoryColumns.Quantity), boil.Infer())
 		cash = cash - (item.Price * buyQuantity)
