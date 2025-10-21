@@ -13,18 +13,18 @@ import (
 //go:generate sqlboiler --no-hooks psql
 
 // ModerationSetup runs the following:
-//  - The schema initialiser
-//  - Registration of the guild join/leave functions
-//  - Initialises the web plugin
-//  - Initialises any other required middlewares
-//  - Registration of the moderation commands & their pagination
+//   - The schema initialiser
+//   - Registration of the guild join/leave functions
+//   - Initialises the web plugin
+//   - Initialises any other required middlewares
+//   - Registration of the moderation commands & their pagination
 func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Moderation", GuildModerationSchema...)
 
-	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate) {
+	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddModerationConfig,
 	})
-	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete) {
+	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete){
 		guildDeleteModerationConfig,
 	})
 

@@ -78,7 +78,7 @@ func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logA
 	return embed
 }
 
-// genjerateLogLink returns the log link of the case within discord 
+// generateLogLink returns the log link of the case within discord
 func generateLogLink(guildID, channelID, messageID string) string {
 	return fmt.Sprintf("https://discord.com/channels/%s/%s/%s", guildID, channelID, messageID)
 }

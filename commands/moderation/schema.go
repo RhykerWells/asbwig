@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS moderation_config (
 
 	last_case_id BIGINT DEFAULT 0 NOT NULL
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS moderation_mutes (
     guild_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS moderation_mutes (
     CONSTRAINT fk_moderation_config_roles_guild FOREIGN KEY (guild_id)
         REFERENCES moderation_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS moderation_bans (
     guild_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS moderation_bans (
     CONSTRAINT fk_moderation_config_roles_guild FOREIGN KEY (guild_id)
         REFERENCES moderation_config (guild_id) ON DELETE CASCADE
 );
-`,`
+`, `
 CREATE TABLE IF NOT EXISTS moderation_cases (
 	case_id BIGINT NOT NULL,
 	guild_id TEXT NOT NULL,

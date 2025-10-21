@@ -49,7 +49,7 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 	}
 }
 
-// ConfigFromModel converts the guild config SQLBoiler model to a Config struct 
+// ConfigFromModel converts the guild config SQLBoiler model to a Config struct
 func ConfigFromModel(m *models.EconomyConfig) *Config {
 	return &Config{
 		// General

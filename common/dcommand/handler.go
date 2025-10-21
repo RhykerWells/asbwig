@@ -202,7 +202,7 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 	return nil, false
 }
 
-// errorEmbed returns a populated embed object to denote an error in the command execution 
+// errorEmbed returns a populated embed object to denote an error in the command execution
 func errorEmbed(cmd string, data *Data, description string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{

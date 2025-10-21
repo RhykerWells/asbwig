@@ -41,7 +41,7 @@ func IsGuildBanned(guildID string) bool {
 	return exists
 }
 
-func HasPerms(guildID, channelID, userID string, perm int64) (bool) {
+func HasPerms(guildID, channelID, userID string, perm int64) bool {
 	perms, err := common.Session.State.UserChannelPermissions(userID, channelID)
 	if err != nil {
 		return false

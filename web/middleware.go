@@ -22,6 +22,7 @@ import (
 var sessionStore = cache.New(24*time.Hour*30, 1*time.Hour)
 
 type CtxKey int
+
 const (
 	CtxKeyTmplData CtxKey = iota
 )
@@ -73,16 +74,16 @@ func setUserSession(w http.ResponseWriter, user *discordgo.User) {
 		Name:    "asbwig_userinfo",
 		Value:   sessionID,
 		Path:    "/",
-		Expires: time.Now().Add(24*time.Hour*30),
+		Expires: time.Now().Add(24 * time.Hour * 30),
 	})
 }
 
 // getUserSession retrieves the user data from the user session cookie
 func getUserSession(sessionID string) (*discordgo.User, bool) {
-    if data, found := sessionStore.Get(sessionID); found {
-        return data.(*discordgo.User), true
-    }
-    return nil, false
+	if data, found := sessionStore.Get(sessionID); found {
+		return data.(*discordgo.User), true
+	}
+	return nil, false
 }
 
 // checkUserCookie checks the stored browser cookie and returns the users information or an error
