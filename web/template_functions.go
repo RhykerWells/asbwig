@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,8 +14,13 @@ import (
 
 var (
 	templateFunctions = map[string]interface{}{
-		"dict":  dict,
+		// Math
+		"add": func(a, b int) int { return a + b },
+		// Misc
 		"lower": lower,
+		// Data types
+		"dict":  dict,
+		"stringDict": stringDict,
 		// Forms content
 		"textInput":            textInput,
 		"toggleSwitch":         toggleSwitch,
@@ -34,17 +40,40 @@ func dict(pairs ...interface{}) map[int]interface{} {
 	return result
 }
 
+func stringDict(pairs ...interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for i := 0; i < len(pairs); i += 2 {
+		key, _ := pairs[i].(string)
+		result[key] = pairs[i+1]
+	}
+	return result
+}
+
 func lower(str string) string {
 	return strings.ToLower(str)
 }
 
-// textInput generates a HTML object for the custom input.
-// currentInput: the current input of the input
-// uniqueID: string for the input ID (used to retrieve and store changed data)
-func textInput(currentInput, uniqueID string) template.HTML {
+// textInput generates a HTML element for a text input field.
+//
+// Parameters:
+//	- currentInput: the current input of the input
+// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+// 	- opts: An optional key/value map of additional parameters such as label settings.
+// 			See inputLabel for supported keys
+func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
+
+	var leftLable, rightLabel string
+	if len(opts) > 0 {
+		leftLable, rightLabel = inputLabel(opts[0])
+	}
+
 	menu.WriteString(`<div class="input-group mb-3">`)
-	menu.WriteString(`<input type="text" class="textInput form-control text-light" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `">`)
+
+	menu.WriteString(leftLable)
+	menu.WriteString(`<input type="text" class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `">`)
+	menu.WriteString(rightLabel)
+
 	menu.WriteString("</div>")
 
 	return template.HTML(menu.String())
@@ -69,16 +98,33 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 	return template.HTML(menu.String())
 }
 
-// numberSelection generates HTML options for a number picker
-// min: lowest number possible
-// max: highest number possible
-// currentNumber: the current number
-// uniqueID: string for the hidden input ID (used to retrieve and store changed data)
-func numberSelection(min int64, max int64, currentNumber int64, uniqueID string) template.HTML {
+// numberSelection generates a HTML element for a number input field.
+//
+// Parameters:
+//	- min: lowest number possible
+// 	- max: highest number possible
+// 	- currentNumber: the current number
+// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+// 	- opts: An optional key/value map of additional parameters such as label settings.
+// 			See inputLabel for supported keys
+func numberSelection(min, max, currentNumber int64, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 	menu.WriteString(`<div class="input-group mb-3">`)
-	menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10) + `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10) + `">`)
-	menu.WriteString(`<span class="input-group-text text-light" style="background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)">seconds</span>`)
+
+	var leftLable, rightLabel string
+	if len(opts) > 0 {
+		leftLable, rightLabel = inputLabel(opts[0])
+	}
+
+	menu.WriteString(leftLable)
+	if max == 0 {
+		menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1"` + `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10) + `">`)
+	} else {
+		menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10) + `" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" value="` + strconv.FormatInt(currentNumber, 10) + `">`)
+	}
+
+	menu.WriteString(rightLabel)
+
 	menu.WriteString(`</div>`)
 
 	return template.HTML(menu.String())
@@ -282,4 +328,49 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(selectedChannelID) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
+}
+
+func inputLabel(opts map[string]interface{}) (string, string) {
+	labelEnabled := opts["label"].(bool)
+	labelContent := opts["labelContent"].(string)
+	labelSide := opts["labelSide"].(string)
+
+	if !labelEnabled || (labelSide != "left" && labelSide != "right"){
+		return "", ""
+	}
+
+	labelContent = convertToImage(labelContent)
+
+	label := fmt.Sprintf("<label class=\"input-group-text text-light\" style=\"background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)\">%s</label>", labelContent)
+
+	if labelSide == "left" {
+		return label, ""
+	}
+
+	return "", label
+}
+
+func convertToImage(emoji string) string {
+	re := regexp.MustCompile(`<a?:([a-zA-Z0-9_]+):(\d+)>`)
+
+	return re.ReplaceAllStringFunc(emoji, func(match string) string {
+		matches := re.FindStringSubmatch(match)
+		if len(matches) < 3 {
+			return match
+		}
+
+		name := matches[1]
+		id := matches[2]
+
+		isAnimated := match[1] == 'a'
+
+		format := "png"
+		if isAnimated {
+			format = "gif"
+		}
+
+		url := fmt.Sprintf("https://cdn.discordapp.com/emojis/%s.%s", id, format)
+
+		return fmt.Sprintf(`<img src="%s" alt="%s" style="height: 2rem; width: auto;">`, url, name)
+	})
 }

@@ -56,7 +56,7 @@
 								</div>
 								<div class="card-body">
 									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
-									{{numberSelect 0 60 .ModerationConfig.ModerationTriggerDeletionSeconds "ModerationTriggerDeletionSeconds"}}
+									{{numberSelect 0 60 .ModerationConfig.ModerationTriggerDeletionSeconds "ModerationTriggerDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
 								</div>
 							</div>
 						</div>
@@ -68,7 +68,7 @@
 								</div>
 								<div class="card-body">
 									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
-									{{numberSelect 0 60 .ModerationConfig.ModerationResponseDeletionSeconds "ModerationResponseDeletionSeconds"}}
+									{{numberSelect 0 60 .ModerationConfig.ModerationResponseDeletionSeconds "ModerationResponseDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
 								</div>
 							</div>
 						</div>
