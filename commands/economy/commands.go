@@ -1,0 +1,1488 @@
+package economy
+
+import (
+	"context"
+	"fmt"
+	"math"
+	"math/rand"
+	"regexp"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/commands/util"
+	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"github.com/bwmarrin/discordgo"
+	"github.com/dustin/go-humanize"
+)
+
+type FullEconomyMember struct {
+	EconomyUser models.EconomyUser
+	EconomyUserInventory models.EconomyUserInventorySlice
+}
+
+// getFullEconomyMember returns a members full economy information
+func getFullEconomyMember(config *Config, memberID string) FullEconomyMember {
+	guildEconomySettings := GetConfig(config.GuildID)
+
+	var economyUser *models.EconomyUser
+	economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(config.GuildID), models.EconomyUserWhere.UserID.EQ(memberID)).One(context.Background(), common.PQ)
+	if err != nil {
+		economyUser = &models.EconomyUser{
+			GuildID: config.GuildID,
+			UserID: memberID,
+			Cash: guildEconomySettings.EconomyStartBalance,
+			Bank: 0,
+			Cfwinchance: 50,
+		}
+	}
+
+	var economyUserInventory models.EconomyUserInventorySlice
+	economyUserInventory, err = models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(config.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(memberID)).All(context.Background(), common.PQ)
+	if err != nil {
+		economyUserInventory = models.EconomyUserInventorySlice{}
+	}
+
+	return FullEconomyMember{
+		EconomyUser: *economyUser,
+		EconomyUserInventory: economyUserInventory,
+	}
+}
+
+func getUserCashRank(guildID, userID string) (int64, string) {
+	var position int64
+	err := common.PQ.QueryRowContext(context.Background(), `SELECT position FROM (SELECT user_id, RANK() OVER (ORDER BY cash DESC) AS position FROM economy_cash WHERE guild_id=$1) AS s WHERE user_id=$2`, guildID, userID).Scan(&position)
+	if err != nil {
+		return position, ""
+	}
+
+	ordinal := "th"
+	cent := functions.ToInt64(math.Mod(float64(position), float64(100)))
+	dec := functions.ToInt64(math.Mod(float64(position), float64(10)))
+	if cent < 10 || cent > 19 {
+		switch dec {
+		case 1:
+			ordinal = "st"
+		case 2:
+			ordinal = "nd"
+		case 3:
+			ordinal = "rd"
+		}
+	}
+	ordinalPosition := fmt.Sprintf("%d%s.", position, ordinal)
+
+	return position, ordinalPosition
+}
+
+func getPageNumber(page string) int {
+	pageNum, _ := strconv.Atoi(page)
+	if pageNum < 1 {
+		pageNum = 1
+	}
+
+	return pageNum
+}
+
+func sendPaginatedEmbed[T any](channelID string, embed *discordgo.MessageEmbed, components []discordgo.MessageComponent, items []T, page int) {
+	embed.Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
+
+	if page != 1 {
+		row := components[0].(discordgo.ActionsRow)
+		btnPrev := row.Components[0].(discordgo.Button)
+		btnPrev.Disabled = false
+		row.Components[0] = btnPrev
+		components[0] = row
+	}
+	if len(items) > (page - 1) * 10 {
+		row := components[0].(discordgo.ActionsRow)
+		btnNext := row.Components[1].(discordgo.Button)
+		btnNext.Disabled = false
+		row.Components[1] = btnNext
+		components[0] = row
+	}
+
+	msg, _ := functions.SendMessage(channelID, &discordgo.MessageSend{Embed: embed, Components: components})
+	go disableButtons(channelID, msg.ID)
+}
+
+func disableButtons(channelID, messageID string) {
+	time.Sleep(10 * time.Second)
+
+	message, _ := common.Session.ChannelMessage(channelID, messageID)
+	components := message.Components
+	row := components[0].(*discordgo.ActionsRow)
+	btnPrev := row.Components[0].(*discordgo.Button)
+	btnNext := row.Components[1].(*discordgo.Button)
+	btnPrev.Disabled = true
+	btnNext.Disabled = true
+	row.Components[0] = btnPrev
+	row.Components[1] = btnNext
+	components[0] = row
+
+	updatedMessage := &discordgo.MessageSend{
+		Embed:      message.Embeds[0],
+		Components: components,
+	}
+	functions.EditMessage(channelID, messageID, updatedMessage)
+}
+
+// commandCooldown returns a boolean whether the current command is on a cooldown for the user
+func commandCooldown(config *Config, userID string, cooldownType string) (bool, int64) {
+	cooldown, err := models.EconomyCooldowns(models.EconomyCooldownWhere.GuildID.EQ(config.GuildID), models.EconomyCooldownWhere.UserID.EQ(userID), models.EconomyCooldownWhere.Type.EQ(cooldownType)).One(context.Background(), common.PQ)
+	if err != nil {
+		return false, 0
+	}
+
+	if !cooldown.ExpiresAt.Time.After(time.Now()) {
+		return false, 0
+	}
+
+	return true, time.Now().Unix() + int64(time.Until(cooldown.ExpiresAt.Time).Seconds())
+}
+
+func betAmount(config *Config, economyMember FullEconomyMember, amount string) int64 {
+	switch amount {
+	case "all":
+		return economyMember.EconomyUser.Cash
+	case "max":
+		if config.EconomyMaxBet > 0 {
+			return config.EconomyMaxBet
+		} else {
+			return economyMember.EconomyUser.Cash
+		}
+	default:
+		return functions.ToInt64(amount)
+	}
+}
+
+var (
+	activeGames = make(map[string]*RouletteGame)
+)
+
+type RouletteGame struct {
+	Bet       int64
+	PlayerIDs []string
+	HostID   string
+	IsActive  bool
+}
+
+var informationCommands = []*dcommand.AsbwigCommand{
+	{
+		Command:     "balance",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"bal"},
+		Description: "Views your balance in the economy",
+		Run: (func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			var cash, bank int64 = fullEconomyMember.EconomyUser.Cash, fullEconomyMember.EconomyUser.Bank
+			_, ordinalPosition := getUserCashRank(data.GuildID, data.Author.ID)
+
+			embed := &discordgo.MessageEmbed{
+				Author: &discordgo.MessageEmbedAuthor{
+					Name:    data.Author.Username,
+					IconURL: data.Author.AvatarURL("256"),
+				},
+				Description: fmt.Sprintf("%s's balance\nLeaderboard rank %s", data.Author.Mention(), ordinalPosition),
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name:   "Cash",
+						Value:  fmt.Sprint(cash),
+						Inline: true,
+					},
+					{
+						Name:   "Bank",
+						Value:  fmt.Sprint(bank),
+						Inline: true,
+					},
+					{
+						Name:   "Networth",
+						Value:  fmt.Sprint(cash+bank),
+						Inline: true,
+					},
+				},
+				Timestamp: time.Now().Format(time.RFC3339),
+				Color:     common.SuccessGreen,
+			}
+			
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		}),
+	},
+	{
+		Command:  "leaderboard",
+		Category: dcommand.CategoryEconomy,
+		Aliases:  []string{"lb", "top"},
+		Args: []*dcommand.Args{
+			{Name: "Page", Type: dcommand.Int, Optional: true},
+		},
+		Description: "Views your server leaderboard",
+		Run: (func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			guild, _ := common.Session.Guild(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Description: "No users are on this page", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+			components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "leaderboard_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "leaderboard_forward"}}}}
+
+			page := 1
+			if len(data.Args) > 0 {
+				page = getPageNumber(data.Args[0])
+			}
+
+			offset := (page - 1) * 10
+			economyUsers, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(guild.ID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+			if err != nil || len(economyUsers) == 0 {
+				sendPaginatedEmbed(data.ChannelID, embed, components, economyUsers, page)
+				return
+			}
+
+			embed.Description = ""
+			embed.Color = common.SuccessGreen
+			for i, economyUser := range economyUsers {
+				if i == 10 {
+					break
+				}
+
+				user, _ := functions.GetUser(economyUser.UserID)
+				cash := humanize.Comma(economyUser.Cash)
+				position, ordinalPosition := getUserCashRank(data.GuildID, economyUser.UserID)
+				if medal, ok := map[int64]string{1: "🥇", 2: "🥈", 3: "🥉"}[position]; ok {
+					ordinalPosition = medal
+				}
+				embed.Description += fmt.Sprintf("**%v** %s **•** %s%s\n", ordinalPosition, user.Username, guildConfig.EconomySymbol, cash)
+			}
+
+			sendPaginatedEmbed(data.ChannelID, embed, components, economyUsers, page)
+		}),
+	},
+}
+
+func leaderboardPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
+	if b.MessageComponentData().CustomID != "leaderboard_back" && b.MessageComponentData().CustomID != "leaderboard_forward" {
+		return
+	}
+
+	guildConfig := GetConfig(b.GuildID)
+	guild, _ := common.Session.Guild(b.GuildID)
+	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Description: "No users are on this page", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
+	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "leaderboard_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "leaderboard_forward"}}}}
+
+	re := regexp.MustCompile(`\d+`)
+	page, _ := strconv.Atoi(re.FindString(b.Message.Embeds[0].Footer.Text))
+	switch b.MessageComponentData().CustomID {
+	case "leaderboard_forward":
+		page++
+	case "leaderboard_back":
+		page--
+	}
+
+	offset := (page - 1) * 10
+	economyUsers, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(b.GuildID), qm.OrderBy("cash DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	if err == nil && len(economyUsers) == 0 {
+		embed[0].Description = ""
+		embed[0].Color = common.SuccessGreen
+	}
+
+	rank := (page - 1) * 10
+	for i, economyUser := range economyUsers {
+		if i == 10 {
+			break
+		}
+	
+		user, _ := functions.GetUser(economyUser.UserID)
+		cash := humanize.Comma(economyUser.Cash)
+		position, ordinalPosition := getUserCashRank(b.GuildID, economyUser.UserID)
+		if medal, ok := map[int64]string{1: "🥇", 2: "🥈", 3: "🥉"}[position]; ok {
+			ordinalPosition = medal
+		}
+
+		embed[0].Description += fmt.Sprintf("**%v** %s **•** %s%s\n", ordinalPosition, user.Username, guildConfig.EconomySymbol, cash)
+	}
+
+	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
+	if page != 1 {
+		row := components[0].(discordgo.ActionsRow)
+		btnPrev := row.Components[0].(discordgo.Button)
+		btnPrev.Disabled = false
+		row.Components[0] = btnPrev
+		components[0] = row
+	}
+	if len(economyUsers) > rank {
+		row := components[0].(discordgo.ActionsRow)
+		btnNext := row.Components[1].(discordgo.Button)
+		btnNext.Disabled = false
+		row.Components[1] = btnNext
+		components[0] = row
+	}
+
+	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components,}})
+}
+
+var incomeCommands = []*dcommand.AsbwigCommand{
+	{
+		Command:     "work",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Work work work",
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "work")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			payout := rand.Int63n(guildConfig.EconomyMaxReturn - guildConfig.EconomyMinReturn + 1) + guildConfig.EconomyMinReturn
+
+			embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guildConfig.EconomySymbol, humanize.Comma(payout))
+			if guildConfig.EconomyCustomWorkResponsesEnabled && len(guildConfig.EconomyCustomWorkResponses) > 0 {
+				embed.Description = strings.ReplaceAll(guildConfig.EconomyCustomWorkResponses[rand.Intn(len(guildConfig.EconomyCustomWorkResponses))], "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
+			}
+
+			cash = cash + payout
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "work", ExpiresAt: null.Time{Time: time.Now().Add(3600 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "crime",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Pew pew pew",
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "crime")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			payout := rand.Int63n(guildConfig.EconomyMaxReturn - guildConfig.EconomyMinReturn + 1) + guildConfig.EconomyMinReturn
+
+			if rand.Int63n(2) == 1 {
+				embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guildConfig.EconomySymbol, humanize.Comma(payout))
+				if guildConfig.EconomyCustomCrimeResponsesEnabled && len(guildConfig.EconomyCustomCrimeResponses) > 0 {
+					embed.Description = strings.ReplaceAll(guildConfig.EconomyCustomCrimeResponses[rand.Intn(len(guildConfig.EconomyCustomCrimeResponses))], "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
+				}
+				embed.Color = common.SuccessGreen
+				cash = cash + payout
+			} else {
+				embed.Description = fmt.Sprintf("You broke the law and got caught! You were arrested and lost %s%s", guildConfig.EconomySymbol, humanize.Comma(payout))
+				cash = cash - payout
+			}
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "crime", ExpiresAt: null.Time{Time: time.Now().Add(3600 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "rob",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"steal"},
+		Description: "Money money money money money",
+		Args: []*dcommand.Args{
+			{Name: "Member", Type: dcommand.Member},
+		},
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "rob")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			if len(data.Args) <= 0 {
+				embed.Description = "No `Member` argument provided"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			targetMember, err := functions.GetMember(data.GuildID, data.Args[0])
+			if err != nil {
+				embed.Description = "Invalid `Member` argument provided"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if targetMember.User.ID == data.Author.ID {
+				embed.Description = "Invalid `Member` argument provided"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMemberTarget := getFullEconomyMember(guildConfig, data.Author.ID)
+			targetCash := fullEconomyMemberTarget.EconomyUser.Cash
+
+			if targetCash < 0 {
+				embed.Description = "This user has no cash to steal :("
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			payout := rand.Int63n(targetCash) + 1
+			embed.Description = fmt.Sprintf("You stole %s%s from %s", guildConfig.EconomySymbol, humanize.Comma(payout), targetMember.Mention())
+			cash = cash + payout
+			targetCash = targetCash - payout
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			targetEntry := models.EconomyUser{GuildID: data.GuildID, UserID: targetMember.User.ID, Cash: targetCash}
+			targetEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "rob", ExpiresAt: null.Time{Time: time.Now().Add(18000 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "chickenfight",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Chicken fight for a payout of <Bet> with a base payout of 50%. Increases each win up to 70%",
+		Args: []*dcommand.Args{
+			{Name: "Bet", Type: dcommand.Bet},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "chickenfight")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bet := betAmount(guildConfig, fullEconomyMember, data.Args[0])
+
+			if bet > cash {
+				embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(fullEconomyMember.EconomyUser.Cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if guildConfig.EconomyMaxBet > 0 && bet > guildConfig.EconomyMaxBet {
+				embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guildConfig.EconomySymbol, humanize.Comma(guildConfig.EconomyMaxBet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			chicken, exists := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), models.EconomyUserInventoryWhere.Name.IN([]string{"Chicken", "chicken"})).One(context.Background(), common.PQ)
+			if exists != nil {
+				embed.Description = "You don't have this item\nBuy it in the shop!"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			winChance := fullEconomyMember.EconomyUser.Cfwinchance
+			win := (rand.Int63n(100) + 1) <= winChance
+
+			if win {
+				if winChance != 70 {
+					winChance = winChance + 1
+				}
+				cash = cash + bet
+				embed.Description = "Your chicken won the fight! Play again with an increased win chance"
+				embed.Color = common.SuccessGreen
+			} else {
+				winChance = 50
+				cash = cash - bet
+				embed.Description = "Your chicken lost the fight and died :(\nBuy a new one to play again"
+				chicken.Delete(context.Background(), common.PQ)
+			}
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Cfwinchance: winChance}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Cfwinchance), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "chickenfight", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "coinflip",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"cf", "flip"},
+		Description: "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
+		Args: []*dcommand.Args{
+			{Name: "Bet", Type: dcommand.Bet},
+			{Name: "Coin side", Type: dcommand.CoinSide},
+		},
+		ArgsRequired: 2,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "coinflip")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			if len(data.Args) <= 0 {
+				embed.Description = "No `Bet` argument provided"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			bet := betAmount(guildConfig, fullEconomyMember, data.Args[0])
+
+			if bet > cash {
+				embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(fullEconomyMember.EconomyUser.Cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if guildConfig.EconomyMaxBet > 0 && bet > guildConfig.EconomyMaxBet {
+				embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guildConfig.EconomySymbol, humanize.Comma(guildConfig.EconomyMaxBet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			coinSide := data.Args[1]
+			if rand.Int63n(2) == 1 {
+				cash = cash + bet
+				embed.Description = fmt.Sprintf("You flipped %s and won %s%s", coinSide, guildConfig.EconomySymbol, humanize.Comma(bet))
+				embed.Color = common.SuccessGreen
+			} else {
+				cash = cash + bet
+				embed.Description = fmt.Sprintf("You flipped %s and lost", coinSide)
+			}
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "coinflip", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "rollnumber",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"roll", "rollnum"},
+		Description: "Rolls a number\n**100** = payout of `<bet>*5`\n**90-99** = payout of `<Bet>*3`\n**65-89** = payout of `<Bet>`\n**64 and under** = Loss of `<Bet>`",
+		Args: []*dcommand.Args{
+			{Name: "Bet", Type: dcommand.Bet},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "rollnumber")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bet := betAmount(guildConfig, fullEconomyMember, data.Args[0])
+
+			if bet > fullEconomyMember.EconomyUser.Cash {
+				embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(fullEconomyMember.EconomyUser.Cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if guildConfig.EconomyMaxBet > 0 && bet > guildConfig.EconomyMaxBet {
+				embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guildConfig.EconomySymbol, humanize.Comma(guildConfig.EconomyMaxBet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			roll := rand.Int63n(100) + 1
+			var multiplier int64 = 0
+			embed.Color = common.SuccessGreen
+			condition := "won"
+
+			switch {
+			case roll == 100:
+				multiplier = 5
+			case roll < 100:
+				multiplier = 3
+			case roll < 90:
+				multiplier = 1
+			case roll < 65:
+				multiplier = -1
+				condition = "lost"
+				embed.Color = common.ErrorRed
+			}
+			cash += bet * multiplier
+
+			embed.Description = fmt.Sprintf("The ball landed on %d, and you %s %s%s", roll, condition, guildConfig.EconomySymbol, humanize.Comma(bet))
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "rollnumber", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "russianroulette",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"rr"},
+		Description: "Russian roulette with up to 6 people\nAll players must join with the same bet\nPayout for winners is `(<Bet>*Players)/winners`",
+		Args: []*dcommand.Args{
+			{Name: "Bet", Type: dcommand.Int},
+		},
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			if data.Args[0] == "start" {
+				game, exists := activeGames[data.GuildID]
+				if !exists {
+					embed.Description = "There's no game to start."
+					functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+					return
+				}
+				if game.HostID != data.Author.ID {
+					embed.Description = "Only the host can start the game."
+					functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+					return
+				}
+				startGame(guildConfig, data.GuildID, data.ChannelID)
+				return
+			}
+
+			bet := betAmount(guildConfig, fullEconomyMember, data.Args[0])
+			if bet > fullEconomyMember.EconomyUser.Cash {
+				embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(fullEconomyMember.EconomyUser.Cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if guildConfig.EconomyMaxBet > 0 && bet > guildConfig.EconomyMaxBet {
+				embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guildConfig.EconomySymbol, humanize.Comma(guildConfig.EconomyMaxBet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			game, exists := activeGames[data.GuildID]
+			if !exists {
+				cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "russianroulette")
+				if cooldownActive {
+					embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+					functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+					return
+				}
+
+				activeGames[data.GuildID] = &RouletteGame{
+					HostID:   data.Author.ID,
+					Bet:       bet,
+					PlayerIDs: []string{data.Author.ID},
+					IsActive:  false,
+				}
+
+				embed.Description = fmt.Sprintf("A new game of russian roulette has started\n\nTo join, use the command `russianroulette %d` (1/6)\nTo start this game use the command `russianroulette start` or wait for more players\nThis game will automatically start in <t:%d:R> minutes if enough players join.", bet, (time.Now().Unix() + int64((2 * time.Minute).Seconds())))
+				embed.Color = common.SuccessGreen
+				cash = cash - bet
+
+				userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+				userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+				cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "russianroulette", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
+				cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				time.AfterFunc(2*time.Minute, func() { startGame(guildConfig, data.GuildID, data.ChannelID) })
+				return
+			}
+
+			if bet != game.Bet {
+				embed.Description = fmt.Sprintf("All players must bet the same amount. This game's bet is %s%s", guildConfig.EconomySymbol, humanize.Comma(game.Bet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			if game.IsActive {
+				embed.Description = "You can't join or start a game while there is one running"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			if slices.Contains(game.PlayerIDs, data.Author.ID) {
+				embed.Description = "You've already joined this game.\nIf you're the host, start the game with `russianroulette start`"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			game.PlayerIDs = append(game.PlayerIDs, data.Author.ID)
+			if len(game.PlayerIDs) == 6 {
+				startGame(guildConfig, data.GuildID, data.ChannelID)
+				return
+			}
+
+			embed.Description = fmt.Sprintf("You've joined this game of russian roulette with a bet of %s%s (%d/6)", guildConfig.EconomySymbol, humanize.Comma(bet), len(game.PlayerIDs))
+			embed.Color = common.SuccessGreen
+			cash = cash - bet
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "snakeeyes",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"dice"},
+		Description: "Rolls 2 6-sided dice, with a payout of `<Bet>*36` if they both land on 1",
+		Args: []*dcommand.Args{
+			{Name: "Bet", Type: dcommand.Bet},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			cooldownActive, cooldown := commandCooldown(guildConfig, data.Author.ID, "snakeeyes")
+			if cooldownActive {
+				embed.Description = fmt.Sprintf("This command is on cooldown for <t:%d:R>", cooldown)
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bet := betAmount(guildConfig, fullEconomyMember, data.Args[0])
+
+			if bet > cash {
+				embed.Description = fmt.Sprintf("You can't bet more than you have in your hand. You currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(fullEconomyMember.EconomyUser.Cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if guildConfig.EconomyMaxBet > 0 && bet > guildConfig.EconomyMaxBet {
+				embed.Description = fmt.Sprintf("You can't bet more than the servers limit. The limit is %s%s", guildConfig.EconomySymbol, humanize.Comma(guildConfig.EconomyMaxBet))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			d1, d2 := rand.Int63n(6)+1, rand.Int63n(6)+1
+			condition := "won"
+			if d1 == 1 && d2 == 1 {
+				cash = cash + (bet * 36)
+			} else {
+				cash = cash - bet
+				condition = "lost"
+			}
+			embed.Description = fmt.Sprintf("You rolled %d & %d, and you %s %s%s", d1, d2, condition, guildConfig.EconomySymbol, humanize.Comma(bet))
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			cooldowns := models.EconomyCooldown{GuildID: data.GuildID, UserID: data.Author.ID, Type: "snakeeyes", ExpiresAt: null.Time{Time: time.Now().Add(300 * time.Second), Valid: true}}
+			cooldowns.Upsert(context.Background(), common.PQ, true, []string{models.EconomyCooldownColumns.GuildID, models.EconomyCooldownColumns.UserID, models.EconomyCooldownColumns.Type}, boil.Whitelist(models.EconomyCooldownColumns.ExpiresAt), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+}
+
+var transferCommands = []*dcommand.AsbwigCommand{
+	{
+		Command:     "deposit",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"dep"},
+		Description: "Deposits a given amount into your bank",
+		Args: []*dcommand.Args{
+			{Name: "Amount", Type: dcommand.Int},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bank := fullEconomyMember.EconomyUser.Bank
+
+			var deposit int64
+			if data.Args[0] == "all" {
+				deposit = fullEconomyMember.EconomyUser.Cash
+			} else {
+				deposit = functions.ToInt64(data.Args[0])
+			}
+			if deposit > fullEconomyMember.EconomyUser.Cash {
+				embed.Description = fmt.Sprintf("You're unable to deposit more than you have in cash\nYou currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			cash = cash - deposit
+			bank = bank + deposit
+
+			embed.Description = fmt.Sprintf("You deposited %s%s into your bank\nThere is now %s%s in your bank", guildConfig.EconomySymbol, humanize.Comma(deposit), guildConfig.EconomySymbol, humanize.Comma(bank))
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Bank: bank}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "withdraw",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"with"},
+		Description: "Withdraws a given amount from your bank",
+		Args: []*dcommand.Args{
+			{Name: "Amount", Type: dcommand.Int},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bank := fullEconomyMember.EconomyUser.Bank
+
+			var withdraw int64
+			if withdraw > bank {
+				embed.Description = fmt.Sprintf("You're unable to withdraw more than you have in your bank\nYou currently have %s%s", guildConfig.EconomySymbol, humanize.Comma(bank))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+			if bank < 0 {
+				embed.Description = fmt.Sprintf("You're unable to withdraw from your overdraft\nYou are currently %s%s in arrears", guildConfig.EconomySymbol, humanize.Comma(bank))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			cash = cash + withdraw
+			bank = bank - withdraw
+
+			embed.Description = fmt.Sprintf("You Withdrew %s%s from your bank\nThere is now %s%s in your bank", guildConfig.EconomySymbol, humanize.Comma(withdraw), guildConfig.EconomySymbol, humanize.Comma(bank))
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Bank: bank}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
+	
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "givemoney",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"loan"},
+		Description: "Gives money to a specified users from your cash",
+		Args: []*dcommand.Args{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Amount", Type: dcommand.Int},
+		},
+		ArgsRequired: 2,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			target, _ := functions.GetMember(data.GuildID, data.Args[0])
+
+			var giveAmount int64
+			if data.Args[0] == "all" {
+				giveAmount = fullEconomyMember.EconomyUser.Cash
+			} else {
+				giveAmount = functions.ToInt64(data.Args[0])
+			}
+			if giveAmount > fullEconomyMember.EconomyUser.Cash {
+				embed.Description = fmt.Sprintf("You don't have enough cash to give. You have %s%s", guildConfig.EconomySymbol, humanize.Comma(cash))
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			fullEconomyMemberTarget := getFullEconomyMember(guildConfig, target.User.ID)
+			targetCash := fullEconomyMemberTarget.EconomyUser.Cash
+
+			cash = cash - giveAmount
+			targetCash = targetCash + giveAmount
+
+			embed.Description = fmt.Sprintf("You gave %s%s to %s!", guildConfig.EconomySymbol, humanize.Comma(functions.ToInt64(giveAmount)), target.Mention())
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+			receivingEntry := models.EconomyUser{GuildID: data.GuildID, UserID: target.User.ID, Cash: targetCash}
+			receivingEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "addmoney",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Adds money to a specified users cash/bank balance",
+		Args: []*dcommand.Args{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Place", Type: dcommand.UserBalance},
+			{Name: "Amount", Type: dcommand.Int},
+		},
+		ArgsRequired: 3,
+		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			member, _ := functions.GetMember(data.GuildID, data.Args[0])
+			fullEconomyMember := getFullEconomyMember(guildConfig, member.User.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bank := fullEconomyMember.EconomyUser.Bank
+
+			destination := data.Args[1]
+			amount := data.Args[2]
+			if destination == "cash" {
+				cash = cash + functions.ToInt64(amount)
+			} else {
+				bank = bank + functions.ToInt64(amount)
+			}
+
+			embed.Description = fmt.Sprintf("You added %s%s to %ss %s", guildConfig.EconomySymbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: member.User.ID, Cash: cash, Bank: bank}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+
+		}),
+	},
+	{
+		Command:     "removemoney",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Removes money from a specified users cash/bank balance",
+		Args: []*dcommand.Args{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Place", Type: dcommand.UserBalance},
+			{Name: "Amount", Type: dcommand.Int},
+		},
+		ArgsRequired: 3,
+		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			member, _ := functions.GetMember(data.GuildID, data.Args[0])
+			fullEconomyMember := getFullEconomyMember(guildConfig, member.User.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+			bank := fullEconomyMember.EconomyUser.Bank
+			
+			destination := data.Args[1]
+			amount := data.Args[2]
+			if destination == "cash" {
+				cash = cash - functions.ToInt64(amount)
+			} else {
+				bank = bank - functions.ToInt64(amount)
+			}
+
+			embed.Description = fmt.Sprintf("You removed %s%s from %ss %s", guildConfig.EconomySymbol, humanize.Comma(functions.ToInt64(amount)), member.Mention(), destination)
+			embed.Color = common.SuccessGreen
+
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: member.User.ID, Cash: cash, Bank: bank}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		}),
+	},
+}
+
+func startGame(config *Config, guildID, channelID string) {
+	game, exists := activeGames[guildID]
+	if !exists {
+		return
+	}
+
+	game.IsActive = true
+	hostMember, _ := functions.GetUser(game.HostID)
+
+	embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: hostMember.Username, IconURL: hostMember.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+	removeLeftPlayers(guildID, game)
+	if len(game.PlayerIDs) <= 1 {
+		functions.SendBasicMessage(channelID, "There weren't enough players to start russian roulette. Please start a new one.")
+		delete(activeGames, guildID)
+		return
+	}
+
+	functions.SendBasicMessage(channelID, "The russian roulette game has begun")
+	loser, _ := functions.GetMember(config.GuildID, game.PlayerIDs[rand.Intn(len(game.PlayerIDs))])
+	for _, player := range game.PlayerIDs {
+		member, _ := functions.GetMember(guildID, player)
+		if player != loser.User.ID {
+			functions.SendBasicMessage(channelID, fmt.Sprintf("> **%s** pulled the trigger and survived", member.Mention()))
+			continue
+		}
+		functions.SendBasicMessage(channelID, fmt.Sprintf("> **%s** pulled the trigger and died", member.Mention()))
+		break
+	}
+
+	fields := []*discordgo.MessageEmbedField{}
+	payout := (game.Bet * int64(len(game.PlayerIDs))) / int64(len(game.PlayerIDs)-1)
+	for _, playerID := range game.PlayerIDs {
+		if loser.User.ID == playerID {
+			continue
+		}
+
+		fullEconomyMember := getFullEconomyMember(config, playerID)
+		cash := fullEconomyMember.EconomyUser.Cash
+
+		member, _ := functions.GetMember(guildID, playerID)
+		field := &discordgo.MessageEmbedField{Name: member.User.Username, Value: member.Mention(), Inline: false}
+		fields = append(fields, field)
+	
+		userEntry := models.EconomyUser{GuildID: guildID, UserID: playerID, Cash: cash + payout}
+		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+	}
+
+	embed.Title = "Russian roulette winners"
+	embed.Description = fmt.Sprintf("Payout is %s%s per winner", config.EconomySymbol, humanize.Comma(payout))
+	embed.Fields = fields
+	embed.Color = common.SuccessGreen
+
+	delete(activeGames, guildID)
+	functions.SendMessage(channelID, &discordgo.MessageSend{Embed: embed})
+}
+
+func removeLeftPlayers(guildID string, game *RouletteGame) {
+	filtered := make([]string, 0, len(game.PlayerIDs))
+	for _, playerID := range game.PlayerIDs {
+		if _, err := functions.GetMember(guildID, playerID); err == nil {
+			filtered = append(filtered, playerID)
+		}
+	}
+	game.PlayerIDs = filtered
+}
+
+var shopCommands = []*dcommand.AsbwigCommand{
+	{
+		Command:     "shop",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Views the shop for the server",
+		Args: []*dcommand.Args{
+			{Name: "Page", Type: dcommand.Int, Optional: true},
+		},
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			guild, _ := common.Session.Guild(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Description: "No items are in the shop for this page.\nAdd some with `createitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+			components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
+
+			page := 1
+			if len(data.Args) > 0 {
+				page = getPageNumber(data.Args[0])
+			}
+
+			offset := (page - 1) * 10
+			guildShop, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+			if err != nil || len(guildShop) == 0 {
+				sendPaginatedEmbed(data.ChannelID, embed, components, guildShop, page)
+			}
+
+			embed.Description = "Buy an item with `buyitem <Name> [Quantity:Int]`\nFor more information about an item, use `iteminfo <Name>`"
+			embed.Color = common.SuccessGreen
+			fields := []*discordgo.MessageEmbedField{}
+			for i, item := range guildShop {
+				if i == 10 {
+					break
+				}
+
+				quantity := "Infinite"
+				if item.Quantity > 0 {
+					quantity = humanize.Comma(item.Quantity)
+				}
+
+				price := humanize.Comma(item.Price)
+
+				fieldName := fmt.Sprintf("%s%s - %s - %s", guildConfig.EconomySymbol, price, item.Name, quantity)
+				fieldDesc := item.Description
+
+				if item.Soldby != "0" {
+					fieldDesc = fmt.Sprintf("%s\nSold by: <@%s>", item.Description, item.Soldby)
+				}
+
+				itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: fieldDesc, Inline: false}
+				fields = append(fields, itemField)
+			}
+			embed.Fields = fields
+			
+			sendPaginatedEmbed(data.ChannelID, embed, components, guildShop, page)
+		},
+	},
+	{
+		Command:     "iteminfo",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Views the saved information about an item",
+		Args: []*dcommand.Args{
+			{Name: "Name", Type: dcommand.String},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			guild, _ := common.Session.Guild(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			item, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(data.ArgsNotLowered[1])).One(context.Background(), common.PQ)
+			if err != nil {
+				embed.Description = "This item does not exist"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			embed.Color = common.SuccessGreen
+			embed.Fields = []*discordgo.MessageEmbedField{
+				{Name: "Name", Value: item.Name, Inline: true},
+				{Name: "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", Value: "⠀⠀", Inline: true},
+				{Name: "Price", Value: fmt.Sprintf("%s%d", guildConfig.EconomySymbol, item.Price), Inline: true},
+				{Name: "Description", Value: item.Description, Inline: true},
+				{Name: "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", Value: "⠀⠀", Inline: true},
+				{Name: "Quantity", Value: humanize.Comma(item.Quantity), Inline: true},
+				{Name: "Role given", Value: fmt.Sprintf("<@&%s>", item.Role), Inline: false},
+				{Name: "Reply message", Value: item.Reply, Inline: true},
+			}
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+	{
+		Command:     "buyitem",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"buy"},
+		Description: "Buys an item from the shop",
+		Args: []*dcommand.Args{
+			{Name: "Name", Type: dcommand.String},
+			{Name: "Quantity", Type: dcommand.Int, Optional: true},
+		},
+		ArgsRequired: 1,
+		Run: func(data *dcommand.Data) {
+			guildConfig := GetConfig(data.GuildID)
+			guild, _ := common.Session.Guild(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
+			cash := fullEconomyMember.EconomyUser.Cash
+
+			item, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+			if err != nil {
+				embed.Description = "This item doesn't exist. Use `shop` to view all items"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			var buyQuantity int64 = 1
+			if len(data.Args) > 1 {
+				if data.Args[1] == "max" || data.Args[1] == "all" {
+					quantity := map[string]int64{"max": (cash / item.Price), "all": item.Quantity}
+					buyQuantity = quantity[data.Args[1]]
+					if buyQuantity == 0 {
+						buyQuantity = quantity["max"]
+					}
+				} else {
+					buyQuantity = functions.ToInt64(data.Args[1])
+				}
+				if item.Quantity > 0 && buyQuantity > item.Quantity {
+					embed.Description = "There's not enough of this in the shop to buy that much"
+					functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+					return
+				}
+			}
+
+			if (item.Name == "Chicken") && buyQuantity > 1 {
+				embed.Description = "You can't buy more than one chicken at a time"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			for _, inventoryItem := range fullEconomyMember.EconomyUserInventory {
+				if inventoryItem.Name != "Chicken" {
+					continue
+				}
+
+				embed.Description = "You can't have more than one chicken in your inventory"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			if (item.Price * buyQuantity) > cash {
+				embed.Description = "You don't have enough money to buy this item"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			newQuantity := item.Quantity - buyQuantity
+			if item.Quantity > 0 && newQuantity == 0 {
+				item.Delete(context.Background(), common.PQ)
+			} else if item.Quantity != 0 {
+				item.Quantity = newQuantity
+				item.Update(context.Background(), common.PQ, boil.Infer())
+			}
+
+			newQuantity = buyQuantity
+			for _, inventoryItem := range fullEconomyMember.EconomyUserInventory {
+				if inventoryItem.Name != item.Name {
+					continue
+				}
+				
+				newQuantity = inventoryItem.Quantity + buyQuantity
+				break
+			}
+
+			embed.Color = common.SuccessGreen
+			embed.Description = fmt.Sprintf("You bought %s of %s for %s%s", humanize.Comma(buyQuantity), item.Name, guildConfig.EconomySymbol, humanize.Comma(item.Price*buyQuantity))
+			cash = cash - (item.Price * buyQuantity)
+
+			userInventory := models.EconomyUserInventory{GuildID: data.GuildID, UserID: data.Author.ID, Name: item.Name, Description: item.Description, Quantity: newQuantity, Role: item.Role, Reply: item.Reply}
+			userInventory.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist(models.EconomyUserInventoryColumns.Quantity), boil.Infer())
+			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash}
+			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
+
+			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+		},
+	},
+}
+
+func shopPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
+	if b.MessageComponentData().CustomID != "shop_back" && b.MessageComponentData().CustomID != "shop_forward" {
+		return
+	}
+
+	guildConfig := GetConfig(b.GuildID)
+	guild, _ := common.Session.Guild(b.GuildID)
+	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Description: "No items are in the shop for this page.\nAdd some with `createitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
+	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
+
+	re := regexp.MustCompile(`\d+`)
+	page, _ := strconv.Atoi(re.FindString(b.Message.Embeds[0].Footer.Text))
+	switch b.MessageComponentData().CustomID {
+	case "shop_forward":
+		page++
+	case "shop_back":
+		page--
+	}
+
+	offset := (page - 1) * 10
+	guildShop, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(b.GuildID), qm.OrderBy("price DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	if err == nil && len(guildShop) != 0 {
+		embed[0].Description = "Buy an item with `buyitem <Name> [Quantity:Int]`\nFor more information about an item, use `iteminfo <Name>`"
+		embed[0].Color = common.SuccessGreen
+	}
+
+	fields := []*discordgo.MessageEmbedField{}
+	for i, item := range guildShop {
+		if i == 10 {
+			break
+		}
+
+		quantity := "Infinite"
+		if item.Quantity > 0 {
+			quantity = humanize.Comma(item.Quantity)
+		}
+		price := humanize.Comma(item.Price)
+
+		fieldName := fmt.Sprintf("%s%s - %s - %s", guildConfig.EconomySymbol, price, item.Name, quantity)
+		fieldDesc := item.Description
+
+		if item.Soldby != "0" {
+			fieldDesc = fmt.Sprintf("%s\nSold by: <@%s>", item.Description, item.Soldby)
+		}
+
+		itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: fieldDesc, Inline: false}
+		fields = append(fields, itemField)
+	}
+
+	embed[0].Fields = fields
+	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
+	if page != 1 {
+		row := components[0].(discordgo.ActionsRow)
+		btnPrev := row.Components[0].(discordgo.Button)
+		btnPrev.Disabled = false
+		row.Components[0] = btnPrev
+		components[0] = row
+	}
+	if len(guildShop) > offset {
+		row := components[0].(discordgo.ActionsRow)
+		btnNext := row.Components[1].(discordgo.Button)
+		btnNext.Disabled = false
+		row.Components[1] = btnNext
+		components[0] = row
+	}
+
+	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components}})
+}
+
+var inventoryCommands = []*dcommand.AsbwigCommand{
+	{
+		Command:     "inventory",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"inv"},
+		Description: "Your inventory",
+		Args: []*dcommand.Args{
+			{Name: "Page", Type: dcommand.Int, Optional: true},
+		},
+		Run: func(data *dcommand.Data) {
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username + " Inventory", IconURL: data.Author.AvatarURL("256")}, Description: "There are no item on this page\nBuy some with `buyitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+			components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "inventory_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "inventory_forward"}}}}
+
+			page := 1
+			if len(data.Args) > 0 {
+				page = getPageNumber(data.Args[0])
+			}
+
+			offset := (page - 1) * 10
+			userInventory, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+			if err != nil || len(userInventory) == 0 {
+				sendPaginatedEmbed(data.ChannelID, embed, components, userInventory, page)
+			}
+
+			embed.Description = "Use an item with `useitem <Name>`\nFor more information about an item, use `iteminfo <Name>`"
+			embed.Color = common.SuccessGreen
+			fields := []*discordgo.MessageEmbedField{}
+			for i, item := range userInventory {
+				if i == 10 {
+					break
+				}
+
+				role := "None"
+				if item.Role != "0" {
+					role = "<@&" + item.Role + ">"
+				}
+
+				itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s\nRole given: %s", item.Description, humanize.Comma(item.Quantity), role), Inline: false}
+				fields = append(fields, itemField)
+			}
+
+			embed.Fields = fields
+			embed.Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
+
+			sendPaginatedEmbed(data.ChannelID, embed, components, userInventory, page)
+		},
+	},
+	{
+		Command:     "useitem",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"use"},
+		Description: "Uses an item present in your inventory",
+		Args: []*dcommand.Args{
+			{Name: "Name", Type: dcommand.String},
+			{Name: "Quantity", Type: dcommand.Int},
+		},
+		Run: func(data *dcommand.Data) {
+			guild, _ := common.Session.Guild(data.GuildID)
+			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
+
+			item, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), models.EconomyUserInventoryWhere.Name.EQ(data.ArgsNotLowered[0])).One(context.Background(), common.PQ)
+			if err != nil {
+				embed.Description = "You don't have this item\nUse `inventory [Page]` to view your items"
+				functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
+				return
+			}
+
+			if _, err := functions.GetRole(data.GuildID, item.Role); err == nil {
+				functions.AddRole(data.GuildID, data.Author.ID, item.Role)
+			}
+
+			quantity := item.Quantity
+			newQuantity := quantity - 1
+			if newQuantity == 0 {
+				item.Delete(context.Background(), common.PQ)
+			} else if newQuantity > 0 {
+				item.Quantity = newQuantity
+				item.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserInventoryColumns.GuildID, models.EconomyUserInventoryColumns.UserID, models.EconomyUserInventoryColumns.Name}, boil.Whitelist(models.EconomyUserInventoryColumns.Quantity), boil.Infer())
+			}
+
+			functions.SendBasicMessage(data.ChannelID, item.Reply, 10)
+		},
+	},
+}
+
+func inventoryPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
+	if b.MessageComponentData().CustomID != "inventory_back" && b.MessageComponentData().CustomID != "inventory_forward" {
+		return
+	}
+
+	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: b.Member.User.Username + " inventory", IconURL: b.Member.User.AvatarURL("256")}, Description: "There are no item on this page\nBuy some with `buyitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
+	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "inventory_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "inventory_forward"}}}}
+
+	re := regexp.MustCompile(`\d+`)
+	page, _ := strconv.Atoi(re.FindString(b.Message.Embeds[0].Footer.Text))
+	switch b.MessageComponentData().CustomID {
+	case "inventory_forward":
+		page++
+	case "inventory_back":
+		page--
+	}
+
+	offset := (page - 1) * 10
+	userInventory, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(b.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(b.Member.User.ID), qm.OrderBy("quantity DESC"), qm.Offset(offset)).All(context.Background(), common.PQ)
+	if err == nil && len(userInventory) != 0 {
+		embed[0].Description = "Use an item with `useitem <Name>`\nFor more information about an item, use `iteminfo <Name>`"
+		embed[0].Color = common.SuccessGreen
+	}
+
+	fields := []*discordgo.MessageEmbedField{}
+	for i, item := range userInventory {
+		if i == 10 {
+			break
+		}
+
+		role := "None"
+		if item.Role != "0" {
+			role = "<@&" + item.Role + ">"
+		}
+
+		itemField := &discordgo.MessageEmbedField{Name: item.Name, Value: fmt.Sprintf("Description: %s\nQuantity: %s\nRole given: %s", item.Description, humanize.Comma(item.Quantity), role), Inline: false}
+		fields = append(fields, itemField)
+	}
+
+	embed[0].Fields = fields
+	embed[0].Footer = &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("Page: %d", page)}
+	if page != 1 {
+		row := components[0].(discordgo.ActionsRow)
+		btnPrev := row.Components[0].(discordgo.Button)
+		btnPrev.Disabled = false
+		row.Components[0] = btnPrev
+		components[0] = row
+	}
+	if len(userInventory) > offset {
+		row := components[0].(discordgo.ActionsRow)
+		btnNext := row.Components[1].(discordgo.Button)
+		btnNext.Disabled = false
+		row.Components[1] = btnNext
+		components[0] = row
+	}
+
+	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components}})
+}

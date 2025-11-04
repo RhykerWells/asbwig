@@ -58,6 +58,29 @@
 					</div>
 				</div>
 			</div>
+			<h2 style="margin-top: 2px">Economy</h2>
+			<div class="container-fluid my-4 px-0">
+				<div class="row row-cols-1 row-cols-md-3 g-4">
+					<div class="col">
+						<div class="card">
+							<h5 class="card-header">Economy settings</h5>
+							<div class="card-body">
+								<p class="card-text">Configure and manage your servers economy settings</p>
+								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy" class="btn text-light">Edit Settings</a>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card">
+							<h5 class="card-header">Shop</h5>
+							<div class="card-body">
+								<p class="card-text">View, edit, delete and manage all shop items.</p>
+								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop" class="btn text-light">Manage the shop</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</main>
 </body>

@@ -2,23 +2,25 @@ package economy
 
 var GuildEconomySchema = []string{`
 CREATE TABLE IF NOT EXISTS economy_config (
+	-- General
 	guild_id TEXT PRIMARY KEY,
-	min BIGINT NOT NULL DEFAULT 200,
-	max BIGINT NOT NULL DEFAULT 500,
-	maxbet BIGINT NOT NULL DEFAULT 5000,
-	symbol TEXT NOT NULL DEFAULT '£',
-	startbalance BIGINT NOT NULL DEFAULT 200,
-	customworkresponses BOOLEAN NOT NULL DEFAULT 'false',
-	customcrimeresponses BOOLEAN NOT NULL DEFAULT 'false'
+	economy_enabled BOOL DEFAULT FALSE NOT NULL,
+	economy_symbol TEXT NOT NULL DEFAULT '£',
+	economy_start_balance BIGINT NOT NULL DEFAULT 200,
+
+	-- Monkey making management
+	economy_min_return BIGINT NOT NULL DEFAULT 200,
+	economy_max_return BIGINT NOT NULL DEFAULT 500,
+	economy_max_bet BIGINT NOT NULL DEFAULT 5000,
+
+	-- Custom responses
+	economy_custom_work_responses_enabled BOOL DEFAULT FALSE NOT NULL,
+	economy_custom_work_responses TEXT[] DEFAULT '{}' NOT NULL,
+	economy_custom_crime_responses_enabled BOOL DEFAULT FALSE NOT NULL,
+	economy_custom_crime_responses TEXT[] DEFAULT '{}' NOT NULL
 );
 `, `
-CREATE TABLE IF NOT EXISTS economy_custom_responses (
-    guild_id TEXT PRIMARY KEY,
-	type TEXT NOT NULL,
-    response TEXT NOT NULL,
-    CONSTRAINT fk_guild_work_responses FOREIGN KEY (guild_id)
-        REFERENCES economy_config (guild_id) ON DELETE CASCADE
-);
+
 `, `
 CREATE TABLE IF NOT EXISTS economy_users (
 	guild_id TEXT NOT NULL,

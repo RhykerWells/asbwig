@@ -7,7 +7,6 @@ var TableNames = struct {
 	EconomyConfig          string
 	EconomyCooldowns       string
 	EconomyCreateitem      string
-	EconomyCustomResponses string
 	EconomyShop            string
 	EconomyUserInventories string
 	EconomyUsers           string
@@ -15,7 +14,6 @@ var TableNames = struct {
 	EconomyConfig:          "economy_config",
 	EconomyCooldowns:       "economy_cooldowns",
 	EconomyCreateitem:      "economy_createitem",
-	EconomyCustomResponses: "economy_custom_responses",
 	EconomyShop:            "economy_shop",
 	EconomyUserInventories: "economy_user_inventories",
 	EconomyUsers:           "economy_users",
