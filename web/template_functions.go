@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -58,20 +59,25 @@ func lower(str string) string {
 // Parameters:
 //	- currentInput: the current input of the input
 // 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-// 	- opts: An optional key/value map of additional parameters such as label settings.
-// 			See inputLabel for supported keys
+// 	- opts: An optional key/value map of additional parameters.
 func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 
-	var leftLable, rightLabel string
+	var leftLable, rightLabel, maxCharacters string
 	if len(opts) > 0 {
-		leftLable, rightLabel = inputLabel(opts[0])
+		leftLable, rightLabel = inputLabel(uniqueID, opts[0])
+		if value, ok := opts[0]["maxlength"]; ok {
+			maxCharacters = fmt.Sprint(functions.ToInt64(value))
+		}
 	}
 
 	menu.WriteString(`<div class="input-group mb-3">`)
 
 	menu.WriteString(leftLable)
-	menu.WriteString(`<input type="text" class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `">`)
+	menu.WriteString(`<input type="text" class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `" maxlength="` + maxCharacters + `">`)
+	if maxCharacters != "" {
+		menu.WriteString(`<input type="hidden" name="` + uniqueID + `MaxLength" value="` + maxCharacters + `"></input>`)
+	}
 	menu.WriteString(rightLabel)
 
 	menu.WriteString("</div>")
@@ -113,7 +119,7 @@ func numberSelection(min, max, currentNumber int64, uniqueID string, opts ...map
 
 	var leftLable, rightLabel string
 	if len(opts) > 0 {
-		leftLable, rightLabel = inputLabel(opts[0])
+		leftLable, rightLabel = inputLabel(uniqueID, opts[0])
 	}
 
 	menu.WriteString(leftLable)
@@ -330,7 +336,7 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	return template.HTML(menu.String())
 }
 
-func inputLabel(opts map[string]interface{}) (string, string) {
+func inputLabel(labelFor string, opts map[string]interface{}) (string, string) {
 	labelEnabled := opts["label"].(bool)
 	labelContent := opts["labelContent"].(string)
 	labelSide := opts["labelSide"].(string)
@@ -341,7 +347,7 @@ func inputLabel(opts map[string]interface{}) (string, string) {
 
 	labelContent = convertToImage(labelContent)
 
-	label := fmt.Sprintf("<label class=\"input-group-text text-light\" style=\"background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)\">%s</label>", labelContent)
+	label := fmt.Sprintf("<label for=\"%s\" class=\"input-group-text text-light\" style=\"background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)\">%s</label>", labelFor, labelContent)
 
 	if labelSide == "left" {
 		return label, ""
