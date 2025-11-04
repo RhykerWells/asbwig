@@ -11,42 +11,42 @@ import (
 // Config defines the general struct to pass data to and from the dashboard template/context data
 type Config struct {
 	// General
-	GuildID              string
-	EconomyEnabled		 bool
-	EconomySymbol               string
-	EconomyStartBalance         int64
+	GuildID             string
+	EconomyEnabled      bool
+	EconomySymbol       string
+	EconomyStartBalance int64
 
 	// Money making management
-	EconomyMinReturn                  int64
-	EconomyMaxReturn                  int64
-	EconomyMaxBet               int64
+	EconomyMinReturn int64
+	EconomyMaxReturn int64
+	EconomyMaxBet    int64
 
 	// Custom responses
 	EconomyCustomWorkResponsesEnabled  bool
-	EconomyCustomWorkResponses  []string
+	EconomyCustomWorkResponses         []string
 	EconomyCustomCrimeResponsesEnabled bool
-	EconomyCustomCrimeResponses []string
+	EconomyCustomCrimeResponses        []string
 }
 
 // ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
 func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 	return &models.EconomyConfig{
 		// General
-		GuildID:              c.GuildID,
-		EconomyEnabled:		c.EconomyEnabled,
-		EconomySymbol:                  c.EconomySymbol,
-		EconomyStartBalance:               c.EconomyStartBalance,
+		GuildID:             c.GuildID,
+		EconomyEnabled:      c.EconomyEnabled,
+		EconomySymbol:       c.EconomySymbol,
+		EconomyStartBalance: c.EconomyStartBalance,
 
 		// Money making management
-		EconomyMinReturn:               c.EconomyMinReturn,
-		EconomyMaxReturn:         c.EconomyMaxReturn,
-		EconomyMaxBet:  c.EconomyMaxBet,
+		EconomyMinReturn: c.EconomyMinReturn,
+		EconomyMaxReturn: c.EconomyMaxReturn,
+		EconomyMaxBet:    c.EconomyMaxBet,
 
 		// Custom responses
-		EconomyCustomWorkResponsesEnabled: c.EconomyCustomWorkResponsesEnabled,
-		EconomyCustomWorkResponses: c.EconomyCustomWorkResponses,
+		EconomyCustomWorkResponsesEnabled:  c.EconomyCustomWorkResponsesEnabled,
+		EconomyCustomWorkResponses:         c.EconomyCustomWorkResponses,
 		EconomyCustomCrimeResponsesEnabled: c.EconomyCustomCrimeResponsesEnabled,
-		EconomyCustomCrimeResponses: c.EconomyCustomCrimeResponses,
+		EconomyCustomCrimeResponses:        c.EconomyCustomCrimeResponses,
 	}
 }
 
@@ -54,21 +54,21 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 func ConfigFromModel(m *models.EconomyConfig) *Config {
 	return &Config{
 		// General
-		GuildID:              m.GuildID,
-		EconomyEnabled:		m.EconomyEnabled,
-		EconomySymbol:                  m.EconomySymbol,
-		EconomyStartBalance:               m.EconomyStartBalance,
+		GuildID:             m.GuildID,
+		EconomyEnabled:      m.EconomyEnabled,
+		EconomySymbol:       m.EconomySymbol,
+		EconomyStartBalance: m.EconomyStartBalance,
 
 		// Money making management
-		EconomyMinReturn:               m.EconomyMinReturn,
-		EconomyMaxReturn:         m.EconomyMaxReturn,
-		EconomyMaxBet: m.EconomyMaxBet,
+		EconomyMinReturn: m.EconomyMinReturn,
+		EconomyMaxReturn: m.EconomyMaxReturn,
+		EconomyMaxBet:    m.EconomyMaxBet,
 
 		// Custom responses
-		EconomyCustomWorkResponsesEnabled: m.EconomyCustomWorkResponsesEnabled,
-		EconomyCustomWorkResponses: m.EconomyCustomWorkResponses,
+		EconomyCustomWorkResponsesEnabled:  m.EconomyCustomWorkResponsesEnabled,
+		EconomyCustomWorkResponses:         m.EconomyCustomWorkResponses,
 		EconomyCustomCrimeResponsesEnabled: m.EconomyCustomCrimeResponsesEnabled,
-		EconomyCustomCrimeResponses: m.EconomyCustomCrimeResponses,
+		EconomyCustomCrimeResponses:        m.EconomyCustomCrimeResponses,
 	}
 }
 

@@ -20,7 +20,7 @@ var (
 		// Misc
 		"lower": lower,
 		// Data types
-		"dict":  dict,
+		"dict":       dict,
 		"stringDict": stringDict,
 		// Forms content
 		"textInput":            textInput,
@@ -57,9 +57,9 @@ func lower(str string) string {
 // textInput generates a HTML element for a text input field.
 //
 // Parameters:
-//	- currentInput: the current input of the input
-// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-// 	- opts: An optional key/value map of additional parameters.
+//   - currentInput: the current input of the input
+//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+//   - opts: An optional key/value map of additional parameters.
 func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 
@@ -107,12 +107,11 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 // numberSelection generates a HTML element for a number input field.
 //
 // Parameters:
-//	- min: lowest number possible
-// 	- max: highest number possible
-// 	- currentNumber: the current number
-// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-// 	- opts: An optional key/value map of additional parameters such as label settings.
-// 			See inputLabel for supported keys
+//   - min: lowest number possible
+//   - max: highest number possible
+//   - currentNumber: the current number
+//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+//   - opts: An optional key/value map of additional parameters such as label settings.
 func numberSelection(min, max, currentNumber int64, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 	menu.WriteString(`<div class="input-group mb-3">`)
@@ -341,7 +340,7 @@ func inputLabel(labelFor string, opts map[string]interface{}) (string, string) {
 	labelContent := opts["labelContent"].(string)
 	labelSide := opts["labelSide"].(string)
 
-	if !labelEnabled || (labelSide != "left" && labelSide != "right"){
+	if !labelEnabled || (labelSide != "left" && labelSide != "right") {
 		return "", ""
 	}
 
