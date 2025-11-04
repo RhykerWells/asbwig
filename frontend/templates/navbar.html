@@ -61,7 +61,7 @@
 								<img src="{{.User.AvatarURL "1024"}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
 							</figure>
 							<span class="d-flex flex-column">
-								<span>{{.User.GlobalName}}</span>
+								<span>{{or .User.GlobalName .User.Username}}</span>
 							</span>
 						</a>
 						<ul class="dropdown-menu logoutarea" aria-labelledby="navbarDropdown">
