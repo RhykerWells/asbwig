@@ -16,6 +16,7 @@ import (
 // EconomySetup runs the following:
 //   - The schema initialiser
 //   - Registration of the guild and user join/leave functions
+//   - Initialises the web plugin
 //   - Registration of the economy commands & their pagination
 func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
@@ -31,6 +32,8 @@ func EconomySetup(cmdHandler *dcommand.CommandHandler) {
 	events.RegisterGuildMemberLeavefunctions([]func(g *discordgo.GuildMemberRemove){
 		guildMemberRemoveFromEconomy,
 	})
+
+	initWeb()
 
 	// Information commands
 	cmdHandler.RegisterCommands(informationCommands...)

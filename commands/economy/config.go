@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/RhykerWells/asbwig/commands/economy/models"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
@@ -91,4 +92,14 @@ func SaveConfig(config *Config) error {
 	}
 
 	return nil
+}
+
+// getGuildShop returns the guild shop
+func getGuildShop(guildID string) models.EconomyShopSlice {
+	models, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guildID)).All(context.Background(), common.PQ)
+	if err != nil {
+		return nil
+	}
+
+	return models
 }

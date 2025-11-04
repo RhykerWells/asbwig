@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="{{.HomeURL}}/static/img/avatar.png">
+	<title>ASBWIG | {{.CurrentGuild.Name}}</title>
+	<!-- Discord embed link -->
+	<meta content="ASBWIG" property="og:title"/>
+	<meta content="Oh boy it's another Discord bot" property="og:description"/>
+	<meta content="{{.HomeURL}}" property="og:url"/>
+	<meta content="#08060d" data-react-helmet="true" name="theme-color"/>
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- Font awesome -->
+	<script src="https://kit.fontawesome.com/f8e6b016a3.js" crossorigin="anonymous"></script>
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="{{.HomeURL}}/static/css/dashboard.css">
+</head>
+<body class="text-light">
+	{{template "dashboard_nav" .}}
+	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
+		<div class="m-4 w-100">
+			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
+			<form id="CoreForm" method="POST">
+				<input type="hidden" name="form_type" value="Core">
+				<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
+					<div class="order-2 w-100 mt-2">
+						<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
+							<div class="d-flex align-items-center">
+								{{toggleSwitch .EconomyConfig.EconomyEnabled "EconomyEnabled"}}
+								<h2 class="mb-0">Economy</h2>
+							</div>
+							<button type="submit" class="btn btn-success">Save changes</button>
+						</div>
+					</div>
+				</div>
+				<div class="container-fluid my-4 px-0">
+					<div class="row">
+						<div class="col-md-4 mb-4">
+							<div class="card">
+								<div class="card-header">
+									<h5>Currency symbol</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code></p>
+									{{textInput .EconomyConfig.EconomySymbol "EconomySymbol"}}
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4 mb-4">
+							<div class="card">
+								<div class="d-flex align-items-center card-header">
+									<h5>Start balance</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Note: setting <code>0</code> will result in new members staring at 0.</p>
+									{{numberSelect 0 0 .EconomyConfig.EconomyStartBalance "EconomyStartBalance" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4 d-none d-md-block"></div>
+						<div class="col-md-4 mb-4">
+							<div class="card">
+								<div class="d-flex align-items-center card-header">
+									<h5>Minimum payout</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code></p>
+									{{numberSelect 1 .EconomyConfig.EconomyMaxReturn .EconomyConfig.EconomyMinReturn "EconomyMinReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4 mb-4">
+							<div class="card">
+								<div class="d-flex align-items-center card-header">
+									<h5>Maximum payout</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code></p>
+									{{numberSelect .EconomyConfig.EconomyMinReturn 0 .EconomyConfig.EconomyMaxReturn "EconomyMaxReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4 mb-4">
+							<div class="card">
+								<div class="d-flex align-items-center card-header">
+									<h5>Maximum bet amount</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Note: This affects gambling related command</p>
+									{{numberSelect 0 0 .EconomyConfig.EconomyMaxBet "EconomyMaxBet" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom responses</h2>
+				<div id="responses" class="container-fluid my-4 px-0">
+					<div class="row">
+						{{range $_, $customResponse := dict 1 "Work" 2 "Crime"}}
+						{{$responses := $.EconomyConfig.EconomyCustomWorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.EconomyConfig.EconomyCustomCrimeResponses}}{{end}}
+						<div class="col">
+							<div class="card">
+								<div class="d-flex align-items-center card-header">
+									{{if eq $customResponse "Work"}}
+									{{toggleSwitch $.EconomyConfig.EconomyCustomWorkResponsesEnabled "EconomyCustomWorkResponsesEnabled"}}
+									{{else}}
+									{{toggleSwitch $.EconomyConfig.EconomyCustomCrimeResponsesEnabled "EconomyCustomCrimeResponsesEnabled"}}
+									{{end}}
+									<h5>Custom {{lower $customResponse}} responses</h5>
+								</div>
+								<div class="card-body">
+									<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{lower $customResponse}}ResponsesModal">View & edit {{lower $customResponse}} responses</button>
+								</div>
+								<div class="modal fade" id="{{lower $customResponse}}ResponsesModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+									<div class="modal-dialog modal-dialog-centered modal-xl">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5>{{$customResponse}} responses</h5>
+												<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+											</div>
+											<div class="modal-body">
+												<p class="card-text">Note: the bot will automatically use custom responses instead of the in-built one if there are any present.</p>
+												<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new{{$customResponse}}Response">Add new response</button>
+												<div class="table-responsive">
+													<table class="table table-striped" id="{{lower $customResponse}}Table" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%);">
+														<thead>
+															<tr>
+																<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
+																<th>Response</th>
+															</tr>
+														</thead>
+														<tbody>
+															{{range $i, $response := $responses}}
+															<tr>
+																<td>
+																	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit{{$customResponse}}Response{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
+																	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#delete{{$customResponse}}Response{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
+																</td>
+																<td class="text-truncate">{{$response}}</td>
+															</tr>
+															{{end}}
+															<tr id="{{lower $customResponse}}NoResultsRow" class="text-center" colspan="3" {{if $responses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
+														</tbody>
+													</table>
+													<div id="{{lower $customResponse}}Table-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{{end}}
+					</div>
+				</div>
+			</form>
+			{{range $_, $customResponse := dict 1 "Work" 2 "Crime"}}
+			{{$responses := $.EconomyConfig.EconomyCustomWorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.EconomyConfig.EconomyCustomCrimeResponses}}{{end}}
+			{{range $i, $response := $responses}}
+			<div class="modal fade" id="edit{{$customResponse}}Response{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+				<div class="modal-dialog modal-dialog-centered modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5>Response #{{add $i 1}}</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+						</div>
+						<form id="edit{{$customResponse}}Response{{$i}}Form" method="POST">
+							<input type="hidden" name="form_type" value="edit{{$customResponse}}Response">
+							<input type="hidden" name="index" value="{{$i}}">
+							<div class="modal-body">
+								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
+								<span>{{textInput $response (printf "%d%sResponse" $i $customResponse)}}</span>
+							</div>
+							<div class="modal-footer justify-content-between">
+								<div>
+									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
+									<button type="submit" class="btn btn-success">Save changes</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="modal fade" id="delete{{$customResponse}}Response{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+				<div class="modal-dialog modal-dialog-centered modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5>Response #{{add $i 1}}</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+						</div>
+						<form id="delete{{$customResponse}}Response{{$i}}Form" method="POST">
+							<input type="hidden" name="form_type" value="delete{{$customResponse}}Response">
+							<input type="hidden" name="index" value="{{$i}}">
+							<div class="modal-body">
+								<p class="card-text">This cannot be undone!</p>
+								<span>You are deleting: "<code>{{$response}}</code>"</span>
+							</div>
+							<div class="modal-footer justify-content-between">
+								<div>
+									<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-danger">Delete response</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			{{end}}
+			<div class="modal fade" id="new{{$customResponse}}Response" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+				<div class="modal-dialog modal-dialog-centered modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5>New response</h5>
+							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+						</div>
+						<form id="new{{$customResponse}}ResponseForm" method="POST">
+							<input type="hidden" name="form_type" value="new{{$customResponse}}Response">
+							<div class="modal-body">
+								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
+								{{textInput "" (printf "%sResponse" (lower $customResponse))}}
+							</div>
+							<div class="modal-footer justify-content-between">
+								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
+								<button type="submit" class="btn btn-success">Save changes</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			{{end}}
+		</div>
+	</main>
+	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+</body>
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const tables = ["workTable", "crimeTable"];
+		const noResponseRows = ["workNoResultsRow", "crimeNoResultsRow"];
+
+		tables.forEach((tableID, index) => {
+			// Initial load
+			filterResponses(tableID, noResponseRows[index], [], true);
+		});
+	});
+</script>
+<script src="{{.HomeURL}}/static/js/dropdownDisplay.js"></script>
+<script src="{{.HomeURL}}/static/js/saveForm.js"></script>
+<script src="{{.HomeURL}}/static/js/toasts.js"></script>
+<script src="{{.HomeURL}}/static/js/misc.js"></script>
+</html>
