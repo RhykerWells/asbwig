@@ -4,14 +4,9 @@
 		<a class="navbar-brand" href="#">
 			<img src="{{.HomeURL}}/static/img/avatar.svg" alt="logo" width="64" height="64">
 		</a>
-		<form class="navbar-login-section d-flex">
-			{{if not .User}}
-			<a class="btn me-2 btn-outline-light" href="{{.HomeURL}}/login">Login</a>
-			{{else}}
-			<a class="btn me-2 btn-outline-light" href="{{.HomeURL}}/logout">Logout</a>
-			{{end}}
+		<div class="navbar-login-section d-flex">
 			<a class="btn btn-outline-light" href="{{.HomeURL}}/dashboard">Dashboard</a>
-		</form>
+		</div>
 	</div>
 </nav>
 {{end}}
