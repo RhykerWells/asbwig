@@ -211,7 +211,7 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 
 		user, err := checkUserCookie(w, r)
 		if err != nil {
-			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
+			inner.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 
