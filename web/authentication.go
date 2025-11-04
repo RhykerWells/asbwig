@@ -82,15 +82,13 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 
 // handleLogout handles the logout route and ensures that all cookies related to data storage are removed
 func handleLogout(w http.ResponseWriter, r *http.Request) {
-	userCookie, err := r.Cookie("asbwig_userinfo")
-	if err != nil {
-		return
+	if userCookie, err := r.Cookie("asbwig_userinfo"); err == nil {
+		deleteCookie(w, userCookie)
 	}
-	deleteCookie(w, userCookie)
-	csrfCookie, err := r.Cookie("asbwig_csrf")
-	if err != nil {
-		return
+
+	if csrfCookie, err := r.Cookie("asbwig_csrf"); err == nil {
+		deleteCookie(w, csrfCookie)
 	}
-	deleteCookie(w, csrfCookie)
+
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
