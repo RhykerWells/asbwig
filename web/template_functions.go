@@ -4,21 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"net/url"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
 	templateFunctions = map[string]interface{}{
-		// Math
-		"add": func(a, b int) int { return a + b },
 		// Misc
 		"lower": lower,
+		"getJoinLink": getJoinLink,
+		// Math
+		"add": func(a, b int) int { return a + b },
 		// Data types
 		"dict":       dict,
 		"stringDict": stringDict,
@@ -31,6 +34,14 @@ var (
 		"channelOptionsSingle": channelOptionsSingle,
 	}
 )
+
+func lower(str string) string {
+	return strings.ToLower(str)
+}
+
+func getJoinLink(guildID interface{}) string {
+    return fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&guild_id=%v&response_type=code&redirect_uri=%s", common.ConfigBotClientID, guildID, url.PathEscape(URL+"/dashboard"))
+}
 
 func dict(pairs ...interface{}) map[int]interface{} {
 	result := make(map[int]interface{})
@@ -48,10 +59,6 @@ func stringDict(pairs ...interface{}) map[string]interface{} {
 		result[key] = pairs[i+1]
 	}
 	return result
-}
-
-func lower(str string) string {
-	return strings.ToLower(str)
 }
 
 // textInput generates a HTML element for a text input field.
