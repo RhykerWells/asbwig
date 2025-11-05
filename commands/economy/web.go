@@ -168,18 +168,18 @@ func saveItemHandler(w http.ResponseWriter, r *http.Request) {
 	index := r.FormValue("index")
 
 	var err error
-	
+
 	formType := r.FormValue("form_type")
 	switch formType {
 	case "editItem":
 		htmlInput := fmt.Sprintf("editItem%s", index)
 
-		name := r.FormValue(htmlInput+"Name")
-		description := r.FormValue(htmlInput+"Description")
-		price := r.FormValue(htmlInput+"Price")
-		quantity := r.FormValue(htmlInput+"Quantity")
-		role := r.FormValue(htmlInput+"Role")
-		reply := r.FormValue(htmlInput+"Reply")
+		name := r.FormValue(htmlInput + "Name")
+		description := r.FormValue(htmlInput + "Description")
+		price := r.FormValue(htmlInput + "Price")
+		quantity := r.FormValue(htmlInput + "Quantity")
+		role := r.FormValue(htmlInput + "Role")
+		reply := r.FormValue(htmlInput + "Reply")
 
 		if r.FormValue("item") != name {
 			if !newItemNameOk(w, guildID, name) {
@@ -187,19 +187,19 @@ func saveItemHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput+"NameMaxLength"))
+		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
 		if len(name) > nameMaxLength {
 			web.SendErrorToast(w, fmt.Sprintf("The name must be less than %d characters.", nameMaxLength))
 			return
 		}
 
-		descriptionMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput+"NameMaxLength"))
+		descriptionMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
 		if len(description) > descriptionMaxLength {
 			web.SendErrorToast(w, fmt.Sprintf("The description must be less than %d characters.", descriptionMaxLength))
 			return
 		}
 
-		replyMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput+"ReplyMaxLength"))
+		replyMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "ReplyMaxLength"))
 		if len(reply) > replyMaxLength {
 			web.SendErrorToast(w, fmt.Sprintf("The reply must be less than %d characters.", replyMaxLength))
 			return
@@ -234,19 +234,19 @@ func saveItemHandler(w http.ResponseWriter, r *http.Request) {
 	case "newItem":
 		htmlInput := "newItem"
 
-		name := r.FormValue(htmlInput+"Name")
-		description := r.FormValue(htmlInput+"Description")
-		price := r.FormValue(htmlInput+"Price")
-		quantity := r.FormValue(htmlInput+"Quantity")
-		role := r.FormValue(htmlInput+"Role")
-		reply := r.FormValue(htmlInput+"Reply")
+		name := r.FormValue(htmlInput + "Name")
+		description := r.FormValue(htmlInput + "Description")
+		price := r.FormValue(htmlInput + "Price")
+		quantity := r.FormValue(htmlInput + "Quantity")
+		role := r.FormValue(htmlInput + "Role")
+		reply := r.FormValue(htmlInput + "Reply")
 		if r.FormValue("item") != name {
 			if !newItemNameOk(w, guildID, name) {
 				return
 			}
 		}
 
-		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput+"NameMaxLength"))
+		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
 		if len(name) > nameMaxLength {
 			web.SendErrorToast(w, fmt.Sprintf("The name must be less than %d characters.", nameMaxLength))
 			return
@@ -257,15 +257,14 @@ func saveItemHandler(w http.ResponseWriter, r *http.Request) {
 			role = ""
 		}
 
-
 		item := models.EconomyShop{
-			GuildID: guildID,
-			Name: name,
+			GuildID:     guildID,
+			Name:        name,
 			Description: description,
-			Price: functions.ToInt64(price),
-			Quantity: functions.ToInt64(quantity),
-			Role: role,
-			Reply: reply,
+			Price:       functions.ToInt64(price),
+			Quantity:    functions.ToInt64(quantity),
+			Role:        role,
+			Reply:       reply,
 		}
 		err = item.Insert(context.Background(), common.PQ, boil.Infer())
 	}

@@ -4,23 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"net/url"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
+	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
 	templateFunctions = map[string]interface{}{
-		// Math
-		"add": func(a, b int) int { return a + b },
 		// Misc
 		"lower": lower,
+		"getJoinLink": getJoinLink,
+		// Math
+		"add": func(a, b int) int { return a + b },
 		// Data types
-		"dict":  dict,
+		"dict":       dict,
 		"stringDict": stringDict,
 		// Forms content
 		"textInput":            textInput,
@@ -31,6 +34,14 @@ var (
 		"channelOptionsSingle": channelOptionsSingle,
 	}
 )
+
+func lower(str string) string {
+	return strings.ToLower(str)
+}
+
+func getJoinLink(guildID interface{}) string {
+    return fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&guild_id=%v&response_type=code&redirect_uri=%s", common.ConfigBotClientID, guildID, url.PathEscape(URL+"/dashboard"))
+}
 
 func dict(pairs ...interface{}) map[int]interface{} {
 	result := make(map[int]interface{})
@@ -50,16 +61,12 @@ func stringDict(pairs ...interface{}) map[string]interface{} {
 	return result
 }
 
-func lower(str string) string {
-	return strings.ToLower(str)
-}
-
 // textInput generates a HTML element for a text input field.
 //
 // Parameters:
-//	- currentInput: the current input of the input
-// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-// 	- opts: An optional key/value map of additional parameters.
+//   - currentInput: the current input of the input
+//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+//   - opts: An optional key/value map of additional parameters.
 func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 
@@ -107,12 +114,11 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 // numberSelection generates a HTML element for a number input field.
 //
 // Parameters:
-//	- min: lowest number possible
-// 	- max: highest number possible
-// 	- currentNumber: the current number
-// 	- uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-// 	- opts: An optional key/value map of additional parameters such as label settings.
-// 			See inputLabel for supported keys
+//   - min: lowest number possible
+//   - max: highest number possible
+//   - currentNumber: the current number
+//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+//   - opts: An optional key/value map of additional parameters such as label settings.
 func numberSelection(min, max, currentNumber int64, uniqueID string, opts ...map[string]interface{}) template.HTML {
 	var menu strings.Builder
 	menu.WriteString(`<div class="input-group mb-3">`)
@@ -341,7 +347,7 @@ func inputLabel(labelFor string, opts map[string]interface{}) (string, string) {
 	labelContent := opts["labelContent"].(string)
 	labelSide := opts["labelSide"].(string)
 
-	if !labelEnabled || (labelSide != "left" && labelSide != "right"){
+	if !labelEnabled || (labelSide != "left" && labelSide != "right") {
 		return "", ""
 	}
 

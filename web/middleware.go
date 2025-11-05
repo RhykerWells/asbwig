@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -16,7 +17,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
+	"github.com/sirupsen/logrus"
 	"goji.io/v3/pat"
+	"golang.org/x/oauth2"
 )
 
 var sessionStore = cache.New(24*time.Hour*30, 1*time.Hour)
@@ -66,9 +69,9 @@ func getCSRF(w http.ResponseWriter, r *http.Request) string {
 }
 
 // setUserDataCookie sets the cookie containing the users account data
-func setUserSession(w http.ResponseWriter, user *discordgo.User) {
+func setUserSession(w http.ResponseWriter, token *oauth2.Token) {
 	sessionID := uuid.NewString()
-	sessionStore.Set(sessionID, user, cache.DefaultExpiration)
+	sessionStore.Set(sessionID, token, cache.DefaultExpiration)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "asbwig_userinfo",
@@ -79,20 +82,20 @@ func setUserSession(w http.ResponseWriter, user *discordgo.User) {
 }
 
 // getUserSession retrieves the user data from the user session cookie
-func getUserSession(sessionID string) (*discordgo.User, bool) {
+func getUserSession(sessionID string) (*oauth2.Token, bool) {
 	if data, found := sessionStore.Get(sessionID); found {
-		return data.(*discordgo.User), true
+		return data.(*oauth2.Token), true
 	}
 	return nil, false
 }
 
 // checkUserCookie checks the stored browser cookie and returns the users information or an error
-func checkUserCookie(w http.ResponseWriter, r *http.Request) (*discordgo.User, error) {
+func checkUserCookie(w http.ResponseWriter, r *http.Request) (*oauth2.Token, error) {
 	cookie, err := r.Cookie("asbwig_userinfo")
 	if err == nil {
 		// Verify cookie session
-		if user, found := getUserSession(cookie.Value); found {
-			return user, nil
+		if token, found := getUserSession(cookie.Value); found {
+			return token, nil
 		}
 
 		// If verification failed — clear the bad cookie
@@ -103,7 +106,7 @@ func checkUserCookie(w http.ResponseWriter, r *http.Request) (*discordgo.User, e
 			Expires: time.Unix(0, 0),
 		})
 	}
-	return nil, errors.New("no valid session found")
+	return nil, errors.New("no session found")
 }
 
 // deleteCookie deletes the specified HTTP cookie from local storage
@@ -113,12 +116,14 @@ func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 	http.SetCookie(w, cookie)
 }
 
-// getUserManagedGuilds returns the guild IDs of the guilds that the bot is in
-// where the user has Owner, Manage Server or Administrator permissions
-func getUserManagedGuilds(userID string) map[string]string {
+// getUserGuilds returns the guild IDs that the user can currently manage
+// and the guild IDs that the user has the correct permission to manage if the bot is added
+func getUserManagedGuilds(w http.ResponseWriter, r *http.Request, ctx context.Context, token *oauth2.Token) (map[string]string, map[string]string) {
+	user := tokenToUser(w, r, ctx, token)
+
 	managedGuilds := make(map[string]string)
 	for _, guild := range common.Session.State.Guilds {
-		member, err := common.Session.GuildMember(guild.ID, userID)
+		member, err := common.Session.GuildMember(guild.ID, user.ID)
 		if err != nil {
 			continue
 		}
@@ -129,13 +134,44 @@ func getUserManagedGuilds(userID string) map[string]string {
 		}
 	}
 
-	return managedGuilds
+	client := OauthConf.Client(ctx, token)
+	resp, err := client.Get("https://discord.com/api/v10/users/@me/guilds")
+	if err != nil {
+	}
+
+	if resp.StatusCode != http.StatusOK {
+	}
+	defer resp.Body.Close()
+
+	type PartialGuild struct {
+		ID          string `json:"id"`
+		Name        string `json:"name"`
+		Permissions string `json:"permissions"`
+	}
+	var guilds []PartialGuild
+	json.NewDecoder(resp.Body).Decode(&guilds)
+
+	availableGuilds := make(map[string]string)
+	for _, guild := range guilds {
+		if _, ok := managedGuilds[guild.ID]; ok {
+			continue
+		}
+		logrus.Infoln(guild.Name)
+
+		permInt, _ := strconv.Atoi(guild.Permissions)
+		var requiredPerms = discordgo.PermissionManageServer | discordgo.PermissionAdministrator
+		if permInt&requiredPerms != 0 {
+			availableGuilds[guild.ID] = guild.Name
+		}
+	}
+
+	return managedGuilds, availableGuilds
 }
 
 // isUserManaged returns a boolean of whether or not the user has the permissions to manage the guild
 // Permissions required are: Owner, Manage Server or Administrator
 func isUserManaged(guildID string, member *discordgo.Member) bool {
-	guild, err := common.Session.State.Guild(guildID)
+	guild, err := common.Session.Guild(guildID)
 	if err == nil && guild.OwnerID == member.User.ID {
 		return true
 	}
@@ -165,11 +201,12 @@ func validateGuild(inner http.Handler) http.Handler {
 			return
 		}
 
-		user, err := checkUserCookie(w, r)
+		token, err := checkUserCookie(w, r)
 		if err != nil {
 			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
 			return
 		}
+		user := tokenToUser(w, r, r.Context(), token)
 
 		member, err := functions.GetMember(guildIDStr, user.ID)
 		if err != nil {
@@ -209,31 +246,26 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		user, err := checkUserCookie(w, r)
+		token, err := checkUserCookie(w, r)
 		if err != nil {
 			inner.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
+		user := tokenToUser(w, r, ctx, token)
 
-		guilds := getUserManagedGuilds(user.ID)
-		guildList := make([]map[string]interface{}, 0)
-		for guildID, guildName := range guilds {
-			avatarURL := URL + "/static/img/icons/cross.png"
-			if guild, err := common.Session.Guild(guildID); err == nil {
-				if url := guild.IconURL("1024"); url != "" {
-					avatarURL = url
-				}
-			}
-			guildList = append(guildList, TmplContextData{
-				"ID":     guildID,
-				"Avatar": avatarURL,
-				"Name":   guildName,
-			})
+		managedGuilds, availableGuilds := getUserManagedGuilds(w, r, ctx, token)
+		// Remove managed guilds from available list
+		for id := range managedGuilds {
+			delete(availableGuilds, id)
 		}
+
+		fullManagedGuilds := getPopulatedGuildList(managedGuilds, URL + "/static/img/icons/question.svg", true)
+		fullAvailableGuilds := getPopulatedGuildList(availableGuilds, URL + "/static/img/icons/plus.svg", false)
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["User"] = user
-		tmplData["ManagedGuilds"] = guildList
+		tmplData["ManagedGuilds"] = fullManagedGuilds
+		tmplData["AvailableGuilds"] = fullAvailableGuilds
 
 		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
@@ -272,7 +304,7 @@ func currentGuildDataMW(inner http.Handler) http.Handler {
 			"BotHighestRolePosition": role.Position,
 		}
 		if guildData["Avatar"] == "" {
-			guildData["Avatar"] = URL + "/static/img/icons/cross.png"
+			guildData["Avatar"] = URL + "/static/img/icons/question.svg"
 		}
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
@@ -313,18 +345,47 @@ func urlDataMW(inner http.Handler) http.Handler {
 	return http.HandlerFunc(middleware)
 }
 
-/* generic middleware setup
-// genericMiddlewareNameMW provides middleware to parse XXXX data (and YYYY) to the template data
-func genericMiddlewareNameMW(inner http.Handler) http.Handler {
-	middleware := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func getPopulatedGuildList(guilds map[string]string, defaultIcon string, useGuildIcon bool) []map[string]interface{} {
+	guildList := make([]map[string]interface{}, 0)
+	for guildID, guildName := range guilds {
+		avatarURL := defaultIcon
+		if useGuildIcon {
+			if guild, err := common.Session.Guild(guildID); err == nil {
+				if url := guild.IconURL("1024"); url != "" {
+					avatarURL = url
+				}
+			}
+		}
 
-		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
-
-		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
-		inner.ServeHTTP(w, r.WithContext(ctx))
+		guildList = append(guildList, TmplContextData{
+			"ID":     guildID,
+			"Avatar": avatarURL,
+			"Name":   guildName,
+		})
 	}
 
-	return http.HandlerFunc(middleware)
+	return guildList
 }
-*/
+
+func tokenToUser(w http.ResponseWriter, r *http.Request, ctx context.Context, token *oauth2.Token) *discordgo.User {
+	client := OauthConf.Client(ctx, token)
+	resp, err := client.Get("https://discord.com/api/v10/users/@me")
+	if err != nil {
+		http.Redirect(w, r, "/?error=failed_retrieving_info", http.StatusTemporaryRedirect)
+		return nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		http.Redirect(w, r, "/?error=discord_api_error", http.StatusTemporaryRedirect)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	var user *discordgo.User
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		http.Redirect(w, r, "/?error=json_decode_error", http.StatusTemporaryRedirect)
+		return nil
+	}
+
+	return user
+}

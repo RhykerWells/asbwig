@@ -1,12 +1,9 @@
 package web
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/common"
-	"github.com/bwmarrin/discordgo"
 	"golang.org/x/oauth2"
 )
 
@@ -17,10 +14,10 @@ func initDiscordOauth() {
 	OauthConf = &oauth2.Config{
 		ClientID:     common.ConfigBotClientID,
 		ClientSecret: common.ConfigBotSecret,
-		Scopes:       []string{"identify"},
+		Scopes:       []string{"identify", "guilds"},
 		Endpoint: oauth2.Endpoint{
-			TokenURL: "https://discordapp.com/api/oauth2/token",
-			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
+			TokenURL: "https://discord.com/api/oauth2/token",
+			AuthURL:  "https://discord.com/api/oauth2/authorize",
 		},
 	}
 	OauthConf.RedirectURL = "https://" + common.ConfigASBWIGHost + "/confirm"
@@ -70,12 +67,7 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	var jsonData map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&jsonData)
-	var user *discordgo.User
-	user, _ = functions.GetUser(jsonData["id"].(string))
-
-	setUserSession(w, user)
+	setUserSession(w, token)
 
 	http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 }

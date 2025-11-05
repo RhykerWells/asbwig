@@ -24,7 +24,7 @@ import (
 )
 
 type FullEconomyMember struct {
-	EconomyUser models.EconomyUser
+	EconomyUser          models.EconomyUser
 	EconomyUserInventory models.EconomyUserInventorySlice
 }
 
@@ -36,10 +36,10 @@ func getFullEconomyMember(config *Config, memberID string) FullEconomyMember {
 	economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(config.GuildID), models.EconomyUserWhere.UserID.EQ(memberID)).One(context.Background(), common.PQ)
 	if err != nil {
 		economyUser = &models.EconomyUser{
-			GuildID: config.GuildID,
-			UserID: memberID,
-			Cash: guildEconomySettings.EconomyStartBalance,
-			Bank: 0,
+			GuildID:     config.GuildID,
+			UserID:      memberID,
+			Cash:        guildEconomySettings.EconomyStartBalance,
+			Bank:        0,
 			Cfwinchance: 50,
 		}
 	}
@@ -51,7 +51,7 @@ func getFullEconomyMember(config *Config, memberID string) FullEconomyMember {
 	}
 
 	return FullEconomyMember{
-		EconomyUser: *economyUser,
+		EconomyUser:          *economyUser,
 		EconomyUserInventory: economyUserInventory,
 	}
 }
@@ -100,7 +100,7 @@ func sendPaginatedEmbed[T any](channelID string, embed *discordgo.MessageEmbed, 
 		row.Components[0] = btnPrev
 		components[0] = row
 	}
-	if len(items) > (page - 1) * 10 {
+	if len(items) > (page-1)*10 {
 		row := components[0].(discordgo.ActionsRow)
 		btnNext := row.Components[1].(discordgo.Button)
 		btnNext.Disabled = false
@@ -169,7 +169,7 @@ var (
 type RouletteGame struct {
 	Bet       int64
 	PlayerIDs []string
-	HostID   string
+	HostID    string
 	IsActive  bool
 }
 
@@ -205,14 +205,14 @@ var informationCommands = []*dcommand.AsbwigCommand{
 					},
 					{
 						Name:   "Networth",
-						Value:  fmt.Sprint(cash+bank),
+						Value:  fmt.Sprint(cash + bank),
 						Inline: true,
 					},
 				},
 				Timestamp: time.Now().Format(time.RFC3339),
 				Color:     common.SuccessGreen,
 			}
-			
+
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		}),
 	},
@@ -294,7 +294,7 @@ func leaderboardPagination(s *discordgo.Session, b *discordgo.InteractionCreate)
 		if i == 10 {
 			break
 		}
-	
+
 		user, _ := functions.GetUser(economyUser.UserID)
 		cash := humanize.Comma(economyUser.Cash)
 		position, ordinalPosition := getUserCashRank(b.GuildID, economyUser.UserID)
@@ -321,7 +321,7 @@ func leaderboardPagination(s *discordgo.Session, b *discordgo.InteractionCreate)
 		components[0] = row
 	}
 
-	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components,}})
+	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components}})
 }
 
 var incomeCommands = []*dcommand.AsbwigCommand{
@@ -343,7 +343,7 @@ var incomeCommands = []*dcommand.AsbwigCommand{
 			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
 			cash := fullEconomyMember.EconomyUser.Cash
 
-			payout := rand.Int63n(guildConfig.EconomyMaxReturn - guildConfig.EconomyMinReturn + 1) + guildConfig.EconomyMinReturn
+			payout := rand.Int63n(guildConfig.EconomyMaxReturn-guildConfig.EconomyMinReturn+1) + guildConfig.EconomyMinReturn
 
 			embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guildConfig.EconomySymbol, humanize.Comma(payout))
 			if guildConfig.EconomyCustomWorkResponsesEnabled && len(guildConfig.EconomyCustomWorkResponses) > 0 {
@@ -379,7 +379,7 @@ var incomeCommands = []*dcommand.AsbwigCommand{
 			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
 			cash := fullEconomyMember.EconomyUser.Cash
 
-			payout := rand.Int63n(guildConfig.EconomyMaxReturn - guildConfig.EconomyMinReturn + 1) + guildConfig.EconomyMinReturn
+			payout := rand.Int63n(guildConfig.EconomyMaxReturn-guildConfig.EconomyMinReturn+1) + guildConfig.EconomyMinReturn
 
 			if rand.Int63n(2) == 1 {
 				embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guildConfig.EconomySymbol, humanize.Comma(payout))
@@ -706,7 +706,7 @@ var incomeCommands = []*dcommand.AsbwigCommand{
 				}
 
 				activeGames[data.GuildID] = &RouletteGame{
-					HostID:   data.Author.ID,
+					HostID:    data.Author.ID,
 					Bet:       bet,
 					PlayerIDs: []string{data.Author.ID},
 					IsActive:  false,
@@ -894,7 +894,7 @@ var transferCommands = []*dcommand.AsbwigCommand{
 
 			userEntry := models.EconomyUser{GuildID: data.GuildID, UserID: data.Author.ID, Cash: cash, Bank: bank}
 			userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash, models.EconomyUserColumns.Bank), boil.Infer())
-	
+
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		},
 	},
@@ -1000,7 +1000,7 @@ var transferCommands = []*dcommand.AsbwigCommand{
 			fullEconomyMember := getFullEconomyMember(guildConfig, member.User.ID)
 			cash := fullEconomyMember.EconomyUser.Cash
 			bank := fullEconomyMember.EconomyUser.Bank
-			
+
 			destination := data.Args[1]
 			amount := data.Args[2]
 			if destination == "cash" {
@@ -1063,7 +1063,7 @@ func startGame(config *Config, guildID, channelID string) {
 		member, _ := functions.GetMember(guildID, playerID)
 		field := &discordgo.MessageEmbedField{Name: member.User.Username, Value: member.Mention(), Inline: false}
 		fields = append(fields, field)
-	
+
 		userEntry := models.EconomyUser{GuildID: guildID, UserID: playerID, Cash: cash + payout}
 		userEntry.Upsert(context.Background(), common.PQ, true, []string{models.EconomyUserColumns.GuildID, models.EconomyUserColumns.UserID}, boil.Whitelist(models.EconomyUserColumns.Cash), boil.Infer())
 	}
@@ -1138,7 +1138,7 @@ var shopCommands = []*dcommand.AsbwigCommand{
 				fields = append(fields, itemField)
 			}
 			embed.Fields = fields
-			
+
 			sendPaginatedEmbed(data.ChannelID, embed, components, guildShop, page)
 		},
 	},
@@ -1255,7 +1255,7 @@ var shopCommands = []*dcommand.AsbwigCommand{
 				if inventoryItem.Name != item.Name {
 					continue
 				}
-				
+
 				newQuantity = inventoryItem.Quantity + buyQuantity
 				break
 			}

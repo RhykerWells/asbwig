@@ -27,7 +27,7 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<figure class="profile-picture me-3 mb-0">
-								<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/search.png{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
+								<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
 							</figure>
 							<span class="d-flex flex-column">
 								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
@@ -35,18 +35,31 @@
 							</span>
 						</a>
 						<ul class="dropdown-menu selectserverarea w-100" aria-labelledby="serverDropdown" style="min-width: auto;">
-							{{if .ManagedGuilds}}
-								{{range .ManagedGuilds}}
-									<li class="d-flex align-items-center gap-2 px-2 py-1">
-										<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-light serverbtn" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0rem;">
-											<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px; margin-left: 0.5rem">
-											{{.Name}}
-										</a>
-									</li>
-								{{end}}
-							{{else}}
-								<li><p class="dropdown-item serverbtn">You don't manage any servers</p></li>
+						{{if .ManagedGuilds}}
+							{{range .ManagedGuilds}}
+								<li class="d-flex align-items-center gap-2 px-2 py-1">
+									<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-light serverbtn" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0rem;">
+										<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px; margin-left: 0.5rem">
+										{{.Name}}
+									</a>
+								</li>
 							{{end}}
+						{{else}}
+							<li><p class="dropdown-item serverbtn">You don't manage any servers</p></li>
+						{{end}}
+						{{if and .ManagedGuilds .AvailableGuilds}}
+						<li>
+							<hr />
+						</li>
+						{{end}}
+						{{range .AvailableGuilds}}
+							<li class="d-flex align-items-center gap-2 px-2 py-1">
+								<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-light serverbtn" href="{{getJoinLink .ID}}" style="white-space: normal; word-break: break-word; padding-left: 0rem;">
+									<img src="{{$.HomeURL}}/static/img/icons/plus.svg" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px; margin-left: 0.5rem">
+									{{.Name}}
+								</a>
+							</li>
+						{{end}}
 						</ul>
 					</li>					
 					<div class="vr d-none d-sm-block me-2"></div>
