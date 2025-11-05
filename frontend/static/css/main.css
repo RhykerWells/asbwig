@@ -7,6 +7,9 @@
 
     color: white;
     font-family: Arial, Helvetica, sans-serif;
+
+    --bs-body-color: white;
+    --bs-font-sans-serif: 'Lexend', Arial, Helvetica, sans-serif;
 }
 
 /* Terms, Privacy etc */

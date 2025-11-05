@@ -232,6 +232,7 @@ func baseTemplateDataMW(inner http.Handler) http.Handler {
 		baseData := TmplContextData{
 			"HomeURL": URL,
 			"Year":    time.Now().UTC().Year(),
+			"Path": r.URL.Path,
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
 
