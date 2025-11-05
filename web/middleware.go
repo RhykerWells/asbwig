@@ -113,9 +113,9 @@ func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 	http.SetCookie(w, cookie)
 }
 
-// getUserManagedGuilds returns the guild IDs of the guilds that the bot is in
-// where the user has Owner, Manage Server or Administrator permissions
-func getUserManagedGuilds(userID string) map[string]string {
+// getUserGuilds returns the guild IDs that the user can currently manage
+// and the guild IDs that the user has the correct permission to manage if the bot is added
+func getUserManagedGuilds(userID string) (map[string]string, map[string]string) {
 	managedGuilds := make(map[string]string)
 	for _, guild := range common.Session.State.Guilds {
 		member, err := common.Session.GuildMember(guild.ID, userID)
@@ -129,8 +129,25 @@ func getUserManagedGuilds(userID string) map[string]string {
 		}
 	}
 
-	return managedGuilds
+	availableGuilds := make(map[string]string)
+	userGuilds, _ := common.Session.UserGuilds(200, "", "", false)
+	for _, guild := range userGuilds {
+		member, _ := common.Session.GuildMember(guild.ID, userID)
+
+		if _, ok := managedGuilds[guild.ID]; !ok {
+			continue
+		}
+
+		managed := isUserManaged(guild.ID, member)
+		if managed {
+			// Store the guild ID and name in the map
+			availableGuilds[guild.ID] = guild.Name
+		}
+	}
+
+	return managedGuilds, availableGuilds
 }
+
 
 // isUserManaged returns a boolean of whether or not the user has the permissions to manage the guild
 // Permissions required are: Owner, Manage Server or Administrator
@@ -215,25 +232,14 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 			return
 		}
 
-		guilds := getUserManagedGuilds(user.ID)
-		guildList := make([]map[string]interface{}, 0)
-		for guildID, guildName := range guilds {
-			avatarURL := URL + "/static/img/icons/cross.png"
-			if guild, err := common.Session.Guild(guildID); err == nil {
-				if url := guild.IconURL("1024"); url != "" {
-					avatarURL = url
-				}
-			}
-			guildList = append(guildList, TmplContextData{
-				"ID":     guildID,
-				"Avatar": avatarURL,
-				"Name":   guildName,
-			})
-		}
+		managedGuilds, availableGuilds := getUserManagedGuilds(user.ID)
+		fullManagedGuilds := getPopulatedGuildList(managedGuilds, URL + "/static/img/icons/question.svg", true)
+		fullAvailableGuilds := getPopulatedGuildList(availableGuilds, URL + "/static/img/icons/plus.svg", false)
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["User"] = user
-		tmplData["ManagedGuilds"] = guildList
+		tmplData["ManagedGuilds"] = fullManagedGuilds
+		tmplData["AvailableGuilds"] = fullAvailableGuilds
 
 		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
@@ -272,7 +278,7 @@ func currentGuildDataMW(inner http.Handler) http.Handler {
 			"BotHighestRolePosition": role.Position,
 		}
 		if guildData["Avatar"] == "" {
-			guildData["Avatar"] = URL + "/static/img/icons/cross.png"
+			guildData["Avatar"] = URL + "/static/img/icons/question.svg"
 		}
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
@@ -313,18 +319,24 @@ func urlDataMW(inner http.Handler) http.Handler {
 	return http.HandlerFunc(middleware)
 }
 
-/* generic middleware setup
-// genericMiddlewareNameMW provides middleware to parse XXXX data (and YYYY) to the template data
-func genericMiddlewareNameMW(inner http.Handler) http.Handler {
-	middleware := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func getPopulatedGuildList(guilds map[string]string, defaultIcon string, useGuildIcon bool) []map[string]interface{} {
+	guildList := make([]map[string]interface{}, 0)
+	for guildID, guildName := range guilds {
+		avatarURL := defaultIcon
+		if useGuildIcon {
+			if guild, err := common.Session.Guild(guildID); err == nil {
+				if url := guild.IconURL("1024"); url != "" {
+					avatarURL = url
+				}
+			}
+		}
 
-		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
-
-		ctx = context.WithValue(ctx, CtxKeyTmplData, tmplData)
-		inner.ServeHTTP(w, r.WithContext(ctx))
+		guildList = append(guildList, TmplContextData{
+			"ID":     guildID,
+			"Avatar": avatarURL,
+			"Name":   guildName,
+		})
 	}
 
-	return http.HandlerFunc(middleware)
+	return guildList
 }
-*/

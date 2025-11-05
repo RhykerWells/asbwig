@@ -17,10 +17,10 @@ func initDiscordOauth() {
 	OauthConf = &oauth2.Config{
 		ClientID:     common.ConfigBotClientID,
 		ClientSecret: common.ConfigBotSecret,
-		Scopes:       []string{"identify"},
+		Scopes:       []string{"identify", "guilds"},
 		Endpoint: oauth2.Endpoint{
-			TokenURL: "https://discordapp.com/api/oauth2/token",
-			AuthURL:  "https://discordapp.com/api/oauth2/authorize",
+			TokenURL: "https://discord.com/api/oauth2/token",
+			AuthURL:  "https://discord.com/api/oauth2/authorize",
 		},
 	}
 	OauthConf.RedirectURL = "https://" + common.ConfigASBWIGHost + "/confirm"
