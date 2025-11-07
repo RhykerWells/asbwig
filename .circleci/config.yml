@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Build the application
           command: |
-            go build -o asbwig ./cmd/asbwig  # Build the binary from cmd/asbwig/main.go
+            go build -o summit ./cmd/summit  # Build the binary from cmd/summit/main.go
 
 workflows:
   version: 2

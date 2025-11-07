@@ -1,27 +1,27 @@
 ## Discord 
 # Your Discord bot token
-ASBWIG_TOKEN=tokenXXXX
+SUMMIT_TOKEN=tokenXXXX
 # Your Discord bot client ID
-ASBWIG_CLIENTID=clientIDXXXX
+SUMMIT_CLIENTID=clientIDXXXX
 # Your Discord bot client secret
-ASBWIG_CLIENTSECRET=secretXXXX
+SUMMIT_CLIENTSECRET=secretXXXX
 # Your user ID (to access bot admin commands)
-ASBWIG_OWNERID=userIDXXXX
+SUMMIT_OWNERID=userIDXXXX
 
 ## Database
 # The host address of the PostgreSQL database
-ASBWIG_PGHOST=localhost
+SUMMIT_PGHOST=localhost
 # The name of the PostgreSQL database
-ASBWIG_PGDB=asbwig
+SUMMIT_PGDB=summit
 # The PostgreSQL username for connecting
-ASBWIG_PGUSER=asbwig
+SUMMIT_PGUSER=summit
 # The password for the PostgreSQL account for connecting
-ASBWIG_PGPASSWORD=password
+SUMMIT_PGPASSWORD=password
 
 ## Dashboard
 # The domain name or IP address where the bot dashboard is hosted
-ASBWIG_HOST=your_domain_here
+SUMMIT_HOST=your_domain_here
 # An optional override for the terms page link
-ASBWIG_TERMSURLOVERRIDE=your_full_URL_here # optional
+SUMMIT_TERMSURLOVERRIDE=your_full_URL_here # optional
 # An optional override for the privacy page link
-ASBWIG_PRIVACYURLOVERRIDE=your_full_URL_here # optional
+SUMMIT_PRIVACYURLOVERRIDE=your_full_URL_here # optional

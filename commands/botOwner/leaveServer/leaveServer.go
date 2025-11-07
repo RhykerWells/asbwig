@@ -1,12 +1,12 @@
 package leaveserver
 
 import (
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 )
 
-var Command = &dcommand.AsbwigCommand{
+var Command = &dcommand.SummitCommand{
 	Command:      "leaveserver",
 	Category:     dcommand.CategoryOwner,
 	Description:  "Forces the bot to leave a given server",

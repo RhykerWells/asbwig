@@ -7,11 +7,11 @@ import (
 
 	"slices"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/RhykerWells/durationutil"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -59,7 +59,7 @@ func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.
 	}
 }
 
-var warnCommand = &dcommand.AsbwigCommand{
+var warnCommand = &dcommand.SummitCommand{
 	Command:     "warn",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},
@@ -118,7 +118,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
-var muteCommand = &dcommand.AsbwigCommand{
+var muteCommand = &dcommand.SummitCommand{
 	Command:     "mute",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},
@@ -202,7 +202,7 @@ var muteCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
-var unmuteCommand = &dcommand.AsbwigCommand{
+var unmuteCommand = &dcommand.SummitCommand{
 	Command:     "unmute",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},
@@ -280,7 +280,7 @@ var unmuteCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
-var kickCommand = &dcommand.AsbwigCommand{
+var kickCommand = &dcommand.SummitCommand{
 	Command:     "kick",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},
@@ -351,7 +351,7 @@ var kickCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
-var banCommand = &dcommand.AsbwigCommand{
+var banCommand = &dcommand.SummitCommand{
 	Command:     "ban",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},
@@ -427,7 +427,7 @@ var banCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
-var unbanCommand = &dcommand.AsbwigCommand{
+var unbanCommand = &dcommand.SummitCommand{
 	Command:     "unban",
 	Category:    dcommand.CategoryModeration,
 	Aliases:     []string{""},

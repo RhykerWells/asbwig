@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"github.com/RhykerWells/asbwig/bot/functions"
-	prfx "github.com/RhykerWells/asbwig/bot/prefix"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	prfx "github.com/RhykerWells/summit/bot/prefix"
+	"github.com/RhykerWells/summit/common/dcommand"
 )
 
-var prefixCmd = &dcommand.AsbwigCommand{
+var prefixCmd = &dcommand.SummitCommand{
 	Command:     "prefix",
 	Category:    dcommand.CategoryGeneral,
 	Description: "Views the bot prefix",

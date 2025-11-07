@@ -4,8 +4,8 @@ no-tests = true
 
 [psql]
 host = "localhost"
-dbname = "asbwig"
-user="asbwig"
+dbname = "summit"
+user="summit"
 pass="icantsee"
 sslmode = "disable"
 whitelist = ["economy_config", "economy_users", "economy_user_inventories", "economy_cooldowns", "economy_shop", "economy_createitem"]

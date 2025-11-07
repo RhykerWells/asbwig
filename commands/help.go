@@ -5,13 +5,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
-var helpCmd = &dcommand.AsbwigCommand{
+var helpCmd = &dcommand.SummitCommand{
 	Command:  "help",
 	Aliases:  []string{"h"},
 	Category: dcommand.CategoryGeneral,

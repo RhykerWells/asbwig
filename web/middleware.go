@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
@@ -42,7 +42,7 @@ func createCSRF() (string, error) {
 // setCSRF sets the csrf token in the clients web cache as a cookie
 func setCSRF(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    "asbwig_csrf",
+		Name:    "summit_csrf",
 		Value:   token,
 		Path:    "/",
 		Expires: time.Now().Add(300 * time.Second),
@@ -52,14 +52,14 @@ func setCSRF(w http.ResponseWriter, token string) {
 
 // getCSRF returns the csrf token from the clients cookies
 func getCSRF(w http.ResponseWriter, r *http.Request) string {
-	cookie, err := r.Cookie("asbwig_csrf")
+	cookie, err := r.Cookie("summit_csrf")
 	if err == nil {
 		return cookie.Value
 	}
 
 	// If decoding failed — clear the bad cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:    "asbwig_csrf",
+		Name:    "summit_csrf",
 		Value:   "",
 		Path:    "/",
 		Expires: time.Unix(0, 0),
@@ -74,7 +74,7 @@ func setUserSession(w http.ResponseWriter, token *oauth2.Token) {
 	sessionStore.Set(sessionID, token, cache.DefaultExpiration)
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "asbwig_userinfo",
+		Name:    "summit_userinfo",
 		Value:   sessionID,
 		Path:    "/",
 		Expires: time.Now().Add(24 * time.Hour * 30),
@@ -91,7 +91,7 @@ func getUserSession(sessionID string) (*oauth2.Token, bool) {
 
 // checkUserCookie checks the stored browser cookie and returns the users information or an error
 func checkUserCookie(w http.ResponseWriter, r *http.Request) (*oauth2.Token, error) {
-	cookie, err := r.Cookie("asbwig_userinfo")
+	cookie, err := r.Cookie("summit_userinfo")
 	if err == nil {
 		// Verify cookie session
 		if token, found := getUserSession(cookie.Value); found {
@@ -100,7 +100,7 @@ func checkUserCookie(w http.ResponseWriter, r *http.Request) (*oauth2.Token, err
 
 		// If verification failed — clear the bad cookie
 		http.SetCookie(w, &http.Cookie{
-			Name:    "asbwig_userinfo",
+			Name:    "summit_userinfo",
 			Value:   "",
 			Path:    "/",
 			Expires: time.Unix(0, 0),
@@ -232,7 +232,7 @@ func baseTemplateDataMW(inner http.Handler) http.Handler {
 		baseData := TmplContextData{
 			"HomeURL": URL,
 			"Year":    time.Now().UTC().Year(),
-			"Path": r.URL.Path,
+			"Path":    r.URL.Path,
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
 
@@ -260,8 +260,8 @@ func userAndManagedGuildsInfoMW(inner http.Handler) http.Handler {
 			delete(availableGuilds, id)
 		}
 
-		fullManagedGuilds := getPopulatedGuildList(managedGuilds, URL + "/static/img/icons/question.svg", true)
-		fullAvailableGuilds := getPopulatedGuildList(availableGuilds, URL + "/static/img/icons/plus.svg", false)
+		fullManagedGuilds := getPopulatedGuildList(managedGuilds, URL+"/static/img/icons/question.svg", true)
+		fullAvailableGuilds := getPopulatedGuildList(availableGuilds, URL+"/static/img/icons/plus.svg", false)
 
 		tmplData, _ := ctx.Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["User"] = user

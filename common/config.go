@@ -6,20 +6,20 @@ import (
 )
 
 var (
-	ConfigBotToken    = os.Getenv("ASBWIG_TOKEN")
-	ConfigBotClientID = os.Getenv("ASBWIG_CLIENTID")
-	ConfigBotSecret   = os.Getenv("ASBWIG_CLIENTSECRET")
+	ConfigBotToken    = os.Getenv("SUMMIT_TOKEN")
+	ConfigBotClientID = os.Getenv("SUMMIT_CLIENTID")
+	ConfigBotSecret   = os.Getenv("SUMMIT_CLIENTSECRET")
 
-	ConfigPGHost     = os.Getenv("ASBWIG_PGHOST")
-	ConfigPGDB       = os.Getenv("ASBWIG_PGDB")
-	ConfigPGUsername = os.Getenv("ASBWIG_PGUSER")
-	ConfigPGPassword = os.Getenv("ASBWIG_PGPASSWORD")
+	ConfigPGHost     = os.Getenv("SUMMIT_PGHOST")
+	ConfigPGDB       = os.Getenv("SUMMIT_PGDB")
+	ConfigPGUsername = os.Getenv("SUMMIT_PGUSER")
+	ConfigPGPassword = os.Getenv("SUMMIT_PGPASSWORD")
 
-	ConfigASBWIGHost         = os.Getenv("ASBWIG_HOST")
-	ConfigTermsURLOverride   = os.Getenv("ASBWIG_TERMSURLOVERRIDE")
-	ConfigPrivacyURLOverride = os.Getenv("ASBWIG_PRIVACYURLOVERRIDE")
+	ConfigSummitHost         = os.Getenv("SUMMIT_HOST")
+	ConfigTermsURLOverride   = os.Getenv("SUMMIT_TERMSURLOVERRIDE")
+	ConfigPrivacyURLOverride = os.Getenv("SUMMIT_PRIVACYURLOVERRIDE")
 
-	ConfigBotOwner = os.Getenv("ASBWIG_OWNERID")
+	ConfigBotOwner = os.Getenv("SUMMIT_OWNERID")
 )
 
 // ConfigDgoBotToken prefixes the bot token with the required "Bot " if it is not done by the host

@@ -10,15 +10,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
 	templateFunctions = map[string]interface{}{
 		// Misc
-		"lower": lower,
+		"lower":       lower,
 		"getJoinLink": getJoinLink,
 		// Math
 		"add": func(a, b int) int { return a + b },
@@ -40,7 +40,7 @@ func lower(str string) string {
 }
 
 func getJoinLink(guildID interface{}) string {
-    return fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&guild_id=%v&response_type=code&redirect_uri=%s", common.ConfigBotClientID, guildID, url.PathEscape(URL+"/dashboard"))
+	return fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&guild_id=%v&response_type=code&redirect_uri=%s", common.ConfigBotClientID, guildID, url.PathEscape(URL+"/dashboard"))
 }
 
 func dict(pairs ...interface{}) map[int]interface{} {

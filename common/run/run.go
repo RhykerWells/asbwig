@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/RhykerWells/asbwig/bot"
-	"github.com/RhykerWells/asbwig/commands/economy/models"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/web"
+	"github.com/RhykerWells/summit/bot"
+	"github.com/RhykerWells/summit/commands/economy/models"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/web"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -3,7 +3,7 @@ package core
 //go:generate sqlboiler --no-hooks psql
 
 import (
-	"github.com/RhykerWells/asbwig/bot/events"
+	"github.com/RhykerWells/summit/bot/events"
 	"github.com/bwmarrin/discordgo"
 )
 

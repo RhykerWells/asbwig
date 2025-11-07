@@ -8,8 +8,8 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/frontend"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/frontend"
 	"github.com/sirupsen/logrus"
 	"goji.io/v3"
 	"goji.io/v3/pat"
@@ -26,7 +26,7 @@ var (
 	tmpl                *template.Template
 	StaticFiles         fs.FS = frontend.StaticFiles
 
-	URL        string = "https://" + common.ConfigASBWIGHost
+	URL        string = "https://" + common.ConfigSummitHost
 	TermsURL   string = common.ConfigTermsURLOverride
 	PrivacyURL string = common.ConfigPrivacyURLOverride
 
@@ -171,8 +171,8 @@ func runRootMultiplexer() {
 
 // runWebServer serves the multiplexer on the default http port
 func runWebServer(multiplexer *goji.Mux) {
-	logrus.Info("Webserver started on :80")
-	http.ListenAndServe(":80", multiplexer)
+	logrus.Info("Webserver started on :8085")
+	http.ListenAndServe(":8085", multiplexer)
 }
 
 // Called by plugins to add their routes

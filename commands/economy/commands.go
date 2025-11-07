@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/economy/models"
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/economy/models"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -173,7 +173,7 @@ type RouletteGame struct {
 	IsActive  bool
 }
 
-var informationCommands = []*dcommand.AsbwigCommand{
+var informationCommands = []*dcommand.SummitCommand{
 	{
 		Command:     "balance",
 		Category:    dcommand.CategoryEconomy,
@@ -324,7 +324,7 @@ func leaderboardPagination(s *discordgo.Session, b *discordgo.InteractionCreate)
 	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components}})
 }
 
-var incomeCommands = []*dcommand.AsbwigCommand{
+var incomeCommands = []*dcommand.SummitCommand{
 	{
 		Command:     "work",
 		Category:    dcommand.CategoryEconomy,
@@ -815,7 +815,7 @@ var incomeCommands = []*dcommand.AsbwigCommand{
 	},
 }
 
-var transferCommands = []*dcommand.AsbwigCommand{
+var transferCommands = []*dcommand.SummitCommand{
 	{
 		Command:     "deposit",
 		Category:    dcommand.CategoryEconomy,
@@ -1087,7 +1087,7 @@ func removeLeftPlayers(guildID string, game *RouletteGame) {
 	game.PlayerIDs = filtered
 }
 
-var shopCommands = []*dcommand.AsbwigCommand{
+var shopCommands = []*dcommand.SummitCommand{
 	{
 		Command:     "shop",
 		Category:    dcommand.CategoryEconomy,
@@ -1343,7 +1343,7 @@ func shopPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	common.Session.InteractionRespond(b.Interaction, &discordgo.InteractionResponse{Type: discordgo.InteractionResponseUpdateMessage, Data: &discordgo.InteractionResponseData{Embeds: embed, Components: components}})
 }
 
-var inventoryCommands = []*dcommand.AsbwigCommand{
+var inventoryCommands = []*dcommand.SummitCommand{
 	{
 		Command:     "inventory",
 		Category:    dcommand.CategoryEconomy,

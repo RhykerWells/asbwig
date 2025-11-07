@@ -25,8 +25,8 @@ var (
 	}
 )
 
-// AsbwigCommand defines the general data that must be set during the addition of a new command
-type AsbwigCommand struct {
+// SummitCommand defines the general data that must be set during the addition of a new command
+type SummitCommand struct {
 	Command      string
 	Category     CommandCategory
 	Aliases      []string
@@ -45,8 +45,8 @@ type CommandCategory struct {
 
 // CommandHandler defines the general command handler, the full instances of a command and a string map to retireve them
 type CommandHandler struct {
-	cmdInstances []AsbwigCommand
-	cmdMap       map[string]AsbwigCommand
+	cmdInstances []SummitCommand
+	cmdMap       map[string]SummitCommand
 }
 
 // RegisteredCommand defines the context required to access data surrounding a command
@@ -59,7 +59,7 @@ type RegisteredCommand struct {
 }
 
 // RegisterCommands adds each command to the command handler
-func (c *CommandHandler) RegisterCommands(cmds ...*AsbwigCommand) {
+func (c *CommandHandler) RegisterCommands(cmds ...*SummitCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
 		for range cmd.Command {

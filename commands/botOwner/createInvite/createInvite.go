@@ -1,14 +1,14 @@
 package createinvite
 
 import (
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
-var Command = &dcommand.AsbwigCommand{
+var Command = &dcommand.SummitCommand{
 	Command:      "createinvite",
 	Category:     dcommand.CategoryOwner,
 	Description:  "Creates an invite to the specified guild",

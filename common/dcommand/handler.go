@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	prfx "github.com/RhykerWells/asbwig/bot/prefix"
-	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/summit/bot/functions"
+	prfx "github.com/RhykerWells/summit/bot/prefix"
+	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )
@@ -18,8 +18,8 @@ var CmdHndlr *CommandHandler
 // NewCommandHandler creates a new command handler
 func NewCommandHandler() *CommandHandler {
 	handler := &CommandHandler{
-		cmdInstances: make([]AsbwigCommand, 0),
-		cmdMap:       make(map[string]AsbwigCommand),
+		cmdInstances: make([]SummitCommand, 0),
+		cmdMap:       make(map[string]SummitCommand),
 	}
 	CmdHndlr = handler
 	return CmdHndlr
@@ -98,7 +98,7 @@ func findBasicPrefix(message string, guildID string) (string, bool) {
 	return "", false
 }
 
-// findMentionPrefix finds a bot mention prefix such as @ASBWIG
+// findMentionPrefix finds a bot mention prefix such as @Summit
 func findMentionPrefix(botID string, message string) (string, bool) {
 	prefix := ""
 	ok := false
@@ -114,7 +114,7 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 }
 
 // runCommand logs the command called by the bot, checks the required args, their types and then runs the command
-func runCommand(cmd AsbwigCommand, data *Data) {
+func runCommand(cmd SummitCommand, data *Data) {
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
 		"Command":         cmd.Command,
@@ -137,7 +137,7 @@ func runCommand(cmd AsbwigCommand, data *Data) {
 }
 
 // handleMissingArgs sends message notifying that their are required arguments missing
-func handleMissingArgs(cmd AsbwigCommand, data *Data) {
+func handleMissingArgs(cmd SummitCommand, data *Data) {
 	args := cmd.Args
 	var missingArgs []*Args
 	for _, arg := range args {
@@ -155,7 +155,7 @@ func handleMissingArgs(cmd AsbwigCommand, data *Data) {
 }
 
 // handleInvalidArgs sends a message notifying the user that an argument they have attempted to use is invalid
-func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, bool) {
+func handleInvalidArgs(cmd SummitCommand, data *Data) (*discordgo.MessageEmbed, bool) {
 	for i, arg := range cmd.Args {
 		input := data.Args[i]
 		errorMessage := fmt.Sprintf("Invalid `%s` arg provided.", arg.Name)

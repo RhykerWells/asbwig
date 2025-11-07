@@ -3,7 +3,7 @@ package events
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/core/models"
+	"github.com/RhykerWells/summit/bot/core/models"
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )

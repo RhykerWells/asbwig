@@ -3,11 +3,11 @@ package ping
 import (
 	"time"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/common/dcommand"
 )
 
-var Command = &dcommand.AsbwigCommand{
+var Command = &dcommand.SummitCommand{
 	Command:     "ping",
 	Category:    dcommand.CategoryGeneral,
 	Description: "Displays bot latency",

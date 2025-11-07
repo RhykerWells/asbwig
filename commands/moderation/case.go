@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/moderation/models"
-	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/durationutil"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/moderation/models"
+	"github.com/RhykerWells/summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"

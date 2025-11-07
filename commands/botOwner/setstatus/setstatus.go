@@ -3,13 +3,13 @@ package setstatus
 import (
 	"strings"
 
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
-var Command = &dcommand.AsbwigCommand{
+var Command = &dcommand.SummitCommand{
 	Command:      "setstatus",
 	Category:     dcommand.CategoryOwner,
 	Description:  "Changes the bot status",
