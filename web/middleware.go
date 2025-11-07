@@ -17,7 +17,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
-	"github.com/sirupsen/logrus"
 	"goji.io/v3/pat"
 	"golang.org/x/oauth2"
 )
@@ -156,7 +155,6 @@ func getUserManagedGuilds(w http.ResponseWriter, r *http.Request, ctx context.Co
 		if _, ok := managedGuilds[guild.ID]; ok {
 			continue
 		}
-		logrus.Infoln(guild.Name)
 
 		permInt, _ := strconv.Atoi(guild.Permissions)
 		var requiredPerms = discordgo.PermissionManageServer | discordgo.PermissionAdministrator
