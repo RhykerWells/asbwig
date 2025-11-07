@@ -4,9 +4,6 @@
       <img src="./frontend/static/img/avatar.png" height="128">
     </picture>
     <h1 align="center">Summit</h1>
-    <h1 align="center">
-      <span style="font-weight: bold;">A</span>nother <span style="font-weight: bold;">S</span>hitty</span> <span style="font-weight: bold;">B</span>ot</span> <span style="font-weight: bold;">W</span>ritten</span> <span style="font-weight: bold;">I</span>n</span> <span style="font-weight: bold;">G</span>o</span>
-    </h1>
   </a>
 </p>
 Summit is a bot I've decided to write to give myself a reason to learn Go and how the language works.
