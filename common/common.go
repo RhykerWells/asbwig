@@ -42,7 +42,7 @@ func Init() error {
 	}
 	Session = s
 
-	db := "asbwig"
+	db := "summit"
 	if ConfigPGDB != "" {
 		db = ConfigPGDB
 	}

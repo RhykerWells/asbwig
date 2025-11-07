@@ -1,4 +1,4 @@
-module github.com/RhykerWells/asbwig
+module github.com/RhykerWells/summit
 
 go 1.23.0
 

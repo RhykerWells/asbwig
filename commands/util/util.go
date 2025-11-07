@@ -3,10 +3,10 @@ package util
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/core/models"
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/core/models"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 

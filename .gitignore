@@ -1,5 +1,5 @@
 # Binary
-cmd/asbwig/asbwig
+cmd/summit/summit
 
 # Env files 
 *.env

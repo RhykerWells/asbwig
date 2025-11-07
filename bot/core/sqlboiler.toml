@@ -4,8 +4,8 @@ no-tests = true
 
 [psql]
 host = "localhost"
-dbname = "asbwig"
-user="asbwig"
+dbname = "summit"
+user="summit"
 pass="icantsee"
 sslmode = "disable"
 whitelist = ["core_config", "banned_guilds"]

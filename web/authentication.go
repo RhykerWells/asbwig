@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/summit/common"
 	"golang.org/x/oauth2"
 )
 
@@ -20,7 +20,7 @@ func initDiscordOauth() {
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 		},
 	}
-	OauthConf.RedirectURL = "https://" + common.ConfigASBWIGHost + "/confirm"
+	OauthConf.RedirectURL = "https://" + common.ConfigSummitHost + "/confirm"
 }
 
 // handleLogin attempts to log in a user if they have a valid session, otherwise redirects them to the specified Auth URL
@@ -74,11 +74,11 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 
 // handleLogout handles the logout route and ensures that all cookies related to data storage are removed
 func handleLogout(w http.ResponseWriter, r *http.Request) {
-	if userCookie, err := r.Cookie("asbwig_userinfo"); err == nil {
+	if userCookie, err := r.Cookie("summit_userinfo"); err == nil {
 		deleteCookie(w, userCookie)
 	}
 
-	if csrfCookie, err := r.Cookie("asbwig_csrf"); err == nil {
+	if csrfCookie, err := r.Cookie("summit_csrf"); err == nil {
 		deleteCookie(w, csrfCookie)
 	}
 

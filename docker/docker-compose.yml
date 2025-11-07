@@ -1,4 +1,4 @@
-name: asbwig
+name: summit
 
 volumes:
   db:
@@ -8,8 +8,8 @@ networks:
 
 services:
   app:
-    container_name: asbwig-app
-    image: RhykerWells/asbwig:latest
+    container_name: summit-app
+    image: RhykerWells/summit:latest
     restart: unless-stopped
     networks:
       - default
@@ -20,7 +20,7 @@ services:
     ports:
       - 80:80
   db:
-    container_name: asbwig-postgres-db
+    container_name: summit-postgres-db
     image: postgres:16
     restart: no
     volumes:

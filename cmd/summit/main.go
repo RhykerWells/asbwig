@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/RhykerWells/asbwig/common/run"
+	"github.com/RhykerWells/summit/common/run"
 )
 
 func main() {

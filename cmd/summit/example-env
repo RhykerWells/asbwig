@@ -2,28 +2,28 @@
 
 ## Discord 
 # Your Discord bot token
-export ASBWIG_TOKEN="tokenXXXX"
+export SUMMIT_TOKEN="tokenXXXX"
 # Your Discord bot client ID
-export ASBWIG_CLIENTID="clientIDXXXX"
+export SUMMIT_CLIENTID="clientIDXXXX"
 # Your Discord bot client secret
-export ASBWIG_CLIENTSECRET="secretXXXX"
+export SUMMIT_CLIENTSECRET="secretXXXX"
 # Your user ID (to access bot admin commands)
-export ASBWIG_OWNERID="userIDXXXX"
+export SUMMIT_OWNERID="userIDXXXX"
 
 ## Database
 # The host address of the PostgreSQL database
-export ASBWIG_PGHOST="localhost"
+export SUMMIT_PGHOST="localhost"
 # The name of the PostgreSQL database
-export ASBWIG_PGDB="asbwig"
+export SUMMIT_PGDB="SUMMIT"
 # The PostgreSQL username for connecting
-export ASBWIG_PGUSER="asbwig"
+export SUMMIT_PGUSER="SUMMIT"
 # The password for the PostgreSQL account for connecting
-export ASBWIG_PGPASSWORD="password"
+export SUMMIT_PGPASSWORD="password"
 
 ## Dashboard
 # The domain name or IP address where the bot dashboard is hosted
-export ASBWIG_HOST="your_domain_here"
+export SUMMIT_HOST="your_domain_here"
 # An optional override for the terms page link
-export ASBWIG_TERMSURLOVERRIDE="your_full_URL_here" # optional
+export SUMMIT_TERMSURLOVERRIDE="your_full_URL_here" # optional
 # An optional override for the privacy page link
-export ASBWIG_PRIVACYURLOVERRIDE="your_full_URL_here" # optional
+export SUMMIT_PRIVACYURLOVERRIDE="your_full_URL_here" # optional

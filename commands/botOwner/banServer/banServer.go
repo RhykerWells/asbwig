@@ -3,15 +3,15 @@ package banserver
 import (
 	"context"
 
-	"github.com/RhykerWells/asbwig/bot/core/models"
-	"github.com/RhykerWells/asbwig/bot/functions"
-	"github.com/RhykerWells/asbwig/commands/util"
-	"github.com/RhykerWells/asbwig/common"
-	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/RhykerWells/summit/bot/core/models"
+	"github.com/RhykerWells/summit/bot/functions"
+	"github.com/RhykerWells/summit/commands/util"
+	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/summit/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
-var Command = &dcommand.AsbwigCommand{
+var Command = &dcommand.SummitCommand{
 	Command:      "ban",
 	Category:     dcommand.CategoryOwner,
 	Description:  "Bans a server from inviting the bot",

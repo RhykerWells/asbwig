@@ -1,4 +1,4 @@
-name: asbwig
+name: summit
 
 volumes:
   db:
@@ -8,7 +8,7 @@ networks:
 
 services:
   app:
-    container_name: asbwig-dev-app
+    container_name: summit-dev-app
     build:
       context: ../
       dockerfile: docker/Dockerfile
@@ -23,7 +23,7 @@ services:
     ports:
       - 80:80
   db:
-    container_name: asbwig-dev-postgres-db
+    container_name: summit-dev-postgres-db
     image: postgres:16
     restart: no
     volumes:

@@ -6,9 +6,9 @@ RUN go mod download
 
 COPY ./ .
 
-WORKDIR /app/cmd/asbwig
+WORKDIR /app/cmd/summit
 RUN CGO_ENABLED=0 GOOS=linux go build
 
 EXPOSE 80
 
-CMD ["/app/cmd/asbwig/asbwig"]
+CMD ["/app/cmd/summit/summit"]
