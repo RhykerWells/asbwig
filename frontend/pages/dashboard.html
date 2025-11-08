@@ -5,5 +5,48 @@
 </head>
 <body class="d-flex flex-column min-vh-100 text-light">
 	{{template "dashboard_nav" .}}
+	<main class="d-flex mt-5 pt-5">
+		<div class="row ms-5 me-5">
+			<div class="col-lg-7">
+				<h2 class="mb-2">Latest releases</h2>
+				{{if not .Releases}}
+				<div class="card">
+					<div class="card-header">
+						<span>No releases found</span>
+					</div>
+					<div class="card-body">Sorry :(</div>
+				</div>
+				{{else}}
+				<div style="display: flex; flex-direction: column; max-height: calc(100vh - 10rem);">
+					<div class="scrollable-releases mb-5" style="overflow-y: auto; flex-grow: 1;">
+						{{range $k, $_ := .Releases}}
+						<div class="card{{if ne $k 0}} mt-3{{end}}">
+							<div class="card-header">
+								<span>{{.Name}} | {{humanizeDuration .PublishedAt}} ago ({{.PublishedAt.Format "02 Jan 06 15:04"}})</span>
+							</div>
+							<div class="card-body" style="word-wrap: break-word; overflow-wrap: anywhere;">
+								{{.BodyHTML}}
+							</div>
+						</div>
+						{{end}}
+					</div>
+					{{end}}
+				</div>
+			</div>
+			<div class="col-lg-5 pb-5">
+				<div class="card">
+					<div class="card-header">
+						<h2 class="card-title">Information</h2>
+					</div>
+					<div class="card-body">
+						<p>Summit started off as a hobby project to teach myself Golang (which the bot is written in).</p>
+						<p>Since then, it's evolved into something I actively want to work on & maintain.</p>
+						<p>I'm always expanding on and refactoring it's feature-set so there's always something new to explore or enjoy!</p>
+						<p>If you  any issues and/or need help, join the <a href="https://discord.gg/3TQyZp67cW" target="_blank">support server</a>.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
 </body>
 </html>

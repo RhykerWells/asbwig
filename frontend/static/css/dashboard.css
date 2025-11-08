@@ -44,19 +44,19 @@ h5 {
 	margin: 0;
 }
 
-main::-webkit-scrollbar {
+main::-webkit-scrollbar, .scrollable-releases::-webkit-scrollbar {
 	width: 10px;
 }
-main::-webkit-scrollbar-track {
+main::-webkit-scrollbar-track, .scrollable-releases::-webkit-scrollbar-track {
 	background: transparent;
 	box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
 }
-main::-webkit-scrollbar-thumb {
+main::-webkit-scrollbar-thumb, .scrollable-releases::-webkit-scrollbar-thumb {
 	background-color: var(--accentGrey);
 	border-radius: 5px;
 	border: 2px solid var(--baseGrey);
 }
-main::-webkit-scrollbar-thumb:hover {
+main::-webkit-scrollbar-thumb:hover, .scrollable-releases::-webkit-scrollbar-thumb:hover {
 	background-color: var(--basePurple);
 }
 
