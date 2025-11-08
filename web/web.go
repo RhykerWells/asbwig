@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sync"
-	"text/template"
 
 	"github.com/RhykerWells/summit/common"
 	"github.com/RhykerWells/summit/frontend"
