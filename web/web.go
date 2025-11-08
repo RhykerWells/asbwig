@@ -2,14 +2,19 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"text/template"
 
 	"github.com/RhykerWells/summit/common"
 	"github.com/RhykerWells/summit/frontend"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
 	"github.com/sirupsen/logrus"
 	"goji.io/v3"
 	"goji.io/v3/pat"
@@ -103,6 +108,7 @@ func RenderPage(filename string) http.HandlerFunc {
 
 		// Retrieve the template data from the context
 		tmplData, _ := r.Context().Value(CtxKeyTmplData).(TmplContextData)
+		tmplData["Releases"] = getGithubReleases()
 
 		// Attempt to render the HTML templates and pages
 		w.Header().Set("Content-Type", "text/html")
@@ -193,4 +199,56 @@ func SendSuccessToast(w http.ResponseWriter, message string) {
 // SendErrorToast is used to send a JSON response to the client to send the error toasts
 func SendErrorToast(w http.ResponseWriter, message string) {
 	json.NewEncoder(w).Encode(FormResponse{Success: false, Message: message})
+}
+
+// getGithubReleases returns an array of Releases
+func getGithubReleases() []GithubRelease {
+	if common.ConfigGitHubRepo == "" || common.ConfigGitHubRepoOwner == "" {
+		return nil
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", common.ConfigGitHubRepoOwner, common.ConfigGitHubRepo))
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+
+	var releases []GithubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+		return nil
+	}
+
+	// Precompile the regex to match GitHub PR links
+	prLinkRe := regexp.MustCompile(`https://github\.com/[^/]+/[^/]+/pull/(\d+)`)
+
+	filtered := make([]GithubRelease, 0, len(releases))
+	for _, release := range releases {
+		if !release.Draft {
+			bodyWithPRs := prLinkRe.ReplaceAllStringFunc(release.Body, func(link string) string {
+				matches := prLinkRe.FindStringSubmatch(link)
+				if len(matches) > 1 {
+					prNumber := matches[1]
+					return fmt.Sprintf(`<a href="%s" target="_blank">#%s</a>`, link, prNumber)
+				}
+				return link
+			})
+
+			opts := html.RendererOptions{
+				Flags: html.CommonFlags | html.HrefTargetBlank,
+			}
+
+			release.BodyHTML = template.HTML(markdown.ToHTML([]byte(bodyWithPRs), nil, html.NewRenderer(opts)))
+			filtered = append(filtered, release)
+		}
+	}
+
+	if len(filtered) > 5 {
+		filtered = filtered[:5]
+	}
+
+	return filtered
 }
