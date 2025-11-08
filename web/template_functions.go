@@ -9,7 +9,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/RhykerWells/durationutil"
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
@@ -18,8 +20,9 @@ import (
 var (
 	templateFunctions = map[string]interface{}{
 		// Misc
-		"lower":       lower,
-		"getJoinLink": getJoinLink,
+		"lower":            lower,
+		"getJoinLink":      getJoinLink,
+		"humanizeDuration": func(t time.Time) string { return durationutil.HumanizeDuration(time.Since(t)) },
 		// Math
 		"add": func(a, b int) int { return a + b },
 		// Data types
