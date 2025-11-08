@@ -241,17 +241,13 @@ type GithubRelease struct {
 // baseTemplateDataMW provides the initial template data to be parsed within each page
 func baseTemplateDataMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
-
-		guild := functions.GetGuild(common.ConfigSupportID)
-
 		releases := getGithubReleases()
 
 		baseData := TmplContextData{
-			"HomeURL":       URL,
-			"Year":          time.Now().UTC().Year(),
-			"Path":          r.URL.Path,
-			"SupportServer": guild,
-			"Releases":      releases,
+			"HomeURL":  URL,
+			"Year":     time.Now().UTC().Year(),
+			"Path":     r.URL.Path,
+			"Releases": releases,
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
 
