@@ -9,7 +9,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/RhykerWells/durationutil"
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
@@ -18,8 +20,9 @@ import (
 var (
 	templateFunctions = map[string]interface{}{
 		// Misc
-		"lower":       lower,
-		"getJoinLink": getJoinLink,
+		"lower":            lower,
+		"getJoinLink":      getJoinLink,
+		"humanizeDuration": func(t time.Time) string { return durationutil.HumanizeDuration(time.Since(t)) },
 		// Math
 		"add": func(a, b int) int { return a + b },
 		// Data types
@@ -40,7 +43,12 @@ func lower(str string) string {
 }
 
 func getJoinLink(guildID interface{}) string {
-	return fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&guild_id=%v&response_type=code&redirect_uri=%s", common.ConfigBotClientID, guildID, url.PathEscape(URL+"/dashboard"))
+	joinLink := fmt.Sprintf("https://discord.com/oauth2/authorize?client_id=%s&scope=bot%%20applications.commands+bot&permissions=8&response_type=code&redirect_uri=%s", common.ConfigBotClientID, url.PathEscape(URL+"/dashboard"))
+	if guildID != nil {
+		joinLink += fmt.Sprintf("&guild_id=%v", guildID)
+	}
+
+	return joinLink
 }
 
 func dict(pairs ...interface{}) map[int]interface{} {

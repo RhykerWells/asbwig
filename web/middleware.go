@@ -6,8 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strconv"
 	"time"
@@ -15,6 +18,8 @@ import (
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
 	"goji.io/v3/pat"
@@ -224,13 +229,25 @@ func validateGuild(inner http.Handler) http.Handler {
 
 type TmplContextData map[string]interface{}
 
+type GithubRelease struct {
+	HTMLURL     string    `json:"html_url"`
+	Name        string    `json:"name"`
+	Draft       bool      `json:"draft"`
+	PublishedAt time.Time `json:"published_at"`
+	Body        string    `json:"body"`
+	BodyHTML    template.HTML
+}
+
 // baseTemplateDataMW provides the initial template data to be parsed within each page
 func baseTemplateDataMW(inner http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
+		releases := getGithubReleases()
+
 		baseData := TmplContextData{
-			"HomeURL": URL,
-			"Year":    time.Now().UTC().Year(),
-			"Path":    r.URL.Path,
+			"HomeURL":  URL,
+			"Year":     time.Now().UTC().Year(),
+			"Path":     r.URL.Path,
+			"Releases": releases,
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyTmplData, baseData)
 
@@ -238,6 +255,58 @@ func baseTemplateDataMW(inner http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(middleware)
+}
+
+// getGithubReleases returns an array of Releases
+func getGithubReleases() []GithubRelease {
+	if common.ConfigGitHubRepo == "" || common.ConfigGitHubRepoOwner == "" {
+		return nil
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", common.ConfigGitHubRepoOwner, common.ConfigGitHubRepo))
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+
+	var releases []GithubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+		return nil
+	}
+
+	// Precompile the regex to match GitHub PR links
+	prLinkRe := regexp.MustCompile(`https://github\.com/[^/]+/[^/]+/pull/(\d+)`)
+
+	filtered := make([]GithubRelease, 0, len(releases))
+	for _, release := range releases {
+		if !release.Draft {
+			bodyWithPRs := prLinkRe.ReplaceAllStringFunc(release.Body, func(link string) string {
+				matches := prLinkRe.FindStringSubmatch(link)
+				if len(matches) > 1 {
+					prNumber := matches[1]
+					return fmt.Sprintf(`<a href="%s" target="_blank">#%s</a>`, link, prNumber)
+				}
+				return link
+			})
+
+			opts := html.RendererOptions{
+				Flags: html.CommonFlags | html.HrefTargetBlank,
+			}
+
+			release.BodyHTML = template.HTML(markdown.ToHTML([]byte(bodyWithPRs), nil, html.NewRenderer(opts)))
+			filtered = append(filtered, release)
+		}
+	}
+
+	if len(filtered) > 5 {
+		filtered = filtered[:5]
+	}
+
+	return filtered
 }
 
 // userAndManagedGuildsInfoMW provides middleware to parse the current user data and the list of manageable guilds to the template data

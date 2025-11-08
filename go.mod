@@ -11,6 +11,7 @@ require (
 	github.com/aarondl/strmangle v0.0.9
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/friendsofgo/errors v0.9.2
+	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a
 	github.com/lib/pq v1.10.9
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.3

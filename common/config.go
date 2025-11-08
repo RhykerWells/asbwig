@@ -19,7 +19,11 @@ var (
 	ConfigTermsURLOverride   = os.Getenv("SUMMIT_TERMSURLOVERRIDE")
 	ConfigPrivacyURLOverride = os.Getenv("SUMMIT_PRIVACYURLOVERRIDE")
 
-	ConfigBotOwner = os.Getenv("SUMMIT_OWNERID")
+	ConfigBotOwner  = os.Getenv("SUMMIT_OWNERID")
+	ConfigSupportID = os.Getenv("SUMMIT_SERVERID")
+
+	ConfigGitHubRepo      = os.Getenv("SUMMIT_GITHUBREPO")
+	ConfigGitHubRepoOwner = os.Getenv("SUMMIT_GITHUBREPOOWNER")
 )
 
 // ConfigDgoBotToken prefixes the bot token with the required "Bot " if it is not done by the host
