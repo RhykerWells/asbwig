@@ -44,6 +44,12 @@ body {
     margin-right: 1rem;
 }
 
+/* Feature cards */
+.card.featureCard {
+    background: none;
+    border: 1px solid var(--accentGrey);
+}
+
 /* Footer */
 .footer-main {
     background-color: var(--secondaryPurple);
