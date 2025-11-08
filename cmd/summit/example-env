@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Discord 
+## Bot 
 # Your Discord bot token
 export SUMMIT_TOKEN="tokenXXXX"
 # Your Discord bot client ID
@@ -9,6 +9,12 @@ export SUMMIT_CLIENTID="clientIDXXXX"
 export SUMMIT_CLIENTSECRET="secretXXXX"
 # Your user ID (to access bot admin commands)
 export SUMMIT_OWNERID="userIDXXXX"
+
+## GitHub (to load latest releases on dashboard)
+# Your GitHub username
+export SUMMIT_GITHUBREPOOWNER="userNameXXXX"
+# Your Summit GitHub repo
+export SUMMIT_GITHUBREPO="repoNameXXXX"
 
 ## Database
 # The host address of the PostgreSQL database
@@ -27,3 +33,4 @@ export SUMMIT_HOST="your_domain_here"
 export SUMMIT_TERMSURLOVERRIDE="your_full_URL_here" # optional
 # An optional override for the privacy page link
 export SUMMIT_PRIVACYURLOVERRIDE="your_full_URL_here" # optional
+

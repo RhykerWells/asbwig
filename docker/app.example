@@ -8,6 +8,12 @@ SUMMIT_CLIENTSECRET=secretXXXX
 # Your user ID (to access bot admin commands)
 SUMMIT_OWNERID=userIDXXXX
 
+## GitHub (to load latest releases on dashboard)
+# Your GitHub username
+SUMMIT_GITHUBREPOOWNER=userNameXXXX
+# Your Summit GitHub repo
+SUMMIT_GITHUBREPO=repoNameXXXX
+
 ## Database
 # The host address of the PostgreSQL database
 SUMMIT_PGHOST=localhost
