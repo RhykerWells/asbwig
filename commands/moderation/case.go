@@ -122,3 +122,22 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 
 	return nil
 }
+
+func buildDMEmbed(config *Config, target *discordgo.User, action logAction, reason string, duration ...time.Duration) *discordgo.MessageEmbed {
+	embedDuration := ""
+	if len(duration) > 0 {
+		d := duration[0]
+		embedDuration = fmt.Sprintf("\n\n**Duration:** %s", durationutil.HumanizeDuration(d))
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    fmt.Sprintf("%s (ID %s)", target.Username, target.ID),
+			IconURL: target.AvatarURL("1024"),
+		},
+		Description: fmt.Sprintf("**Server:** %s\n\n**Action:** %s%s\n\n**Reason:** %s", config.GuildID, action.CaseType, embedDuration, reason),
+		Timestamp:   time.Now().Format(time.RFC3339),
+	}
+
+	return embed
+}

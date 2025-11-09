@@ -8,6 +8,7 @@ import (
 
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/commands/moderation/models"
+	"github.com/RhykerWells/summit/commands/util"
 	"github.com/RhykerWells/summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
@@ -86,16 +87,33 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 	if authorID == common.Bot.ID {
 		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
 		createCase(config, botMember, targetMember, logUnmute, config.ModerationLogChannel, "Automatic unmute")
+		muteEmbed := buildDMEmbed(config, targetMember.User, logMute, "Automatic unmute")
+		functions.SendDM(targetID, &discordgo.MessageSend{Embed: muteEmbed})
 	}
 
 	return nil
 }
 
 // RefreshMuteSettings ensures that the configured mute role has correct
-// permissions applied across all channels in the guild. It restricts muted
-// users from sending messages.
+// permissions applied across all channels in the guild. It
 func RefreshMuteSettings(config *Config) {
-	if !config.MuteManageRole {
+	channels, err := common.Session.GuildChannels(config.GuildID)
+	if err != nil {
+		return
+	}
+
+	for _, channel := range channels {
+		if channel.Type == discordgo.ChannelTypeGuildCategory {
+			continue
+		}
+
+		refreshMuteSettingsOnChannel(config, channel)
+	}
+}
+
+// refreshMuteSettingsOnChannel refreshes the mute settings on a channel that is missing the permission
+func refreshMuteSettingsOnChannel(config *Config, channel *discordgo.Channel) {
+	if hasPerms := util.HasPerms(config.GuildID, channel.ID, common.Bot.ID, discordgo.PermissionManageChannels); !hasPerms {
 		return
 	}
 
@@ -103,9 +121,46 @@ func RefreshMuteSettings(config *Config) {
 		return
 	}
 
-	channels, _ := common.Session.GuildChannels(config.GuildID)
-	for _, channel := range channels {
-		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole, discordgo.PermissionOverwriteTypeRole, 0, discordgo.PermissionSendMessages)
+	if !config.MuteManageRole {
+		return
+	}
+
+	channel, _ = common.Session.Channel(channel.ID)
+
+	var existingOverwrite *discordgo.PermissionOverwrite
+
+	for _, v := range channel.PermissionOverwrites {
+		if v.Type == discordgo.PermissionOverwriteTypeRole && v.ID == config.MuteRole {
+			existingOverwrite = v
+			break
+		}
+	}
+
+	muteDenyPerms := int64(discordgo.PermissionSendMessages | discordgo.PermissionVoiceSpeak | discordgo.PermissionSendMessagesInThreads)
+	channelPermsAllow := int64(0)
+	channelPermsDeny := muteDenyPerms
+	channelPermsChanged := true
+
+	if existingOverwrite != nil {
+		channelPermsAllow = existingOverwrite.Allow
+		channelPermsDeny = existingOverwrite.Deny
+		channelPermsChanged = false
+
+		if channelPermsAllow&muteDenyPerms != 0 {
+			// Remove any permissions that we're going to deny that are currently set to allow
+			channelPermsAllow &= muteDenyPerms
+			channelPermsChanged = false
+		}
+
+		if (channelPermsDeny & muteDenyPerms) != muteDenyPerms {
+			// Add any permissions that we're going to deny that are currently not set
+			channelPermsDeny |= muteDenyPerms
+			channelPermsChanged = true
+		}
+	}
+
+	if channelPermsChanged {
+		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole, discordgo.PermissionOverwriteTypeRole, existingOverwrite.Allow, int64(muteDenyPerms))
 	}
 }
 
