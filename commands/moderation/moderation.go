@@ -14,7 +14,7 @@ import (
 
 // ModerationSetup runs the following:
 //   - The schema initialiser
-//   - Registration of the guild join/leave functions
+//   - Registration of event handlers
 //   - Initialises the web plugin
 //   - Initialises any other required middlewares
 //   - Registration of the moderation commands & their pagination
@@ -24,8 +24,21 @@ func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddModerationConfig,
 	})
+
 	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete){
 		guildDeleteModerationConfig,
+	})
+
+	events.RegisterChannelCreatefunctions([]func(c *discordgo.ChannelCreate){
+		func(c *discordgo.ChannelCreate) {
+			refreshMuteSettingsOnChannel(GetConfig(c.GuildID), c.Channel)
+		},
+	})
+
+	events.RegisterChannelUpdatefunctions([]func(c *discordgo.ChannelUpdate){
+		func(c *discordgo.ChannelUpdate) {
+			refreshMuteSettingsOnChannel(GetConfig(c.GuildID), c.Channel)
+		},
 	})
 
 	initWeb()
