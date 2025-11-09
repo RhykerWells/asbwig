@@ -105,6 +105,12 @@ var warnCommand = &dcommand.SummitCommand{
 			return
 		}
 
+		warnEmbed := buildDMEmbed(config, target.User, logWarn, warnReason)
+		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: warnEmbed})
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+		}
+
 		ok, delay := triggerDeletion(config)
 		if ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
@@ -189,6 +195,12 @@ var muteCommand = &dcommand.SummitCommand{
 			return
 		}
 
+		muteEmbed := buildDMEmbed(config, target.User, logMute, muteReason, duration)
+		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: muteEmbed})
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+		}
+
 		ok, delay := triggerDeletion(config)
 		if ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
@@ -267,6 +279,12 @@ var unmuteCommand = &dcommand.SummitCommand{
 			return
 		}
 
+		unmuteEmbed := buildDMEmbed(config, target.User, logUnmute, unmuteReason)
+		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: unmuteEmbed})
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+		}
+
 		ok, delay := triggerDeletion(config)
 		if ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
@@ -326,15 +344,22 @@ var kickCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		err := kickUser(config, author, target, kickReason)
+		err := createCase(config, author, target, logKick, data.ChannelID, kickReason)
 		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
+			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
 			return
 		}
 
-		err = createCase(config, author, target, logKick, data.ChannelID, kickReason)
+		kickEmbed := buildDMEmbed(config, target.User, logKick, kickReason)
+		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: kickEmbed})
 		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+		}
+
+		err = kickUser(config, author, target, kickReason)
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
+
 			return
 		}
 
@@ -402,7 +427,13 @@ var banCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		err := banUser(config, author, target, banReason, duration)
+		banEmbed := buildDMEmbed(config, target.User, logMute, banReason)
+		err := functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: banEmbed})
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+		}
+
+		err = banUser(config, author, target, banReason, duration)
 		if err != nil {
 			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
 			return

@@ -87,6 +87,8 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 	if authorID == common.Bot.ID {
 		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
 		createCase(config, botMember, targetMember, logUnmute, config.ModerationLogChannel, "Automatic unmute")
+		muteEmbed := buildDMEmbed(config, targetMember.User, logMute, "Automatic unmute")
+		functions.SendDM(targetID, &discordgo.MessageSend{Embed: muteEmbed})
 	}
 
 	return nil
