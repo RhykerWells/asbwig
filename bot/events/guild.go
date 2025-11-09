@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the
+// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the bot
 var scheduledGuildJoinFunctions []func(g *discordgo.GuildCreate)
 
 // RegisterGuildJoinfunctions adds each guild join function to the map of functions ran when a guild adds the bot
@@ -32,11 +32,11 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}).Infoln("Joined guild: ", g.Name)
 
 	for _, joinFunction := range scheduledGuildJoinFunctions {
-		joinFunction(g)
+		go joinFunction(g)
 	}
 }
 
-// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the
+// scheduledGuildJoinFunctions serves as a map of all the functions that is run when a guild adds the bot
 var scheduledGuildLeaveFunctions []func(g *discordgo.GuildDelete)
 
 // RegisterGuildJoinfunctions adds each guild join function to the map of functions ran when a guild adds the bot
@@ -57,7 +57,7 @@ func guildLeave(s *discordgo.Session, g *discordgo.GuildDelete) {
 	}
 
 	for _, leaveFunction := range scheduledGuildLeaveFunctions {
-		leaveFunction(g)
+		go leaveFunction(g)
 	}
 }
 
