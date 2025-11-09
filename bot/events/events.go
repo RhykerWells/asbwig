@@ -14,9 +14,25 @@ func InitEvents(s *discordgo.Session, database *sql.DB) {
 	db = database
 
 	s.AddHandler(botReady)
+
+	// Guild events
 	s.AddHandler(guildJoin)
 	s.AddHandler(guildLeave)
+
+	// Guild role events
+	s.AddHandler(guildRoleCreate)
+	s.AddHandler(guildRoleUpdate)
+	s.AddHandler(guildRoleDelete)
+
+	// Guild channel events
+	s.AddHandler(channelCreate)
+	s.AddHandler(channelUpdate)
+	s.AddHandler(channelDelete)
+
+	// Message events
 	s.AddHandler(messageCreate)
+
+	// Guild member events
 	s.AddHandler(guildMemberAdd)
 	s.AddHandler(guildMemberLeave)
 
