@@ -135,9 +135,15 @@ func GetChannel(guildID, channel string) (*discordgo.Channel, error) {
 
 // User functions
 
-// GetUser returns the user object if possible of a user ID
-func GetUser(userID string) (*discordgo.User, error) {
-	u, err := common.Session.User(userID)
+// GetUser returns the user object if possible of a user ID/mention
+func GetUser(userStr string) (*discordgo.User, error) {
+	// Direct mention
+	if strings.HasPrefix(userStr, "<@") {
+		userStr = userStr[2 : len(userStr)-1]
+		userStr = strings.TrimPrefix(userStr, "!")
+	}
+
+	u, err := common.Session.User(userStr)
 
 	return u, err
 }
