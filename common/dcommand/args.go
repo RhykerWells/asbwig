@@ -10,7 +10,7 @@ import (
 )
 
 // Arg defines the structure to pass argument data with
-type Args struct {
+type Arg struct {
 	Name     string
 	Type     ArgumentType
 	Optional bool
@@ -23,7 +23,6 @@ type ArgumentType interface {
 
 var (
 	String      = &StringArg{}
-	MultiString = &MultiStringArg{}
 	Int         = &IntArg{}
 	User        = &UserArg{}
 	Member      = &MemberArg{}
@@ -35,7 +34,6 @@ var (
 
 var (
 	_ ArgumentType = (*StringArg)(nil)
-	_ ArgumentType = (*MultiStringArg)(nil)
 	_ ArgumentType = (*IntArg)(nil)
 	_ ArgumentType = (*UserArg)(nil)
 	_ ArgumentType = (*MemberArg)(nil)
@@ -52,16 +50,6 @@ func (s *StringArg) Help() string {
 }
 
 func (s *StringArg) ValidateArg(arg *ParsedArg, data *Data) bool {
-	return true
-}
-
-type MultiStringArg struct{}
-
-func (s *MultiStringArg) Help() string {
-	return "Text (containing spaces)"
-}
-
-func (s *MultiStringArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	return true
 }
 
