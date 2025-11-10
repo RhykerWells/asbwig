@@ -31,8 +31,8 @@ type SummitCommand struct {
 	Category     CommandCategory
 	Aliases      []string
 	Description  string
-	Args         []*Args
 	ArgsRequired int
+	Args         []*Args
 	Run          Run
 	Data         *Data
 }
