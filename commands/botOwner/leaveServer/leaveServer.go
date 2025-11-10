@@ -15,7 +15,7 @@ var Command = &dcommand.SummitCommand{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {
-		err := common.Session.GuildLeave(data.Args[0])
+		err := common.Session.GuildLeave(data.ParsedArgs[0].String())
 		if err == nil {
 			common.Session.MessageReactionAdd(data.ChannelID, data.Message.ID, "👍")
 		}

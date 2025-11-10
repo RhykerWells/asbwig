@@ -1,8 +1,6 @@
 package setstatus
 
 import (
-	"strings"
-
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/commands/util"
 	"github.com/RhykerWells/summit/common/dcommand"
@@ -15,10 +13,10 @@ var Command = &dcommand.SummitCommand{
 	Description:  "Changes the bot status",
 	ArgsRequired: 1,
 	Args: []*dcommand.Args{
-		{Name: "Status", Type: dcommand.String},
+		{Name: "Status", Type: dcommand.MultiString},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {
-		functions.SetStatus(strings.Join(data.Args, " "))
+		functions.SetStatus(data.ParsedArgs[0].String())
 		message := &discordgo.MessageSend{
 			Content: "Status changed",
 		}

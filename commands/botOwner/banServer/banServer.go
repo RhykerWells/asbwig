@@ -20,12 +20,12 @@ var Command = &dcommand.SummitCommand{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {
-		banned := util.IsGuildBanned(data.Args[0])
+		banned := util.IsGuildBanned(data.ParsedArgs[0].String())
 		if banned {
 			functions.SendBasicMessage(data.ChannelID, "This guild is already banned")
 		} else {
 			guild := models.BannedGuild{
-				GuildID: data.Args[0],
+				GuildID: data.ParsedArgs[0].String(),
 			}
 			guild.Insert(context.Background(), common.PQ, boil.Infer())
 		}
