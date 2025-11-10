@@ -105,7 +105,7 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 	return prefix, ok
 }
 
-// runCommand logs the command called by the bot, checks the required args, their types and then runs the command
+// runCommand logs the command called by the bot, ensures the correct number of args is present, parses the args, then runs the command
 func runCommand(cmd SummitCommand, data *Data, commandArgs []string) {
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
@@ -122,7 +122,9 @@ func runCommand(cmd SummitCommand, data *Data, commandArgs []string) {
 	var parsedArgs []*ParsedArg
 	for i, arg := range cmd.Args {
 		argValue := commandArgs[i]
-		if arg.Type == MultiString {
+
+		// Assign the excess args to the last string arg if the arg exists
+		if i == len(cmd.Args)-1 && arg.Type == String {
 			argValue = strings.Join(commandArgs[i:], " ")
 		}
 
