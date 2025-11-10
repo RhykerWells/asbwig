@@ -31,8 +31,8 @@ type SummitCommand struct {
 	Category     CommandCategory
 	Aliases      []string
 	Description  string
-	Args         []*Args
 	ArgsRequired int
+	Args         []*Arg
 	Run          Run
 	Data         *Data
 }
@@ -55,7 +55,7 @@ type RegisteredCommand struct {
 	Category    CommandCategory
 	Aliases     []string
 	Description string
-	Args        []*Args
+	Args        []*Arg
 }
 
 // RegisterCommands adds each command to the command handler

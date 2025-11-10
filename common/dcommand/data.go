@@ -10,9 +10,8 @@ type Data struct {
 	ChannelID string
 	Author    *discordgo.User
 
-	Message        *discordgo.Message
-	Args           []string
-	ArgsNotLowered []string
+	Message    *discordgo.Message
+	ParsedArgs []*ParsedArg
 
 	Handler *CommandHandler
 }

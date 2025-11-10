@@ -2,12 +2,10 @@ package moderation
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"slices"
 
-	"github.com/RhykerWells/durationutil"
 	"github.com/RhykerWells/summit/bot/functions"
 	"github.com/RhykerWells/summit/commands/util"
 	"github.com/RhykerWells/summit/common"
@@ -60,19 +58,19 @@ func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.
 }
 
 var warnCommand = &dcommand.SummitCommand{
-	Command:     "warn",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Warns a user for a specified reason",
-	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+	Command:      "warn",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Warns a user for a specified reason",
+	ArgsRequired: 2,
+	Args: []*dcommand.Arg{
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		target := data.ParsedArgs[0].Member(data.GuildID)
 
 		config, ok := moderationBase(guild.ID)
 		if !ok {
@@ -97,7 +95,7 @@ var warnCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		warnReason := strings.Join(data.Args[1:], " ")
+		warnReason := data.ParsedArgs[1].String()
 
 		err := createCase(config, author, target, logWarn, data.ChannelID, warnReason)
 		if err != nil {
@@ -125,20 +123,20 @@ var warnCommand = &dcommand.SummitCommand{
 	},
 }
 var muteCommand = &dcommand.SummitCommand{
-	Command:     "mute",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Mutes a user for specified duration and reason",
-	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+	Command:      "mute",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Mutes a user for specified duration and reason",
+	ArgsRequired: 3,
+	Args: []*dcommand.Arg{
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Duration", Type: dcommand.Duration},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 3,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		target := data.ParsedArgs[0].Member(data.GuildID)
 
 		config, ok := moderationBase(guild.ID)
 		if !ok {
@@ -170,8 +168,7 @@ var muteCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		muteReason := strings.Join(data.Args[2:], " ")
-		duration, _ := durationutil.ToDuration(data.Args[1])
+		duration := *data.ParsedArgs[1].Duration()
 		if duration < 10*time.Minute {
 			duration = 10 * time.Minute
 		}
@@ -181,6 +178,8 @@ var muteCommand = &dcommand.SummitCommand{
 			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
 			return
 		}
+
+		muteReason := data.ParsedArgs[2].String()
 
 		err = muteUser(config, target.User.ID, duration)
 		if err != nil {
@@ -215,19 +214,19 @@ var muteCommand = &dcommand.SummitCommand{
 	},
 }
 var unmuteCommand = &dcommand.SummitCommand{
-	Command:     "unmute",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Unmutes a user for a specified reason",
-	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+	Command:      "unmute",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Unmutes a user for a specified reason",
+	ArgsRequired: 2,
+	Args: []*dcommand.Arg{
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		target := data.ParsedArgs[0].Member(data.GuildID)
 
 		config, ok := moderationBase(guild.ID)
 		if !ok {
@@ -259,8 +258,6 @@ var unmuteCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		unmuteReason := strings.Join(data.Args[2:], " ")
-
 		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionManageRoles)
 		if !ok {
 			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
@@ -272,6 +269,8 @@ var unmuteCommand = &dcommand.SummitCommand{
 			functions.SendBasicMessage(data.ChannelID, "Something went wrong. Is the bot role above the mute role?")
 			return
 		}
+
+		unmuteReason := data.ParsedArgs[1].String()
 
 		err = createCase(config, author, target, logUnmute, data.ChannelID, unmuteReason)
 		if err != nil {
@@ -299,19 +298,19 @@ var unmuteCommand = &dcommand.SummitCommand{
 	},
 }
 var kickCommand = &dcommand.SummitCommand{
-	Command:     "kick",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Kicks a user for a specified reason",
-	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+	Command:      "kick",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Kicks a user for a specified reason",
+	ArgsRequired: 2,
+	Args: []*dcommand.Arg{
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		target := data.ParsedArgs[0].Member(data.GuildID)
 
 		config, ok := moderationBase(guild.ID)
 		if !ok {
@@ -336,13 +335,13 @@ var kickCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		kickReason := strings.Join(data.Args[2:], " ")
-
 		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionKickMembers)
 		if !ok {
 			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `kick_members`")
 			return
 		}
+
+		kickReason := data.ParsedArgs[1].String()
 
 		err := createCase(config, author, target, logKick, data.ChannelID, kickReason)
 		if err != nil {
@@ -377,20 +376,20 @@ var kickCommand = &dcommand.SummitCommand{
 	},
 }
 var banCommand = &dcommand.SummitCommand{
-	Command:     "ban",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Bans a user for specified duration and reason",
-	Args: []*dcommand.Args{
-		{Name: "User", Type: dcommand.User},
+	Command:      "ban",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Bans a user for specified duration and reason",
+	ArgsRequired: 3,
+	Args: []*dcommand.Arg{
+		{Name: "Member", Type: dcommand.Member},
 		{Name: "Duration", Type: dcommand.Duration},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 3,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		target := data.ParsedArgs[0].Member(data.GuildID)
 
 		config, ok := moderationBase(guild.ID)
 		if !ok {
@@ -415,8 +414,8 @@ var banCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		banReason := strings.Join(data.Args[2:], " ")
-		duration, _ := durationutil.ToDuration(data.Args[1])
+		banReason := data.ParsedArgs[2].String()
+		duration := *data.ParsedArgs[1].Duration()
 		if duration < 10*time.Minute {
 			duration = 10 * time.Minute
 		}
@@ -459,19 +458,20 @@ var banCommand = &dcommand.SummitCommand{
 	},
 }
 var unbanCommand = &dcommand.SummitCommand{
-	Command:     "unban",
-	Category:    dcommand.CategoryModeration,
-	Aliases:     []string{""},
-	Description: "Unbans a user for a specified reason",
-	Args: []*dcommand.Args{
+	Command:      "unban",
+	Category:     dcommand.CategoryModeration,
+	Aliases:      []string{""},
+	Description:  "Unbans a user for a specified reason",
+	ArgsRequired: 2,
+	Args: []*dcommand.Arg{
 		{Name: "User", Type: dcommand.User},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target, _ := functions.GetUser(data.Args[0])
+		target := data.ParsedArgs[0].User()
+
 		targetMember := &discordgo.Member{
 			User: target,
 		}
@@ -498,7 +498,7 @@ var unbanCommand = &dcommand.SummitCommand{
 			return
 		}
 
-		unbanReason := strings.Join(data.Args[2:], " ")
+		unbanReason := data.ParsedArgs[1].String()
 
 		ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
 		if !ok {

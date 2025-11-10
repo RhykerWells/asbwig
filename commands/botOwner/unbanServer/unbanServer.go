@@ -15,15 +15,15 @@ var Command = &dcommand.SummitCommand{
 	Category:     dcommand.CategoryOwner,
 	Description:  "Removes the server ban from inviting the bot",
 	ArgsRequired: 1,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {
-		banned := util.IsGuildBanned(data.Args[0])
+		banned := util.IsGuildBanned(data.ParsedArgs[0].String())
 		if !banned {
 			functions.SendBasicMessage(data.ChannelID, "That guild was not banned")
 		} else {
-			models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(data.Args[0])).DeleteAll(context.Background(), common.PQ)
+			models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(data.ParsedArgs[0].String())).DeleteAll(context.Background(), common.PQ)
 		}
 	}),
 }

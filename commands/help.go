@@ -15,7 +15,7 @@ var helpCmd = &dcommand.SummitCommand{
 	Command:  "help",
 	Aliases:  []string{"h"},
 	Category: dcommand.CategoryGeneral,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Command", Type: dcommand.String, Optional: true},
 	},
 	Description: "Displays bot help",
@@ -27,8 +27,8 @@ var helpCmd = &dcommand.SummitCommand{
 // Otherwise, it will show a generic category overview of all commands.
 func helpFunc(data *dcommand.Data) {
 	command := ""
-	if len(data.Args) > 0 {
-		command = data.Args[0]
+	if len(data.ParsedArgs) > 0 {
+		command = data.ParsedArgs[0].String()
 	}
 
 	// Per-command help
@@ -130,7 +130,7 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 
 // argHelp returns a formatted string for a single argument, showing both its
 // name and type.
-func argHelp(arg *dcommand.Args) (str string) {
+func argHelp(arg *dcommand.Arg) (str string) {
 	argType := arg.Type.Help()
 	str = fmt.Sprintf("%s:%s", arg.Name, argType)
 	return
