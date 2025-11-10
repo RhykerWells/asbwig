@@ -115,12 +115,17 @@ func runCommand(cmd SummitCommand, data *Data, commandArgs []string) {
 
 	argCount := len(commandArgs)
 	if argCount < cmd.ArgsRequired {
-		handleMissingArgs(cmd, data)
+		handleMissingRequiredArgs(cmd, data)
 		return
 	}
 
 	var parsedArgs []*ParsedArg
 	for i, arg := range cmd.Args {
+		if i >= len(commandArgs) {
+			if arg.Optional {
+				continue
+			}
+		}
 		argValue := commandArgs[i]
 
 		// Assign the excess args to the last string arg if the arg exists

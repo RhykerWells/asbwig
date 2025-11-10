@@ -112,7 +112,7 @@ func (p *ParsedArg) BalanceType() string {
 
 // handleMissingArgs sends a message to the user notifying them that one or more required
 // arguments are missing from their command invocation. Optional arguments are ignored.
-func handleMissingArgs(cmd SummitCommand, data *Data) {
+func handleMissingRequiredArgs(cmd SummitCommand, data *Data) {
 	args := cmd.Args
 	var missingArgs []*Arg
 
