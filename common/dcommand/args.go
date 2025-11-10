@@ -1,6 +1,7 @@
 package dcommand
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -66,16 +67,23 @@ func (s *MultiStringArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 
 type IntArg struct {
 	Min int64
-	Max int64
+	Max *int64
 }
 
 func (i *IntArg) Help() string {
-	return "Whole number"
+	var maxStr string
+	if i.Max != nil {
+		maxStr = fmt.Sprintf(" and below %d", *i.Max)
+	}
+	return fmt.Sprintf("Whole number above %d%s", i.Min, maxStr)
 }
 
 func (i *IntArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	v := functions.ToInt64(arg.Value)
-	if v < i.Min || v > i.Max {
+	if v < i.Min {
+		return false
+	}
+	if i.Max != nil && v > *i.Max {
 		return false
 	}
 
@@ -110,11 +118,15 @@ func (m *MemberArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 
 type BetArg struct {
 	Min int64
-	Max int64
+	Max *int64
 }
 
 func (b *BetArg) Help() string {
-	return "Whole integer|Max|All"
+	var maxStr string
+	if b.Max != nil {
+		maxStr = fmt.Sprintf(" and below %d", *b.Max)
+	}
+	return fmt.Sprintf("Whole number above %d%s|Max|All", b.Min, maxStr)
 }
 
 func (b *BetArg) ValidateArg(arg *ParsedArg, data *Data) bool {
@@ -132,7 +144,10 @@ func (b *BetArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	}
 
 	v := functions.ToInt64(vStr)
-	if v < b.Min || v > b.Max {
+	if v < b.Min {
+		return false
+	}
+	if b.Max != nil && v > *b.Max {
 		return false
 	}
 
