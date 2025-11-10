@@ -120,8 +120,9 @@ func runCommand(cmd SummitCommand, data *Data, commandArgs []string) {
 	}
 
 	var parsedArgs []*ParsedArg
-	for i, argValue := range commandArgs {
-		if i == len(cmd.Args)-1 {
+	for i, arg := range cmd.Args {
+		argValue := commandArgs[i]
+		if arg.Type == MultiString {
 			argValue = strings.Join(commandArgs[i:], " ")
 		}
 
