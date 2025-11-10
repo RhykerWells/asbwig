@@ -59,6 +59,14 @@ func (p *ParsedArg) Member(guildID string) *discordgo.Member {
 	return member
 }
 
+func (p *ParsedArg) BetAmount() string {
+	if p.Value == nil {
+		return ""
+	}
+
+	return strings.ToLower(strings.TrimSpace(p.String()))
+}
+
 func (p *ParsedArg) Duration() *time.Duration {
 	if p.Value == nil {
 		return nil
