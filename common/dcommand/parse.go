@@ -138,7 +138,7 @@ func handleMissingArgs(cmd SummitCommand, data *Data) {
 func handleInvalidArgs(cmd SummitCommand, data *Data) (*discordgo.MessageEmbed, bool) {
 	for _, arg := range data.ParsedArgs {
 		if !arg.Type.ValidateArg(arg, data) {
-			return errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid `%s` argument. Expected: `%s`", cmd.Command, arg.Type.Help())), true
+			return errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid `%s` argument. Expected: `%s`", arg.Name, arg.Type.Help())), true
 		}
 	}
 
