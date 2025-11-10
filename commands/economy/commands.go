@@ -30,15 +30,13 @@ type FullEconomyMember struct {
 
 // getFullEconomyMember returns a members full economy information
 func getFullEconomyMember(config *Config, memberID string) FullEconomyMember {
-	guildEconomySettings := GetConfig(config.GuildID)
-
 	var economyUser *models.EconomyUser
 	economyUser, err := models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(config.GuildID), models.EconomyUserWhere.UserID.EQ(memberID)).One(context.Background(), common.PQ)
 	if err != nil {
 		economyUser = &models.EconomyUser{
 			GuildID:     config.GuildID,
 			UserID:      memberID,
-			Cash:        guildEconomySettings.EconomyStartBalance,
+			Cash:        0,
 			Bank:        0,
 			Cfwinchance: 50,
 		}
