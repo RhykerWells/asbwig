@@ -27,8 +27,8 @@ var helpCmd = &dcommand.SummitCommand{
 // Otherwise, it will show a generic category overview of all commands.
 func helpFunc(data *dcommand.Data) {
 	command := ""
-	if len(data.Args) > 0 {
-		command = data.Args[0]
+	if len(data.ParsedArgs) > 0 {
+		command = data.ParsedArgs[0].String()
 	}
 
 	// Per-command help
