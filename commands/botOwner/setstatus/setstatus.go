@@ -12,8 +12,8 @@ var Command = &dcommand.SummitCommand{
 	Category:     dcommand.CategoryOwner,
 	Description:  "Changes the bot status",
 	ArgsRequired: 1,
-	Args: []*dcommand.Args{
-		{Name: "Status", Type: dcommand.MultiString},
+	Args: []*dcommand.Arg{
+		{Name: "Status", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {
 		functions.SetStatus(data.ParsedArgs[0].String())

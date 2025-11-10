@@ -15,7 +15,7 @@ var Command = &dcommand.SummitCommand{
 	Category:     dcommand.CategoryOwner,
 	Description:  "Removes the server ban from inviting the bot",
 	ArgsRequired: 1,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {

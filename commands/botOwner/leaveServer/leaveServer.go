@@ -11,7 +11,7 @@ var Command = &dcommand.SummitCommand{
 	Category:     dcommand.CategoryOwner,
 	Description:  "Forces the bot to leave a given server",
 	ArgsRequired: 1,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {

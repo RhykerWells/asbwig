@@ -13,7 +13,7 @@ var Command = &dcommand.SummitCommand{
 	Category:     dcommand.CategoryOwner,
 	Description:  "Creates an invite to the specified guild",
 	ArgsRequired: 1,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
 	Run: util.OwnerCommand(func(data *dcommand.Data) {

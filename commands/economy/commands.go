@@ -220,7 +220,7 @@ var informationCommands = []*dcommand.SummitCommand{
 		Command:  "leaderboard",
 		Category: dcommand.CategoryEconomy,
 		Aliases:  []string{"lb", "top"},
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
 		},
 		Description: "Views your server leaderboard",
@@ -407,7 +407,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"steal"},
 		Description:  "Money money money money money",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 		},
 		Run: func(data *dcommand.Data) {
@@ -460,7 +460,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Category:     dcommand.CategoryEconomy,
 		Description:  "Chicken fight for a payout of <Bet> with a base payout of 50%. Increases each win up to 70%",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
@@ -527,7 +527,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"cf", "flip"},
 		Description:  "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
 		ArgsRequired: 2,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Coin side", Type: dcommand.Coin},
 		},
@@ -582,7 +582,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"roll", "rollnum"},
 		Description:  "Rolls a number\n**100** = payout of `<bet>*5`\n**90-99** = payout of `<Bet>*3`\n**65-89** = payout of `<Bet>`\n**64 and under** = Loss of `<Bet>`",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
@@ -645,7 +645,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Category:    dcommand.CategoryEconomy,
 		Aliases:     []string{"rr"},
 		Description: "Russian roulette with up to 6 people\nAll players must join with the same bet\nPayout for winners is `(<Bet>*Players)/winners`",
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.IntArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
@@ -738,7 +738,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"dice"},
 		Description:  "Rolls 2 6-sided dice, with a payout of `<Bet>*36` if they both land on 1",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
@@ -795,7 +795,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"dep"},
 		Description:  "Deposits a given amount into your bank",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
@@ -836,7 +836,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Category:    dcommand.CategoryEconomy,
 		Aliases:     []string{"with"},
 		Description: "Withdraws a given amount from your bank",
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Amount", Type: dcommand.Int},
 		},
 		ArgsRequired: 1,
@@ -883,7 +883,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"loan"},
 		Description:  "Gives money to a specified member from your cash",
 		ArgsRequired: 2,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 		},
@@ -930,7 +930,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Category:     dcommand.CategoryEconomy,
 		Description:  "Adds money to a specified users cash/bank balance",
 		ArgsRequired: 3,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Place", Type: dcommand.UserBalance},
@@ -971,7 +971,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Category:     dcommand.CategoryEconomy,
 		Description:  "Removes money from a specified users cash/bank balance",
 		ArgsRequired: 3,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Place", Type: dcommand.UserBalance},
@@ -1081,7 +1081,7 @@ var shopCommands = []*dcommand.SummitCommand{
 		Command:     "shop",
 		Category:    dcommand.CategoryEconomy,
 		Description: "Views the shop for the server",
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
 		},
 		Run: func(data *dcommand.Data) {
@@ -1136,7 +1136,7 @@ var shopCommands = []*dcommand.SummitCommand{
 		Category:     dcommand.CategoryEconomy,
 		Description:  "Views the saved information about an item",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Name", Type: dcommand.String},
 		},
 		Run: func(data *dcommand.Data) {
@@ -1172,7 +1172,7 @@ var shopCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"buy"},
 		Description:  "Buys an item from the shop",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Name", Type: dcommand.String},
 			{Name: "Quantity", Type: &dcommand.BetArg{Min: 1}, Optional: true},
 		},
@@ -1338,7 +1338,7 @@ var inventoryCommands = []*dcommand.SummitCommand{
 		Category:    dcommand.CategoryEconomy,
 		Aliases:     []string{"inv"},
 		Description: "Your inventory",
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
 		},
 		Run: func(data *dcommand.Data) {
@@ -1385,7 +1385,7 @@ var inventoryCommands = []*dcommand.SummitCommand{
 		Aliases:      []string{"use"},
 		Description:  "Uses an item present in your inventory",
 		ArgsRequired: 1,
-		Args: []*dcommand.Args{
+		Args: []*dcommand.Arg{
 			{Name: "Name", Type: dcommand.String},
 			{Name: "Quantity", Type: dcommand.Int},
 		},

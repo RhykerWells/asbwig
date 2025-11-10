@@ -63,9 +63,9 @@ var warnCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Warns a user for a specified reason",
 	ArgsRequired: 2,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
@@ -128,10 +128,10 @@ var muteCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Mutes a user for specified duration and reason",
 	ArgsRequired: 3,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Member", Type: dcommand.Member},
 		{Name: "Duration", Type: dcommand.Duration},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
@@ -219,9 +219,9 @@ var unmuteCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Unmutes a user for a specified reason",
 	ArgsRequired: 2,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
@@ -303,9 +303,9 @@ var kickCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Kicks a user for a specified reason",
 	ArgsRequired: 2,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
@@ -381,10 +381,10 @@ var banCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Bans a user for specified duration and reason",
 	ArgsRequired: 3,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Member", Type: dcommand.Member},
 		{Name: "Duration", Type: dcommand.Duration},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)
@@ -463,9 +463,9 @@ var unbanCommand = &dcommand.SummitCommand{
 	Aliases:      []string{""},
 	Description:  "Unbans a user for a specified reason",
 	ArgsRequired: 2,
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "User", Type: dcommand.User},
-		{Name: "Reason", Type: dcommand.MultiString},
+		{Name: "Reason", Type: dcommand.String},
 	},
 	Run: func(data *dcommand.Data) {
 		guild := functions.GetGuild(data.GuildID)

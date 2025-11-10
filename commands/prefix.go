@@ -10,7 +10,7 @@ var prefixCmd = &dcommand.SummitCommand{
 	Command:     "prefix",
 	Category:    dcommand.CategoryGeneral,
 	Description: "Views the bot prefix",
-	Args: []*dcommand.Args{
+	Args: []*dcommand.Arg{
 		{Name: "Prefix", Type: dcommand.String},
 	},
 	Run: (func(data *dcommand.Data) {
