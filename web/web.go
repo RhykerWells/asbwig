@@ -12,6 +12,7 @@ import (
 
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/frontend"
+	"github.com/blang/semver/v4"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/sirupsen/logrus"
@@ -224,25 +225,41 @@ func getGithubReleases() []GithubRelease {
 	// Precompile the regex to match GitHub PR links
 	prLinkRe := regexp.MustCompile(`https://github\.com/[^/]+/[^/]+/pull/(\d+)`)
 
+	botVersion, err := semver.ParseTolerant(common.VERSION)
+	if err != nil {
+		botVersion = semver.Version{} // fallback to 0.0.0
+	}
+
 	filtered := make([]GithubRelease, 0, len(releases))
 	for _, release := range releases {
-		if !release.Draft {
-			bodyWithPRs := prLinkRe.ReplaceAllStringFunc(release.Body, func(link string) string {
-				matches := prLinkRe.FindStringSubmatch(link)
-				if len(matches) > 1 {
-					prNumber := matches[1]
-					return fmt.Sprintf(`<a href="%s" target="_blank">#%s</a>`, link, prNumber)
-				}
-				return link
-			})
-
-			opts := html.RendererOptions{
-				Flags: html.CommonFlags | html.HrefTargetBlank,
-			}
-
-			release.BodyHTML = template.HTML(markdown.ToHTML([]byte(bodyWithPRs), nil, html.NewRenderer(opts)))
-			filtered = append(filtered, release)
+		if release.Draft {
+			continue
 		}
+
+		releaseVersion, err := semver.ParseTolerant(release.Name)
+		if err != nil {
+			continue // skip invalid semver tags
+		}
+
+		if releaseVersion.GT(botVersion) {
+			continue // If the new release is not live, skip
+		}
+
+		bodyWithPRs := prLinkRe.ReplaceAllStringFunc(release.Body, func(link string) string {
+			matches := prLinkRe.FindStringSubmatch(link)
+			if len(matches) > 1 {
+				prNumber := matches[1]
+				return fmt.Sprintf(`<a href="%s" target="_blank">#%s</a>`, link, prNumber)
+			}
+			return link
+		})
+
+		opts := html.RendererOptions{
+			Flags: html.CommonFlags | html.HrefTargetBlank,
+		}
+
+		release.BodyHTML = template.HTML(markdown.ToHTML([]byte(bodyWithPRs), nil, html.NewRenderer(opts)))
+		filtered = append(filtered, release)
 	}
 
 	if len(filtered) > 5 {
