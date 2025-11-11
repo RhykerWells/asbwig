@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"github.com/RhykerWells/summit/bot/functions"
-	prfx "github.com/RhykerWells/summit/bot/prefix"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/bot/functions"
+	prfx "github.com/RhykerWells/Summit/bot/prefix"
+	"github.com/RhykerWells/Summit/common/dcommand"
 )
 
 var prefixCmd = &dcommand.SummitCommand{

@@ -5,10 +5,10 @@ package economy
 import (
 	"context"
 
-	"github.com/RhykerWells/summit/bot/events"
-	"github.com/RhykerWells/summit/commands/economy/models"
-	"github.com/RhykerWells/summit/common"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/bot/events"
+	"github.com/RhykerWells/Summit/commands/economy/models"
+	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 )

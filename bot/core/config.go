@@ -3,8 +3,8 @@ package core
 import (
 	"context"
 
-	"github.com/RhykerWells/summit/bot/core/models"
-	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/Summit/bot/core/models"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 )

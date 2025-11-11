@@ -1,19 +1,19 @@
 package commands
 
 import (
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/RhykerWells/summit/commands/economy"
-	"github.com/RhykerWells/summit/commands/invite"
-	"github.com/RhykerWells/summit/commands/moderation"
-	"github.com/RhykerWells/summit/commands/ping"
+	"github.com/RhykerWells/Summit/commands/economy"
+	"github.com/RhykerWells/Summit/commands/invite"
+	"github.com/RhykerWells/Summit/commands/moderation"
+	"github.com/RhykerWells/Summit/commands/ping"
 
-	banserver "github.com/RhykerWells/summit/commands/botOwner/banServer"
-	createinvite "github.com/RhykerWells/summit/commands/botOwner/createInvite"
-	leaveserver "github.com/RhykerWells/summit/commands/botOwner/leaveServer"
-	"github.com/RhykerWells/summit/commands/botOwner/setstatus"
-	unbanserver "github.com/RhykerWells/summit/commands/botOwner/unbanServer"
+	banserver "github.com/RhykerWells/Summit/commands/botOwner/banServer"
+	createinvite "github.com/RhykerWells/Summit/commands/botOwner/createInvite"
+	leaveserver "github.com/RhykerWells/Summit/commands/botOwner/leaveServer"
+	"github.com/RhykerWells/Summit/commands/botOwner/setstatus"
+	unbanserver "github.com/RhykerWells/Summit/commands/botOwner/unbanServer"
 )
 
 // InitCommands initializes the command handler, registers all

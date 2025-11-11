@@ -5,7 +5,7 @@ import (
 	"embed"
 	"net/http"
 
-	"github.com/RhykerWells/summit/web"
+	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
 	"goji.io/v3/pat"
 )

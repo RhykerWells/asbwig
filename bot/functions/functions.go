@@ -8,7 +8,7 @@ import (
 
 	"slices"
 
-	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/bwmarrin/discordgo"
 )
 

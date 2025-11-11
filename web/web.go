@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/RhykerWells/summit/common"
-	"github.com/RhykerWells/summit/frontend"
+	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/frontend"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/sirupsen/logrus"

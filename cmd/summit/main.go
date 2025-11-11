@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/RhykerWells/summit/common/run"
+	"github.com/RhykerWells/Summit/common/run"
 )
 
 func main() {

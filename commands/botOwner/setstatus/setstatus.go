@@ -1,9 +1,9 @@
 package setstatus
 
 import (
-	"github.com/RhykerWells/summit/bot/functions"
-	"github.com/RhykerWells/summit/commands/util"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/commands/util"
+	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 

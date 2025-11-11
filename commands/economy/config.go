@@ -3,8 +3,8 @@ package economy
 import (
 	"context"
 
-	"github.com/RhykerWells/summit/commands/economy/models"
-	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/Summit/commands/economy/models"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 

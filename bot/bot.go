@@ -3,9 +3,9 @@ package bot
 import (
 	"database/sql"
 
-	"github.com/RhykerWells/summit/bot/core"
-	"github.com/RhykerWells/summit/bot/events"
-	"github.com/RhykerWells/summit/commands"
+	"github.com/RhykerWells/Summit/bot/core"
+	"github.com/RhykerWells/Summit/bot/events"
+	"github.com/RhykerWells/Summit/commands"
 	"github.com/bwmarrin/discordgo"
 )
 

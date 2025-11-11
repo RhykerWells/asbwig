@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/durationutil"
-	"github.com/RhykerWells/summit/bot/functions"
-	"github.com/RhykerWells/summit/common"
 	"github.com/bwmarrin/discordgo"
 )
 

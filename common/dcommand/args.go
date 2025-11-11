@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/durationutil"
-	"github.com/RhykerWells/summit/bot/functions"
 )
 
 // Arg defines the structure to pass argument data with

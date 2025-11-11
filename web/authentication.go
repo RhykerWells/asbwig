@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/RhykerWells/summit/common"
+	"github.com/RhykerWells/Summit/common"
 	"golang.org/x/oauth2"
 )
 
