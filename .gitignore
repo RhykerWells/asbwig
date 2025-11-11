@@ -6,3 +6,4 @@ cmd/summit/summit
 
 # Bash helpers
 *.sh
+!build.sh
