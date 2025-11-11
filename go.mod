@@ -21,6 +21,7 @@ require (
 require (
 	github.com/aarondl/inflect v0.0.2 // indirect
 	github.com/aarondl/randomize v0.0.2 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20190420051523-6335edbaa640 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 )

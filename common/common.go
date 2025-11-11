@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	PQ *sql.DB
+	VERSION = "v0.0.0"
+	PQ      *sql.DB
 
 	SuccessGreen = 0x00ff7b
 	ErrorRed     = 0xFF0000
