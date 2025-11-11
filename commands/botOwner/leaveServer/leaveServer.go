@@ -1,9 +1,9 @@
 package leaveserver
 
 import (
-	"github.com/RhykerWells/summit/commands/util"
-	"github.com/RhykerWells/summit/common"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/commands/util"
+	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/common/dcommand"
 )
 
 var Command = &dcommand.SummitCommand{

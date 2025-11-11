@@ -1,4 +1,4 @@
-module github.com/RhykerWells/summit
+module github.com/RhykerWells/Summit
 
 go 1.23.0
 

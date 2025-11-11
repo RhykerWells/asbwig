@@ -3,10 +3,10 @@ package moderation
 import (
 	"context"
 
-	"github.com/RhykerWells/summit/bot/events"
-	"github.com/RhykerWells/summit/commands/moderation/models"
-	"github.com/RhykerWells/summit/common"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/bot/events"
+	"github.com/RhykerWells/Summit/commands/moderation/models"
+	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 

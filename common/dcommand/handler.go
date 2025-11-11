@@ -3,8 +3,8 @@ package dcommand
 import (
 	"strings"
 
-	"github.com/RhykerWells/summit/bot/functions"
-	prfx "github.com/RhykerWells/summit/bot/prefix"
+	"github.com/RhykerWells/Summit/bot/functions"
+	prfx "github.com/RhykerWells/Summit/bot/prefix"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )

@@ -1,7 +1,7 @@
 package prefix
 
 import (
-	"github.com/RhykerWells/summit/bot/core"
+	"github.com/RhykerWells/Summit/bot/core"
 )
 
 // GuildPrefix returns the bots prefix for the current guild

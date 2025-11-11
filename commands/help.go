@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/RhykerWells/summit/bot/functions"
-	"github.com/RhykerWells/summit/common"
-	"github.com/RhykerWells/summit/common/dcommand"
+	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 )
 
