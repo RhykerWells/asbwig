@@ -57,477 +57,479 @@ func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.
 	}
 }
 
-var warnCommand = &dcommand.SummitCommand{
-	Command:      "warn",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Warns a user for a specified reason",
-	ArgsRequired: 2,
-	Args: []*dcommand.Arg{
-		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.String},
+var moderationCommands = []*dcommand.SummitCommand{
+	{
+		Command:      "warn",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Warns a user for a specified reason",
+		ArgsRequired: 2,
+		Args: []*dcommand.Arg{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].Member(data.GuildID)
+
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
+
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
+
+			hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
+
+			ok = functions.IsMemberHigher(data.GuildID, author, target)
+			if !ok || target.User.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher or equal role).")
+				return
+			}
+
+			warnReason := data.ParsedArgs[1].String()
+
+			err := createCase(config, author, target, logWarn, data.ChannelID, warnReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				return
+			}
+
+			warnEmbed := buildDMEmbed(config, target.User, logWarn, warnReason)
+			err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: warnEmbed})
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+			}
+
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
+
+			responseEmbed := responseEmbed(author.User, target.User, logWarn)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].Member(data.GuildID)
+	{
+		Command:      "mute",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Mutes a user for specified duration and reason",
+		ArgsRequired: 3,
+		Args: []*dcommand.Arg{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Duration", Type: dcommand.Duration},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].Member(data.GuildID)
 
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
 
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
 
-		hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
+			hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
 
-		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok || target.User.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher or equal role).")
-			return
-		}
+			ok = functions.IsMemberHigher(data.GuildID, author, target)
+			if !ok || target.User.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to mute this user (target has higher or equal role).")
+				return
+			}
 
-		warnReason := data.ParsedArgs[1].String()
+			muteRole := config.MuteRole
+			_, err := functions.GetRole(config.GuildID, muteRole)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "No mute role has been setup. Please set one up on the dashboard.")
+				return
+			}
 
-		err := createCase(config, author, target, logWarn, data.ChannelID, warnReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			return
-		}
+			duration := *data.ParsedArgs[1].Duration()
+			if duration < 10*time.Minute {
+				duration = 10 * time.Minute
+			}
 
-		warnEmbed := buildDMEmbed(config, target.User, logWarn, warnReason)
-		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: warnEmbed})
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
-		}
+			ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionManageRoles)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
+				return
+			}
 
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
+			muteReason := data.ParsedArgs[2].String()
 
-		responseEmbed := responseEmbed(author.User, target.User, logWarn)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
+			err = muteUser(config, target.User.ID, duration)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Something went wrong. Is the bot role above the mute role?")
+				return
+			}
+
+			err = createCase(config, author, target, logMute, data.ChannelID, muteReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				unmuteUser(config, author.User.ID, target.User.ID)
+				return
+			}
+
+			muteEmbed := buildDMEmbed(config, target.User, logMute, muteReason, duration)
+			err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: muteEmbed})
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+			}
+
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
+
+			responseEmbed := responseEmbed(author.User, target.User, logWarn)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
-}
-var muteCommand = &dcommand.SummitCommand{
-	Command:      "mute",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Mutes a user for specified duration and reason",
-	ArgsRequired: 3,
-	Args: []*dcommand.Arg{
-		{Name: "Member", Type: dcommand.Member},
-		{Name: "Duration", Type: dcommand.Duration},
-		{Name: "Reason", Type: dcommand.String},
+	{
+		Command:      "unmute",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Unmutes a user for a specified reason",
+		ArgsRequired: 2,
+		Args: []*dcommand.Arg{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].Member(data.GuildID)
+
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
+
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
+
+			hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
+
+			ok = functions.IsMemberHigher(data.GuildID, author, target)
+			if !ok || target.User.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to unmute this user (target has higher or equal role).")
+				return
+			}
+
+			muteRole := config.MuteRole
+			_, err := functions.GetRole(config.GuildID, muteRole)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "No mute role has been setup. Please set one up on the dashboard.")
+				return
+			}
+
+			ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionManageRoles)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
+				return
+			}
+
+			err = unmuteUser(config, data.Author.ID, target.User.ID)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Something went wrong. Is the bot role above the mute role?")
+				return
+			}
+
+			unmuteReason := data.ParsedArgs[1].String()
+
+			err = createCase(config, author, target, logUnmute, data.ChannelID, unmuteReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				return
+			}
+
+			unmuteEmbed := buildDMEmbed(config, target.User, logUnmute, unmuteReason)
+			err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: unmuteEmbed})
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+			}
+
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
+
+			responseEmbed := responseEmbed(author.User, target.User, logUnmute)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].Member(data.GuildID)
+	{
+		Command:      "kick",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Kicks a user for a specified reason",
+		ArgsRequired: 2,
+		Args: []*dcommand.Arg{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].Member(data.GuildID)
 
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
 
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
 
-		hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
+			hasRole := hasRequiredRole(author, config.KickRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
 
-		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok || target.User.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to mute this user (target has higher or equal role).")
-			return
-		}
+			ok = functions.IsMemberHigher(data.GuildID, author, target)
+			if !ok || target.User.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to kick this user (target has higher or equal role).")
+				return
+			}
 
-		muteRole := config.MuteRole
-		_, err := functions.GetRole(config.GuildID, muteRole)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "No mute role has been setup. Please set one up on the dashboard.")
-			return
-		}
+			ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionKickMembers)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `kick_members`")
+				return
+			}
 
-		duration := *data.ParsedArgs[1].Duration()
-		if duration < 10*time.Minute {
-			duration = 10 * time.Minute
-		}
+			kickReason := data.ParsedArgs[1].String()
 
-		ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionManageRoles)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
-			return
-		}
+			err := createCase(config, author, target, logKick, data.ChannelID, kickReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				return
+			}
 
-		muteReason := data.ParsedArgs[2].String()
+			kickEmbed := buildDMEmbed(config, target.User, logKick, kickReason)
+			err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: kickEmbed})
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+			}
 
-		err = muteUser(config, target.User.ID, duration)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Something went wrong. Is the bot role above the mute role?")
-			return
-		}
+			err = kickUser(config, author, target, kickReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
 
-		err = createCase(config, author, target, logMute, data.ChannelID, muteReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			unmuteUser(config, author.User.ID, target.User.ID)
-			return
-		}
+				return
+			}
 
-		muteEmbed := buildDMEmbed(config, target.User, logMute, muteReason, duration)
-		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: muteEmbed})
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
-		}
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
 
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
-
-		responseEmbed := responseEmbed(author.User, target.User, logWarn)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
+			responseEmbed := responseEmbed(author.User, target.User, logKick)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
-}
-var unmuteCommand = &dcommand.SummitCommand{
-	Command:      "unmute",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Unmutes a user for a specified reason",
-	ArgsRequired: 2,
-	Args: []*dcommand.Arg{
-		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.String},
+	{
+		Command:      "ban",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Bans a user for specified duration and reason",
+		ArgsRequired: 3,
+		Args: []*dcommand.Arg{
+			{Name: "Member", Type: dcommand.Member},
+			{Name: "Duration", Type: dcommand.Duration},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].Member(data.GuildID)
+
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
+
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
+
+			hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
+
+			ok = functions.IsMemberHigher(data.GuildID, author, target)
+			if !ok || target.User.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to ban this user (target has higher or equal role).")
+				return
+			}
+
+			banReason := data.ParsedArgs[2].String()
+			duration := *data.ParsedArgs[1].Duration()
+			if duration < 10*time.Minute {
+				duration = 10 * time.Minute
+			}
+
+			ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`")
+				return
+			}
+
+			banEmbed := buildDMEmbed(config, target.User, logMute, banReason)
+			err := functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: banEmbed})
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+			}
+
+			err = banUser(config, author, target, banReason, duration)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
+				return
+			}
+
+			err = createCase(config, author, target, logBan, data.ChannelID, banReason, duration)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				return
+			}
+
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
+
+			responseEmbed := responseEmbed(author.User, target.User, logBan)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].Member(data.GuildID)
+	{
+		Command:      "unban",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{""},
+		Description:  "Unbans a user for a specified reason",
+		ArgsRequired: 2,
+		Args: []*dcommand.Arg{
+			{Name: "User", Type: dcommand.User},
+			{Name: "Reason", Type: dcommand.String},
+		},
+		Run: func(data *dcommand.Data) {
+			guild := functions.GetGuild(data.GuildID)
+			author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+			target := data.ParsedArgs[0].User()
 
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
+			targetMember := &discordgo.Member{
+				User: target,
+			}
 
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
 
-		hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
+			if config.ModerationLogChannel != "" {
+				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
+				return
+			}
 
-		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok || target.User.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to unmute this user (target has higher or equal role).")
-			return
-		}
+			hasRole := hasRequiredRole(author, config.BanRequiredRoles)
+			if !hasRole {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
+				return
+			}
 
-		muteRole := config.MuteRole
-		_, err := functions.GetRole(config.GuildID, muteRole)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "No mute role has been setup. Please set one up on the dashboard.")
-			return
-		}
+			if target.ID == author.User.ID {
+				functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to unban this user.")
+				return
+			}
 
-		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionManageRoles)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `manage_roles`")
-			return
-		}
+			unbanReason := data.ParsedArgs[1].String()
 
-		err = unmuteUser(config, data.Author.ID, target.User.ID)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Something went wrong. Is the bot role above the mute role?")
-			return
-		}
+			ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`")
+				return
+			}
 
-		unmuteReason := data.ParsedArgs[1].String()
+			err := unbanUser(config, data.Author.ID, target.ID)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
+				return
+			}
 
-		err = createCase(config, author, target, logUnmute, data.ChannelID, unmuteReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			return
-		}
+			err = createCase(config, author, targetMember, logUnban, data.ChannelID, unbanReason)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
+				return
+			}
 
-		unmuteEmbed := buildDMEmbed(config, target.User, logUnmute, unmuteReason)
-		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: unmuteEmbed})
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
-		}
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
 
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
-
-		responseEmbed := responseEmbed(author.User, target.User, logUnmute)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
-	},
-}
-var kickCommand = &dcommand.SummitCommand{
-	Command:      "kick",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Kicks a user for a specified reason",
-	ArgsRequired: 2,
-	Args: []*dcommand.Arg{
-		{Name: "Member", Type: dcommand.Member},
-		{Name: "Reason", Type: dcommand.String},
-	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].Member(data.GuildID)
-
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
-
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
-
-		hasRole := hasRequiredRole(author, config.KickRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
-
-		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok || target.User.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to kick this user (target has higher or equal role).")
-			return
-		}
-
-		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionKickMembers)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `kick_members`")
-			return
-		}
-
-		kickReason := data.ParsedArgs[1].String()
-
-		err := createCase(config, author, target, logKick, data.ChannelID, kickReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			return
-		}
-
-		kickEmbed := buildDMEmbed(config, target.User, logKick, kickReason)
-		err = functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: kickEmbed})
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
-		}
-
-		err = kickUser(config, author, target, kickReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
-
-			return
-		}
-
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
-
-		responseEmbed := responseEmbed(author.User, target.User, logKick)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
-	},
-}
-var banCommand = &dcommand.SummitCommand{
-	Command:      "ban",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Bans a user for specified duration and reason",
-	ArgsRequired: 3,
-	Args: []*dcommand.Arg{
-		{Name: "Member", Type: dcommand.Member},
-		{Name: "Duration", Type: dcommand.Duration},
-		{Name: "Reason", Type: dcommand.String},
-	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].Member(data.GuildID)
-
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
-
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
-
-		hasRole := hasRequiredRole(author, config.MuteRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
-
-		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok || target.User.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to ban this user (target has higher or equal role).")
-			return
-		}
-
-		banReason := data.ParsedArgs[2].String()
-		duration := *data.ParsedArgs[1].Duration()
-		if duration < 10*time.Minute {
-			duration = 10 * time.Minute
-		}
-
-		ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`")
-			return
-		}
-
-		banEmbed := buildDMEmbed(config, target.User, logMute, banReason)
-		err := functions.SendDM(target.User.ID, &discordgo.MessageSend{Embed: banEmbed})
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
-		}
-
-		err = banUser(config, author, target, banReason, duration)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
-			return
-		}
-
-		err = createCase(config, author, target, logBan, data.ChannelID, banReason, duration)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			return
-		}
-
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
-
-		responseEmbed := responseEmbed(author.User, target.User, logBan)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
-	},
-}
-var unbanCommand = &dcommand.SummitCommand{
-	Command:      "unban",
-	Category:     dcommand.CategoryModeration,
-	Aliases:      []string{""},
-	Description:  "Unbans a user for a specified reason",
-	ArgsRequired: 2,
-	Args: []*dcommand.Arg{
-		{Name: "User", Type: dcommand.User},
-		{Name: "Reason", Type: dcommand.String},
-	},
-	Run: func(data *dcommand.Data) {
-		guild := functions.GetGuild(data.GuildID)
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		target := data.ParsedArgs[0].User()
-
-		targetMember := &discordgo.Member{
-			User: target,
-		}
-
-		config, ok := moderationBase(guild.ID)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
-			return
-		}
-
-		if config.ModerationLogChannel != "" {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
-			return
-		}
-
-		hasRole := hasRequiredRole(author, config.BanRequiredRoles)
-		if !hasRole {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.")
-			return
-		}
-
-		if target.ID == author.User.ID {
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to unban this user.")
-			return
-		}
-
-		unbanReason := data.ParsedArgs[1].String()
-
-		ok = util.HasPerms(config.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
-		if !ok {
-			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`")
-			return
-		}
-
-		err := unbanUser(config, data.Author.ID, target.ID)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong: %s", err.Error()))
-			return
-		}
-
-		err = createCase(config, author, targetMember, logUnban, data.ChannelID, unbanReason)
-		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Something went wrong creating the case: %s", err.Error()))
-			return
-		}
-
-		ok, delay := triggerDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
-		}
-
-		responseEmbed := responseEmbed(author.User, target, logUnban)
-		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
-		ok, delay = responseDeletion(config)
-		if ok {
-			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
-		}
+			responseEmbed := responseEmbed(author.User, target, logUnban)
+			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
+		},
 	},
 }

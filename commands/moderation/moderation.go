@@ -46,14 +46,11 @@ func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	scheduleAllPendingUnmutes()
 	scheduleAllPendingUnbans()
 
-	cmdHandler.RegisterCommands(
-		warnCommand,
-		muteCommand,
-		unmuteCommand,
-		kickCommand,
-		banCommand,
-		unbanCommand,
-	)
+	// Moderation commands
+	cmdHandler.RegisterCommands(moderationCommands...)
+
+	// Case commands
+	cmdHandler.RegisterCommands(caseCommands...)
 }
 
 // guildAddModerationConfig creates the intial configs for the moderation system for a specified guild
