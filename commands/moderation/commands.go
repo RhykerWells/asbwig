@@ -533,3 +533,57 @@ var moderationCommands = []*dcommand.SummitCommand{
 		},
 	},
 }
+
+var moderationHelpers = []*dcommand.SummitCommand{
+	{
+		Command:      "clean",
+		Category:     dcommand.CategoryModeration,
+		Aliases:      []string{"cl", "purge"},
+		Description:  "Delete the last number of messages from the channel with an optional user",
+		ArgsRequired: 1,
+		Args: []*dcommand.Arg{
+			{Name: "Num to delete", Type: &dcommand.IntArg{Min: 1, Max: 100}},
+			{Name: "User", Type: dcommand.User, Optional: true},
+		},
+		Run: func(data *dcommand.Data) {
+			deleteNum := data.ParsedArgs[0].Int64()
+
+			var user *discordgo.User
+			if len(data.ParsedArgs) > 1 {
+				user = data.ParsedArgs[1].User()
+			}
+
+			messages, err := common.Session.ChannelMessages(data.ChannelID, int(deleteNum), "", "", "")
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, err.Error())
+				return
+			}
+
+			var filteredMessages []string
+			now := time.Now()
+			for _, message := range messages {
+				if now.Sub(message.Timestamp) > (14 * time.Hour * 24) {
+					continue
+				}
+
+				if message.ID == data.Message.ID {
+					continue
+				}
+
+				if user != nil && message.Author.ID == user.ID {
+					filteredMessages = append(filteredMessages, message.ID)
+				} else if user == nil {
+					filteredMessages = append(filteredMessages, message.ID)
+				}
+			}
+
+			err = common.Session.ChannelMessagesBulkDelete(data.ChannelID, filteredMessages)
+			if err != nil {
+				functions.SendBasicMessage(data.ChannelID, err.Error())
+				return
+			}
+
+			functions.SendBasicMessage(data.ChannelID, "Done!")
+		},
+	},
+}

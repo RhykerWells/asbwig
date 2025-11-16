@@ -49,8 +49,8 @@ func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	// Moderation commands
 	cmdHandler.RegisterCommands(moderationCommands...)
 
-	// Case commands
-	cmdHandler.RegisterCommands(caseCommands...)
+	// Moderation helpers
+	cmdHandler.RegisterCommands(moderationHelpers...)
 }
 
 // guildAddModerationConfig creates the intial configs for the moderation system for a specified guild
