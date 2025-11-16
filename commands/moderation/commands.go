@@ -546,7 +546,15 @@ var moderationHelpers = []*dcommand.SummitCommand{
 			{Name: "User", Type: dcommand.User, Optional: true},
 		},
 		Run: func(data *dcommand.Data) {
-			deleteNum := data.ParsedArgs[0].Int64()
+			guild := functions.GetGuild(data.GuildID)
+
+			config, ok := moderationBase(guild.ID)
+			if !ok {
+				functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.")
+				return
+			}
+
+			deleteNum := data.ParsedArgs[0].Int64() + 1
 
 			var user *discordgo.User
 			if len(data.ParsedArgs) > 1 {
@@ -583,7 +591,16 @@ var moderationHelpers = []*dcommand.SummitCommand{
 				return
 			}
 
-			functions.SendBasicMessage(data.ChannelID, "Done!")
+			ok, delay := triggerDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+			}
+
+			message, _ := functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Done! Deleted %d messages.", len(filteredMessages)))
+			ok, delay = responseDeletion(config)
+			if ok {
+				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+			}
 		},
 	},
 }
