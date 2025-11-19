@@ -2,8 +2,10 @@ package moderation
 
 import (
 	"context"
+	"errors"
 
 	"github.com/RhykerWells/Summit/bot/events"
+	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/bwmarrin/discordgo"
@@ -30,6 +32,10 @@ func initEvents() {
 			refreshMuteSettingsOnChannel(GetConfig(c.GuildID), c.Channel)
 		},
 	})
+
+	events.RegisterAuditLogCreateFunctions([]func(g *discordgo.GuildAuditLogEntryCreate){
+		logGuildModerationNotByBot,
+	})
 }
 
 // guildAddModerationConfig creates the intial configs for the moderation system for a specified guild
@@ -46,4 +52,55 @@ func guildDeleteModerationConfig(g *discordgo.GuildDelete) {
 	}
 
 	config.Delete(context.Background(), common.PQ)
+}
+
+func logGuildModerationNotByBot(g *discordgo.GuildAuditLogEntryCreate) {
+	entry := g.AuditLogEntry
+
+	config := GetConfig(g.ID)
+
+	err := auditLogCheckBase(entry, config)
+	if err != nil {
+		return
+	}
+
+	author, _ := functions.GetMember(g.ID, g.UserID)
+
+	user, _ := functions.GetUser(entry.TargetID)
+	targetMember := &discordgo.Member{
+		User: user,
+	}
+
+	switch *entry.ActionType {
+	case discordgo.AuditLogActionMemberBanAdd:
+		createCase(config, author, targetMember, logBan, config.ModerationLogChannel, entry.Reason)
+	case discordgo.AuditLogActionMemberBanRemove:
+		createCase(config, author, targetMember, logUnban, config.ModerationLogChannel, entry.Reason)
+	case discordgo.AuditLogActionMemberKick:
+		createCase(config, author, targetMember, logKick, config.ModerationLogChannel, entry.Reason)
+	}
+}
+
+func auditLogCheckBase(entry *discordgo.AuditLogEntry, config *Config) error {
+	if !config.ModerationEnabled {
+		return errors.New("the moderation system is not enabled")
+	}
+
+	if config.ModerationLogChannel == "" {
+		return errors.New("no log channel")
+	}
+
+	if *entry.ActionType != discordgo.AuditLogActionMemberBanAdd|discordgo.AuditLogActionMemberBanRemove|discordgo.AuditLogActionMemberKick {
+		return errors.New("not a moderation action")
+	}
+
+	if entry.UserID == common.Bot.ID {
+		return errors.New("handled via moderation system")
+	}
+
+	if entry.UserID == "" || entry.TargetID == "" {
+		return errors.New("invalid user or target")
+	}
+
+	return nil
 }
