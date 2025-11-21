@@ -82,9 +82,14 @@ func postgresConnect(database string, host string, username string, password str
 
 	// Initialise database
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable%s", host, username, database, password))
+	if err != nil {
+		return err
+	}
+
 	PQ = db
 	boil.SetDB(PQ)
-	return err
+
+	return nil
 }
 
 // InitSchema initialises the schemas passed to the bot
