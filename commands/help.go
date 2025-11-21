@@ -95,9 +95,13 @@ func help(command string, channelID string) {
 		functions.SendBasicMessage(channelID, fmt.Sprintf("Command `%s` not found", command))
 		return
 	}
+	aliases := ""
+	if len(cmd.Aliases) >= 1 {
+		aliases = fmt.Sprintf("/%s", strings.Join(cmd.Aliases, "/"))
+	}
 	helpEmbed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    fmt.Sprintf("%s help - %s/%s", common.Bot.Username, command, strings.Join(cmd.Aliases, "/")),
+			Name:    fmt.Sprintf("%s help - %s%s", common.Bot.Username, command, aliases),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
 		Description: cmd.Description,
