@@ -88,13 +88,15 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 	caseID := getNewCaseID(config)
 
 	caseData := models.ModerationCase{
-		CaseID:     caseID,
-		GuildID:    config.GuildID,
-		StaffID:    author.User.ID,
-		OffenderID: target.User.ID,
-		Reason:     reason,
-		Action:     action.CaseType,
-		LogLink:    "",
+		CaseID:           caseID,
+		GuildID:          config.GuildID,
+		StaffUsername:    author.User.Username,
+		StaffID:          author.User.ID,
+		OffenderUsername: target.User.Username,
+		OffenderID:       target.User.ID,
+		Reason:           reason,
+		Action:           action.CaseType,
+		LogLink:          "",
 	}
 	if err := caseData.Insert(context.Background(), common.PQ, boil.Infer()); err != nil {
 		return err
