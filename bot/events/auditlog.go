@@ -8,7 +8,7 @@ func RegisterAuditLogCreateFunctions(funcmap []func(g *discordgo.GuildAuditLogEn
 	scheduledAuditLogCreateFunctions = append(scheduledAuditLogCreateFunctions, funcmap...)
 }
 
-func AuditLogCreate(s *discordgo.Session, g *discordgo.GuildAuditLogEntryCreate) {
+func auditLogCreate(s *discordgo.Session, g *discordgo.GuildAuditLogEntryCreate) {
 	for _, auditLogCreateFunction := range scheduledAuditLogCreateFunctions {
 		go auditLogCreateFunction(g)
 	}

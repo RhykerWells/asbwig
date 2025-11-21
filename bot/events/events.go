@@ -18,6 +18,7 @@ func InitEvents(s *discordgo.Session, database *sql.DB) {
 	// Guild events
 	s.AddHandler(guildJoin)
 	s.AddHandler(guildLeave)
+	s.AddHandler(auditLogCreate)
 
 	// Guild role events
 	s.AddHandler(guildRoleCreate)
