@@ -57,14 +57,14 @@ func guildDeleteModerationConfig(g *discordgo.GuildDelete) {
 func logGuildModerationNotByBot(g *discordgo.GuildAuditLogEntryCreate) {
 	entry := g.AuditLogEntry
 
-	config := GetConfig(g.ID)
+	config := GetConfig(g.GuildID)
 
 	err := auditLogCheckBase(entry, config)
 	if err != nil {
 		return
 	}
 
-	author, _ := functions.GetMember(g.ID, g.UserID)
+	author, _ := functions.GetMember(g.GuildID, g.UserID)
 
 	user, _ := functions.GetUser(entry.TargetID)
 	targetMember := &discordgo.Member{
@@ -90,7 +90,9 @@ func auditLogCheckBase(entry *discordgo.AuditLogEntry, config *Config) error {
 		return errors.New("no log channel")
 	}
 
-	if *entry.ActionType != discordgo.AuditLogActionMemberBanAdd|discordgo.AuditLogActionMemberBanRemove|discordgo.AuditLogActionMemberKick {
+	switch *entry.ActionType {
+	case discordgo.AuditLogActionMemberBanAdd, discordgo.AuditLogActionMemberBanRemove, discordgo.AuditLogActionMemberKick:
+	default:
 		return errors.New("not a moderation action")
 	}
 
