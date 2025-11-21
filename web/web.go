@@ -203,11 +203,12 @@ func SendErrorToast(w http.ResponseWriter, message string) {
 
 // getGithubReleases returns an array of Releases
 func getGithubReleases() []GithubRelease {
-	if common.ConfigGitHubRepo == "" || common.ConfigGitHubRepoOwner == "" {
-		return nil
+	releaseAPIURL := "https://api.github.com/repos/RhykerWells/Summit/releases"
+	if common.ConfigGitHubRepo != "" && common.ConfigGitHubRepoOwner != "" {
+		releaseAPIURL = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", common.ConfigGitHubRepoOwner, common.ConfigGitHubRepo)
 	}
 
-	resp, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", common.ConfigGitHubRepoOwner, common.ConfigGitHubRepo))
+	resp, err := http.Get(releaseAPIURL)
 	if err != nil {
 		return nil
 	}
