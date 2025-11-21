@@ -7,7 +7,7 @@ RUN go mod download
 COPY ./ .
 
 WORKDIR /app/cmd/summit
-RUN CGO_ENABLED=0 GOOS=linux go build
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X github.com/RhykerWells/Summit/common.VERSION=$(git describe --tags --abbrev=0)"
 
 EXPOSE 80
 
